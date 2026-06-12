@@ -22,13 +22,17 @@ SCENES.push({
     const pts=[]; for(let i=16;i>=0;i--){ const rr=HILL.r*i/16; pts.push(new THREER.Vector2(rr,terr(HILL.x+rr,HILL.z))); }
     const hillM=new THREER.Mesh(new THREER.LatheGeometry(pts,40), mat(0x84745e,{roughness:1}));
     hillM.position.set(HILL.x,0,HILL.z); hillM.receiveShadow=true; hillM.castShadow=false; world.add(hillM);
-    // granietblokken op de flanken
+    // granietblokken op de flanken — solide, en het trappad blijft vrij
     for(let i=0;i<30;i++){ const a=Math.random()*Math.PI*2, rr=1.5+Math.random()*(HILL.r-1.2);
       const bx=HILL.x+Math.cos(a)*rr, bz=HILL.z+Math.sin(a)*rr;
-      if(bz>HILL.z+HILL.r*0.88) continue;                         // pad vrijhouden
-      const rk=sph(0.5+Math.random()*1.1,[0x77684f,0x8a7a64,0x6e604c][i%3],{roughness:1},9);
+      if(bz>HILL.z+HILL.r*0.88) continue;                         // zuidkant open
+      if(Math.abs(bx)<1.8 && bz>HILL.z-1) continue;               // corridor van het trappad
+      const rad=0.5+Math.random()*1.1;
+      const rk=sph(rad,[0x77684f,0x8a7a64,0x6e604c][i%3],{roughness:1},9);
       rk.position.set(bx,terr(bx,bz)*0.8,bz); rk.scale.set(1.3,0.5+Math.random()*0.3,1.1);
-      rk.rotation.y=Math.random()*3; rk.castShadow=false; world.add(rk); }
+      rk.rotation.y=Math.random()*3; rk.castShadow=false; world.add(rk);
+      colliders.push({minX:bx-rad*1.05,maxX:bx+rad*1.05,minZ:bz-rad*0.85,maxZ:bz+rad*0.85});
+    }
     // trappad van de voet naar de top (lichtere steenplaten)
     for(let i=0;i<=11;i++){ const pz=HILL.z+HILL.r-0.4 - i*((HILL.r-0.6)/11);
       const st=box(1.7,0.14,0.8,0xc4b496,{roughness:.95}); st.position.set(0,terr(0,pz)+0.05,pz);
@@ -50,6 +54,28 @@ SCENES.push({
     everyMs(()=>spawnDhikrAt(HILL.x,HILL.z+4),3400);
     // laagstaande zon achter de heuvel
     const sun=sph(2.4,0xffd070,{emissive:0xffb050,emissiveIntensity:1}); sun.position.set(6,4.5,-30); world.add(sun);
+    // ===== een rijke Arafat-vlakte =====
+    // Masjid Namirah in de verte (waar de khutbah wordt gehouden)
+    const nam=box(16,3.6,5,0xf0ead8,{roughness:.95}); nam.position.set(-34,1.8,4); nam.castShadow=false; world.add(nam);
+    [[-41,4],[-27,4]].forEach(p=>{ const m=cyl(0.35,0.5,11,0xf0ead8,{roughness:.9}); m.position.set(p[0],5.5,p[1]); m.castShadow=false; world.add(m);
+      const tip=cyl(0.02,0.3,1.3,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(p[0],11.6,p[1]); tip.castShadow=false; world.add(tip); });
+    const namBand=box(16.2,0.5,5.2,0x2e7a4a,{roughness:.8}); namBand.position.set(-34,3.4,4); namBand.castShadow=false; world.add(namBand);
+    // acacia's verspreid over de vlakte
+    [[-12,6],[14,3],[-9,12],[18,10],[-17,11],[10,13],[22,5],[-22,7]].forEach(p=>acacia(p[0],p[1],0.85+Math.random()*0.4));
+    // schijnwerpermasten en het gele grensbord van Arafat
+    [[-11,-1],[11,-1],[-17,7],[17,7]].forEach(p=>lightMast(p[0],p[1]));
+    [[8.5,12.5],[-8.5,12.5]].forEach(p=>{
+      [-0.9,0.9].forEach(o=>{ const pl2=cyl(0.06,0.08,2.6,0x9a9a9a,{metalness:.3},8); pl2.position.set(p[0]+o,1.3,p[1]); pl2.castShadow=false; world.add(pl2); });
+      const brd=box(2.6,1.1,0.12,0xf2c61e,{roughness:.6}); brd.position.set(p[0],2.6,p[1]); brd.castShadow=false; world.add(brd);
+      const brdT=textSprite('بِدَايَة عَرَفَات','#163a16'); brdT.scale.set(2.3,0.7,1); brdT.position.set(p[0],2.6,p[1]-0.2); world.add(brdT); });
+    // pelgrimsbussen langs de rand + watervoorraad bij de tenten
+    pilgrimBus(-14,13.5,0xe8e4da,0.1); pilgrimBus(-19,13.8,0xdde8dd,-0.06); pilgrimBus(15,14,0xe2dccc,0.05);
+    [[-6,11],[6.5,11.5]].forEach(p=>{ const wv=cyl(0.5,0.55,1.1,0x3a7ab8,{roughness:.5},10); wv.position.set(p[0],0.55,p[1]); wv.castShadow=false; world.add(wv);
+      const krat=box(0.8,0.5,0.5,0xc86a2a,{roughness:.8}); krat.position.set(p[0]+0.9,0.25,p[1]); krat.castShadow=false; world.add(krat); });
+    // donkere kiezelvlekken voor bodemvariatie
+    for(let i=0;i<16;i++){ const px3=(Math.random()-.5)*30, pz3=2+Math.random()*11;
+      if(Math.hypot(px3-HILL.x,pz3-HILL.z)<HILL.r+1) continue;
+      const kz=sph(0.12+Math.random()*0.14,0x6a5d4a,{roughness:1},6); kz.position.set(px3,0.05,pz3); kz.scale.y=0.35; kz.castShadow=false; world.add(kz); }
     // verre bergrand rond de vlakte
     mountainRange(80,0x5a4030,16);
     // white tents + umbrellas at the edges
@@ -237,7 +263,13 @@ SCENES.push({
   fog:{near:34,far:140},
   cam:{dist:6.6,height:2.6},
   build(){
-    groundTex(texMarble(24),120,0xf0eadb);                                  // marmeren plein
+    groundTex(texSand(28),170,0xd8c8a8);                                    // woestijnbodem rondom de stad
+    const plein=box(46,0.08,40,0xffffff,{map:texMarble(12),roughness:.9}); plein.position.set(0,0.045,2); plein.castShadow=false; world.add(plein);
+    // donkere patroonvakken rond elke parasol (zoals het echte Nabawi-plein)
+    for(let px4=-10;px4<=10;px4+=4){ [3.5,7.5].forEach(pz4=>{
+      const kader=box(3.8,0.012,3.8,0x9a8d74,{roughness:.9}); kader.position.set(px4,0.092,pz4); kader.castShadow=false; world.add(kader);
+      const binnen=box(3.2,0.014,3.2,0xe9e0cc,{roughness:.9}); binnen.position.set(px4,0.094,pz4); binnen.castShadow=false; world.add(binnen);
+    }); }
     // ===== gevel met twee verdiepingen arcades =====
     const facade=box(30,7,0.6,0xead9b8,{roughness:.9}); facade.position.set(0,3.5,-5); world.add(facade);
     camOccluders.push(facade);
@@ -295,9 +327,26 @@ SCENES.push({
     [[12.4,4.6],[14.8,8.2]].forEach(p=>{ const v=pilgrimMesh(); v.position.set(p[0],0,p[1]); v.rotation.y=Math.PI/2; v.userData.ph=Math.random()*6.28; world.add(v); });
     // palmen rond plein en begraafplaats
     [[9.4,0.2],[9.4,12.6],[17,12.4],[-8,10],[-12,7],[8,10.5],[-14,2]].forEach(p=>palmTree(p[0],p[1],0.9+Math.random()*0.3));
+    // ===== de stad rondom: hotels, berg Uhud, lantaarns, palmen =====
+    hotelTower(-30,18,7,16,0x2a3046); hotelTower(-34,4,8,20,0x343a52); hotelTower(-29,-10,7,14,0x2e3448);
+    hotelTower(30,20,8,18,0x262c40); hotelTower(34,0,7,15,0x32384e); hotelTower(27,-14,8,21,0x2a3046);
+    hotelTower(-16,26,8,17,0x343a52); hotelTower(14,27,7,19,0x2e3448);
+    // berg Uhud — de roodbruine bergrug ten noorden van de stad
+    [[-26,-46,26,12],[6,-52,30,15],[38,-46,24,11]].forEach(p=>{
+      const uh=cyl(1.5,p[2],p[3],0x7a4a38,{roughness:1},7); uh.position.set(p[0],p[3]/2-1,p[1]); uh.castShadow=false; uh.receiveShadow=false; world.add(uh); });
+    // Nabawi-lantaarnpalen langs het plein
+    [[-13,1],[-13,8],[13.5,13],[-8,12.5],[3,12.5],[13,-1]].forEach(p=>nabawiLamp(p[0],p[1]));
+    // palmen in stenen plantenbakken
+    [[-12,4],[-12,10],[6,12],[-4,12.6],[16.5,13]].forEach(p=>{
+      const bak=cyl(0.85,0.95,0.55,0xcfc4ae,{roughness:.9},12); bak.position.set(p[0],0.27,p[1]); bak.castShadow=false; world.add(bak);
+      palmTree(p[0],p[1],0.75+Math.random()*0.2); });
+    // groene hekjes die de looproute naar Bab as-Salam markeren
+    [-2.6,2.6].forEach(hx=>{ for(let hz=-2.8;hz<=1.2;hz+=2.1){
+      const hek=box(0.08,0.5,2.0,0x1f6b45,{roughness:.5,metalness:.2}); hek.position.set(hx,0.3,hz); hek.castShadow=false; world.add(hek);
+      colliders.push({minX:hx-0.15,maxX:hx+0.15,minZ:hz-1.05,maxZ:hz+1.05}); } });
     // mensen op het plein
-    world.add(makeCrowd(24,-2,5,16));
-    addWanderers(7,{minX:-12,maxX:7,minZ:1,maxZ:9});
+    world.add(makeCrowd(28,-2,5,16));
+    addWanderers(8,{minX:-12,maxX:7,minZ:1,maxZ:9});
     everyMs(()=>spawnDhikrAt(-1,2),3200);
     // ===== volgorde: (aanbevolen) al-Baqi → de moskee binnen =====
     State.baqiDone=false;

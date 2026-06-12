@@ -168,6 +168,34 @@ function palmTree(x,z,s){
     leaf.position.set(x+Math.cos(a)*0.7*s,2.7*s,z+Math.sin(a)*0.7*s); leaf.rotation.y=-a; leaf.rotation.z=0.35; leaf.castShadow=false; world.add(leaf); }
   const dates=sph(0.16*s,0x8a5a20,{roughness:.8},8); dates.position.set(x+0.2*s,2.5*s,z); dates.castShadow=false; world.add(dates);
 }
+// hoge schijnwerpermast (Arafat/Mina)
+function lightMast(x,z){
+  const pole=cyl(0.09,0.14,9,0xb8b8c0,{metalness:.4,roughness:.5}); pole.position.set(x,4.5,z); pole.castShadow=false; world.add(pole);
+  const head=box(1.5,0.25,0.5,0x8a8a92); head.position.set(x,9.1,z); head.castShadow=false; world.add(head);
+  for(let i=-1;i<=1;i++){ const l=sph(0.14,0xfff2cc,{emissive:0xffe9a0,emissiveIntensity:1.2},8); l.position.set(x+i*0.45,8.95,z+0.2); l.castShadow=false; world.add(l); }
+}
+// acacia (doornboom van de woestijnvlakte)
+function acacia(x,z,s){ s=s||1;
+  const tr=cyl(0.1*s,0.16*s,1.6*s,0x5a4630,{roughness:1},7); tr.position.set(x,0.8*s,z); tr.rotation.z=(Math.random()-.5)*0.2; world.add(tr);
+  const cr=sph(1.25*s,0x4a6b35,{roughness:1},10); cr.position.set(x,1.9*s,z); cr.scale.set(1.35,0.34,1.35); cr.castShadow=false; world.add(cr);
+}
+// Nabawi-stijl lantaarnpaal met bollenkrans
+function nabawiLamp(x,z){
+  const pole=cyl(0.07,0.1,3.8,0xe8e2d4,{roughness:.7}); pole.position.set(x,1.9,z); pole.castShadow=false; world.add(pole);
+  for(let i=0;i<5;i++){ const a=(i/5)*Math.PI*2;
+    const bol=sph(0.13,0xfff0c8,{emissive:0xffd98a,emissiveIntensity:.9},8);
+    bol.position.set(x+Math.cos(a)*0.32,3.85,z+Math.sin(a)*0.32); bol.castShadow=false; world.add(bol); }
+  const top=sph(0.15,0xfff0c8,{emissive:0xffd98a,emissiveIntensity:.9},8); top.position.set(x,4.1,z); top.castShadow=false; world.add(top);
+}
+// eenvoudige touringcar (pelgrimsbus)
+function pilgrimBus(x,z,col,rot){
+  const g=new THREER.Group();
+  const body=box(4.2,1.5,1.3,col||0xe8e4da,{roughness:.6}); body.position.y=1.05; body.castShadow=false; g.add(body);
+  const win=box(3.6,0.5,1.34,0x223344,{roughness:.3,metalness:.2}); win.position.y=1.45; win.castShadow=false; g.add(win);
+  [[-1.5],[1.5]].forEach(o=>{ [-0.6,0.6].forEach(s2=>{ const w=cyl(0.3,0.3,0.2,0x141414,{},10);
+    w.rotation.x=Math.PI/2; w.position.set(o[0],0.3,s2); w.castShadow=false; g.add(w); }); });
+  g.position.set(x,0,z); if(rot)g.rotation.y=rot; world.add(g); return g;
+}
 // skyline van Mekka buiten de Haram: klokkentoren + hotels + bergen
 function meccaSkyline(cx,cz,r){
   clockTower(cx, cz+r+40);
