@@ -90,8 +90,8 @@ const Player = {
       Object.assign(t,P);
     } else if(this.pose==='dua'){
       const br=Math.sin(now*1.6)*0.015;                                  // rustige ademhaling
-      t.armLx=-2.05; t.armRx=-2.05; t.armLz=-0.32; t.armRz=0.32;
-      t.elbL=0.85; t.elbR=0.85;                                          // ellebogen gebogen, handpalmen omhoog
+      t.armLx=-0.6; t.armRx=-0.6; t.armLz=-0.18; t.armRz=0.18;           // bovenarmen licht naar voren
+      t.elbL=1.55; t.elbR=1.55;                                          // onderarmen omhoog, handpalmen voor de borst
       t.legL=0; t.legR=0; t.kneeL=0; t.kneeR=0;
       t.bodyY=br; t.bodyRz=0; t.bodyRy=0;
     } else if(this.pose==='sit'||this.sitting){
