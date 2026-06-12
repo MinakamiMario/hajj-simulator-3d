@@ -33,9 +33,29 @@ const Player = {
     this.pose=p;
     if(p==='dua' && was!=='dua' && typeof duaGlow==='function') duaGlow(this.x,this.z);
   },
+  // ---- salat: echt gebed met de juiste bewegingen ----
+  salat:null,
+  praySalat(rakat,cb){
+    Sound.init();
+    const n=rakat||2, tl=[];
+    for(let r=0;r<n;r++){
+      tl.push({st:'qiyam',d:3.0},{st:'ruku',d:2.4},{st:'itidal',d:1.1},
+              {st:'sujud',d:2.3},{st:'julus',d:1.1},{st:'sujud',d:2.3});
+      tl.push(r<n-1 ? {st:'itidal',d:0.9} : {st:'tashahhud',d:3.2});
+    }
+    tl.push({st:'salamR',d:1.5},{st:'salamL',d:1.5});
+    this.salat={tl, idx:-1, t:0, cb:cb||null};
+    this.setPose('salat');
+  },
+  _salatEnter(st){
+    const tx={qiyam:'اللهُ أَكبَر', ruku:'سُبحَانَ رَبِّيَ العَظِيم', sujud:'سُبحَانَ رَبِّيَ الأَعلَى',
+      salamR:'السَّلَامُ عَلَيكُم وَرَحمَةُ الله'}[st];
+    if(st==='qiyam'||st==='sujud'||st==='itidal') Sound.blip(520,0.3,'sine',0.1);
+    if(tx && typeof spawnTextAt==='function') spawnTextAt(tx, this.x, 2.5, this.z, '#f0e0b0');
+  },
   // ---- animatie-engine: doelhoudingen + vloeiend blenden ----
   _bl:null,
-  _resetBlend(){ this._bl={legL:0,legR:0,kneeL:0,kneeR:0,armLx:0,armRx:0,armLz:0,armRz:0,elbL:0,elbR:0,bodyY:0,bodyRz:0,bodyRy:0}; },
+  _resetBlend(){ this._bl={legL:0,legR:0,kneeL:0,kneeR:0,armLx:0,armRx:0,armLz:0,armRz:0,elbL:0,elbR:0,bodyY:0,bodyRz:0,bodyRy:0,bodyRx:0,rootY:0}; },
   animate(dt){
     if(!this.obj)return;
     const pa=this.obj.userData.parts;
@@ -43,7 +63,32 @@ const Player = {
     const b=this._bl, t={};
     const now=clock?clock.elapsedTime:0;
     // 1) bepaal DOEL-houding
-    if(this.pose==='dua'){
+    if(this.pose==='salat' && this.salat){
+      // doorloop de gebedsfases op tijd; elke fase heeft een eigen doelhouding
+      const sl=this.salat;
+      sl.t+=dt;
+      if(sl.idx<0 || sl.t>sl.tl[sl.idx].d){
+        sl.t=0; sl.idx++;
+        if(sl.idx>=sl.tl.length){ // klaar
+          this.salat=null; this.setPose('stand');
+          if(sl.cb) sl.cb();
+        } else this._salatEnter(sl.tl[sl.idx].st);
+      }
+      const st=this.salat ? this.salat.tl[this.salat.idx].st : 'qiyam';
+      const KNEEL={legL:-1.35,legR:-1.35,kneeL:2.4,kneeR:2.4};   // zittend op de hielen
+      const P={
+        qiyam:    {armLx:-1.25,armRx:-1.25,elbL:1.4,elbR:1.4,armLz:-0.12,armRz:0.12},
+        ruku:     {bodyRx:-0.95,armLx:-0.55,armRx:-0.55,elbL:0.1,elbR:0.1,rootY:-0.06},
+        itidal:   {elbL:0.12,elbR:0.12},
+        sujud:    Object.assign({rootY:-0.6,bodyRx:-0.85,armLx:-1.3,armRx:-1.3,elbL:0.25,elbR:0.25},KNEEL),
+        julus:    Object.assign({rootY:-0.6,bodyRx:-0.06,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        tashahhud:Object.assign({rootY:-0.6,bodyRx:-0.06,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        salamR:   Object.assign({rootY:-0.6,bodyRx:-0.05,bodyRy:-0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        salamL:   Object.assign({rootY:-0.6,bodyRx:-0.05,bodyRy:0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+      }[st]||{};
+      for(const k in b) t[k]=0;
+      Object.assign(t,P);
+    } else if(this.pose==='dua'){
       const br=Math.sin(now*1.6)*0.015;                                  // rustige ademhaling
       t.armLx=-2.05; t.armRx=-2.05; t.armLz=-0.32; t.armRz=0.32;
       t.elbL=0.85; t.elbR=0.85;                                          // ellebogen gebogen, handpalmen omhoog
@@ -85,6 +130,8 @@ const Player = {
     pa.armL.rotation.z=b.armLz;  pa.armR.rotation.z=b.armRz;
     if(pa.elbL){ pa.elbL.rotation.x=b.elbL; pa.elbR.rotation.x=b.elbR; }
     pa.body.position.y=b.bodyY;  pa.body.rotation.z=b.bodyRz; pa.body.rotation.y=b.bodyRy;
+    pa.body.rotation.x=b.bodyRx;                               // buigen (ruku/sujud)
+    this.obj.position.y=(this.sitting?-0.42:0)+b.rootY;        // zakken naar de grond
   },
   interact(){ Sound.init(); Zone.trigger(); }
 };
@@ -92,6 +139,7 @@ const Player = {
 // ============================================================
 //  CAMERA RIG
 // ============================================================
+let camOccluders=[];   // grote objecten waar de camera niet achter mag verdwijnen
 const Cam = {
   yaw:0, pitch:0.32, dist:6.2, height:2.4, lookH:1.4, maxY:null, bound:null,
   update(){
@@ -105,6 +153,18 @@ const Cam = {
     if(this.bound){                                       // keep camera inside walls
       camX=Math.max(this.bound.minX,Math.min(this.bound.maxX,camX));
       camZ=Math.max(this.bound.minZ,Math.min(this.bound.maxZ,camZ));
+    }
+    // occlusie: blokkeert een groot object het zicht, trek de camera er dan vóór
+    if(camOccluders.length && typeof THREER!=='undefined' && camera){
+      this._ray=this._ray||new THREER.Raycaster();
+      const ox=Player.x, oy=this.lookH, oz=Player.z;
+      const dx=camX-ox, dy=camY-oy, dz=camZ-oz;
+      const len=Math.hypot(dx,dy,dz)||1;
+      this._ray.set(new THREER.Vector3(ox,oy,oz), new THREER.Vector3(dx/len,dy/len,dz/len));
+      this._ray.far=len;
+      const hits=this._ray.intersectObjects(camOccluders,false);
+      if(hits.length){ const d=Math.max(1.2,hits[0].distance-0.45);
+        camX=ox+dx/len*d; camY=Math.max(0.8,oy+dy/len*d); camZ=oz+dz/len*d; }
     }
     camera.position.set(camX,camY,camZ);
     camera.lookAt(Player.x,this.lookH,Player.z);

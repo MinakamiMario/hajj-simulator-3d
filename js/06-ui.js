@@ -65,6 +65,7 @@ const DUAS={
   arafat:{t:'De beste du\'a — dag van Arafat', ar:'لَا إِلَهَ إِلَّا اللهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ', nl:'Er is geen god dan Allah, alleen, zonder deelgenoot. Aan Hem behoort de heerschappij en alle lof, en Hij is tot alles in staat.'},
   takbir:{t:'Bij het werpen van de steentjes', ar:'اللهُ أَكْبَرُ', nl:'Allah is de Grootste — bij elke worp.'},
   salawat:{t:'Salawat in de moskee van de Profeet ﷺ', ar:'اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ', nl:'O Allah, zegen Mohammed en de familie van Mohammed.'},
+  baqi:{t:'Bij het bezoeken van al-Baqi', ar:'السَّلَامُ عَلَيْكُمْ أَهْلَ الدِّيَارِ مِنَ الْمُؤْمِنِينَ وَالْمُسْلِمِينَ، وَإِنَّا إِنْ شَاءَ اللهُ بِكُمْ لَاحِقُونَ', nl:'Vrede zij met jullie, bewoners van deze verblijfplaats onder de gelovigen en moslims. En wij zullen jullie, als Allah het wil, zeker volgen.'},
   terugkeer:{t:'Bij thuiskomst van de reis', ar:'آيِبُونَ تَائِبُونَ عَابِدُونَ لِرَبِّنَا حَامِدُونَ', nl:'Wij keren terug, berouwvol, aanbiddend en onze Heer prijzend.'},
 };
 function learnDua(key){

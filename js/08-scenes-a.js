@@ -269,9 +269,11 @@ SCENES.push({
         if(State.maqamDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
         openChoice({ ar:'مَقَام إِبرَاهِيم', sub:'"En neem de Maqam Ibrahim als gebedsplaats" (2:125)',
           txt:"Achter deze steen — met de voetafdruk van Ibrahim (a.s.) — bid je 2 rak'ah. Sunnah: al-Kafirun in de eerste, al-Ikhlas in de tweede rak'ah.",
-          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.maqamDone=true; Player.setPose('dua'); Sound.success(); sparkle(Player.x,1.6,Player.z);
-            showFeedback("✅ Je bidt 2 rak'ah achter de Maqam. Drink nu Zamzam 💧, daarna verder naar Sa'i.",true,5000);
-            setTimeout(()=>{ Player.setPose('stand'); showNextBtn("Naar Sa'i →"); },3000); }}]}); }});
+          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.maqamDone=true;
+            showFeedback("🕌 Je bidt 2 rak'ah achter de Maqam — volg de bewegingen.",true,3000);
+            Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z);
+              showFeedback("✅ Gebed voltooid. Drink nu Zamzam 💧, daarna verder naar Sa'i.",true,5000);
+              showNextBtn("Naar Sa'i →"); }); }}]}); }});
     // Zamzam-station
     [[-3.6,6.2],[-4.4,6.2]].forEach(p=>{ const cooler=cyl(0.28,0.32,0.95,0xb8860b,{metalness:.4,roughness:.4}); cooler.position.set(p[0],0.48,p[1]); world.add(cooler);
       const tap=box(0.06,0.06,0.14,0xd9d2c2); tap.position.set(p[0],0.62,p[1]-0.34); world.add(tap); });
@@ -304,6 +306,8 @@ SCENES.push({
     [['safa',-8],[null,8]].forEach((h,i)=>{ const x=i===0?-8:8;
       const rock=sph(1.7,0x8a7a62,{roughness:1},14); rock.position.set(x,0.5,0); rock.scale.set(1.4,0.85,1.1); world.add(rock);
       const rock2=sph(1.0,0x9a8a70,{roughness:1},12); rock2.position.set(x+(i?-0.8:0.8),0.9,0.4); world.add(rock2);
+      colliders.push(i===0 ? {minX:-10,maxX:-6.6,minZ:-1.6,maxZ:1.6} : {minX:6.6,maxX:10,minZ:-1.6,maxZ:1.6});
+      camOccluders.push(rock);
     });
     const safaLbl=textSprite('Safa','#f0d080'); safaLbl.position.set(-8,2.6,0); world.add(safaLbl);
     const marwaLbl=textSprite('Marwa','#f0d080'); marwaLbl.position.set(8,2.6,0); world.add(marwaLbl);

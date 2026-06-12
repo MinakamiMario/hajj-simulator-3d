@@ -112,6 +112,8 @@ function taxi(x,z){
 function kaaba(x,z){
   const g=new THREER.Group();
   const c=box(3.2,3.6,3.2,0x080808,{roughness:.6,metalness:.1}); c.position.y=1.8; g.add(c);
+  colliders.push({minX:x-2.0,maxX:x+2.0,minZ:z-2.0,maxZ:z+2.0});   // je kunt er niet doorheen lopen
+  camOccluders.push(c);                                            // en de camera niet doorheen kijken
   const band=box(3.26,0.5,3.26,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6,metalness:.4,roughness:.4});
   band.position.y=2.55; g.add(band);
   const door=box(0.9,1.4,0.06,0x8a6a1c,{metalness:.5,roughness:.4}); door.position.set(0.6,1.0,1.61); g.add(door);
@@ -157,6 +159,14 @@ function haramSurround(cx,cz,r){
   [[0,r-2],[0,-r+2],[r-2,0],[-r+2,0]].forEach(p=>{
     const fl=new THREER.PointLight(0xfff2d8,0.55,30); fl.position.set(cx+p[0],9,cz+p[1]); world.add(fl);
   });
+}
+// dadelpalm (Medina/Quba)
+function palmTree(x,z,s){
+  s=s||1;
+  const tr=cyl(0.12*s,0.18*s,2.6*s,0x7a5a36,{roughness:1},8); tr.position.set(x,1.3*s,z); tr.rotation.z=(Math.random()-.5)*0.12; world.add(tr);
+  for(let i=0;i<6;i++){ const a=(i/6)*Math.PI*2; const leaf=box(1.5*s,0.06,0.32*s,0x2e6b38,{roughness:1});
+    leaf.position.set(x+Math.cos(a)*0.7*s,2.7*s,z+Math.sin(a)*0.7*s); leaf.rotation.y=-a; leaf.rotation.z=0.35; leaf.castShadow=false; world.add(leaf); }
+  const dates=sph(0.16*s,0x8a5a20,{roughness:.8},8); dates.position.set(x+0.2*s,2.5*s,z); dates.castShadow=false; world.add(dates);
 }
 // skyline van Mekka buiten de Haram: klokkentoren + hotels + bergen
 function meccaSkyline(cx,cz,r){

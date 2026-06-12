@@ -57,7 +57,7 @@ function animate(){
       Cam.yaw+=((Player.faceY-Cam.yaw))*Math.min(1,dt*4); // trail behind
       Zone.check();
     } else {
-      Player.moving = !paused && !Player.sitting && mag>0.08 && Player.pose!=='dua';
+      Player.moving = !paused && !Player.sitting && mag>0.08 && Player.pose!=='dua' && Player.pose!=='salat';
       Player.running = Player.moving && Input.keys.run;            // ⇧ shift = rennen
       if(Player.moving){
         const f=Cam.forward(), r=Cam.right();

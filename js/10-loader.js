@@ -9,7 +9,7 @@ function sceneTimeout(fn,ms){ const id=setTimeout(fn,ms); sceneIntervals.push(id
 function clearSceneIntervals(){ sceneIntervals.forEach(id=>{ clearInterval(id); clearTimeout(id); }); sceneIntervals=[]; }
 function loadScene(id){
   const s=SCENES[id]; State.scene=id; frameHook=null; jamPillar=null;
-  encounter=null; paused=false; closeChoice(); colliders=[];
+  encounter=null; paused=false; closeChoice(); colliders=[]; camOccluders.length=0;
   clearSceneIntervals();
   clearWorld(); Zone.clear();
   document.querySelectorAll('.feedback-bar,.next-bar,.sim-bar').forEach(n=>n.remove());
@@ -65,6 +65,7 @@ function renderEnding(){
     "Sa'i (Safa–Marwa)",'Wuquf op Arafat','Nacht in Muzdalifah','7 steentjes geraapt',
     'Jamarat al-Aqaba gesteenigd','Hadi (offer) geregeld','Haar geschoren/ingekort','Tawaf al-Ifada + al-Wada'];
   if(State.medinaDone) items.push('Ziyarah: Rawda + salam aan de Profeet ﷺ');
+  if(State.baqiDone) items.push('Ziyarah: salam aan de mensen van al-Baqi');
   if(State.qubaDone) items.push("Quba: 2 rak'ah (beloning van een Umrah)");
   if(State.gaveZamzam) items.push('Zamzam & dadels mee naar huis 🧴');
   const faqs=[
@@ -86,7 +87,7 @@ function renderEnding(){
     +faqs.map(f=>`<details class="faq"><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join('')
     +`</div>`;
   const sb=document.querySelector('.end-sub');
-  if(sb){ sb.innerHTML=`<span class="end-dua">🤲 Moge Allah jouw Hajj accepteren — تَقَبَّلَ اللّٰهُ حَجَّك. آمين</span><br><span style="color:var(--gold)">Sabr / ihsan getoond: ${State.sabr}× &nbsp;•&nbsp; 🧠 Quiz: ${State.quiz||0}/${State.quizTotal||0} &nbsp;•&nbsp; 📖 Du'as: ${Object.keys(State.duas||{}).length}/9</span>`; }
+  if(sb){ sb.innerHTML=`<span class="end-dua">🤲 Moge Allah jouw Hajj accepteren — تَقَبَّلَ اللّٰهُ حَجَّك. آمين</span><br><span style="color:var(--gold)">Sabr / ihsan getoond: ${State.sabr}× &nbsp;•&nbsp; 🧠 Quiz: ${State.quiz||0}/${State.quizTotal||0} &nbsp;•&nbsp; 📖 Du'as: ${Object.keys(State.duas||{}).length}/${Object.keys(DUAS).length}</span>`; }
   const es=document.querySelector('.end-stars'); es.innerHTML='';
   for(let i=0;i<80;i++){ const d=document.createElement('div'); d.className='star-dot';
     const sz=1+Math.random()*2.5; d.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--op:${.4+Math.random()*.6};--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s;`;
