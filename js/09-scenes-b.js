@@ -297,11 +297,8 @@ SCENES.push({
       const m=cyl(0.4,0.55,13,0xe9ddc0,{roughness:.9}); m.position.set(p[0],6.5,p[1]); m.castShadow=false; world.add(m);
       const balc=cyl(0.8,0.8,0.3,0xd6cfbc,{roughness:.9},12); balc.position.set(p[0],10.5,p[1]); balc.castShadow=false; world.add(balc);
       const tip=cyl(0.02,0.35,1.6,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(p[0],13.8,p[1]); tip.castShadow=false; world.add(tip); });
-    // de beroemde plein-parasols
-    for(let px=-10;px<=10;px+=4){ [3.5,7.5].forEach(pz=>{
-      const pole=cyl(0.09,0.11,3.4,0xe6e0d0); pole.position.set(px,1.7,pz); pole.castShadow=false; world.add(pole);
-      const um=cyl(1.85,0.12,0.8,0xf4efe2,{roughness:.95},4); um.rotation.y=Math.PI/4; um.position.set(px,3.7,pz); um.castShadow=false; world.add(um);
-    }); }
+    // de beroemde plein-parasols (GLTF-model met fallback)
+    for(let px=-10;px<=10;px+=4){ [3.5,7.5].forEach(pz=>nabawiParasol(px,pz,1.05)); }
     // ===== AL-BAQI: de oude begraafplaats naast de moskee =====
     const sand=box(7,0.05,11,0xffffff,{map:texSand(6),roughness:1}); sand.position.set(13.4,0.05,6.5); world.add(sand);
     const wallSegs=[
@@ -485,11 +482,8 @@ SCENES.push({
     [[-6.4,-1.4],[6.4,-1.4],[-6.4,-6.6],[6.4,-6.6]].forEach(p=>{
       const m=cyl(0.38,0.5,9,0xf6f2e8,{roughness:.9}); m.position.set(p[0],4.5,p[1]); m.castShadow=false; world.add(m);
       const tip=cyl(0.02,0.3,1.2,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(p[0],9.7,p[1]); tip.castShadow=false; world.add(tip); });
-    // palmbomen (Medina staat bekend om zijn dadelpalmen)
-    function palm(x,z){ const tr=cyl(0.12,0.18,2.6,0x7a5a36,{roughness:1},8); tr.position.set(x,1.3,z); tr.rotation.z=(Math.random()-.5)*0.12; world.add(tr);
-      for(let i=0;i<6;i++){ const a=(i/6)*Math.PI*2; const leaf=box(1.5,0.06,0.32,0x2e6b38,{roughness:1});
-        leaf.position.set(x+Math.cos(a)*0.7,2.7,z+Math.sin(a)*0.7); leaf.rotation.y=-a; leaf.rotation.z=0.35; leaf.castShadow=false; world.add(leaf); } }
-    [[-6,4],[6,4],[-8,1],[8,1],[-3,6.5],[3,6.5],[-10,5],[10,5],[-12,2],[12,2]].forEach(p=>palm(p[0],p[1]));
+    // palmbomen (Medina staat bekend om zijn dadelpalmen) — GLTF met fallback
+    [[-6,4],[6,4],[-8,1],[8,1],[-3,6.5],[3,6.5],[-10,5],[10,5],[-12,2],[12,2]].forEach(p=>palmTree(p[0],p[1],0.9+Math.random()*0.25));
     const courtyard=box(14,0.05,8,0xffffff,{map:texMarble(6),roughness:.9}); courtyard.position.set(0,0.04,3); world.add(courtyard);
     world.add(makeCrowd(12,0,3,12));
     addWanderers(4,{minX:-6,maxX:6,minZ:1,maxZ:7});

@@ -160,9 +160,10 @@ function haramSurround(cx,cz,r){
     const fl=new THREER.PointLight(0xfff2d8,0.55,30); fl.position.set(cx+p[0],9,cz+p[1]); world.add(fl);
   });
 }
-// dadelpalm (Medina/Quba)
+// dadelpalm (Medina/Quba) — GLTF-model als het geladen is, anders procedureel
 function palmTree(x,z,s){
   s=s||1;
+  if(Assets.spawn('palm',x,z,s)) return;
   const tr=cyl(0.12*s,0.18*s,2.6*s,0x7a5a36,{roughness:1},8); tr.position.set(x,1.3*s,z); tr.rotation.z=(Math.random()-.5)*0.12; world.add(tr);
   for(let i=0;i<6;i++){ const a=(i/6)*Math.PI*2; const leaf=box(1.5*s,0.06,0.32*s,0x2e6b38,{roughness:1});
     leaf.position.set(x+Math.cos(a)*0.7*s,2.7*s,z+Math.sin(a)*0.7*s); leaf.rotation.y=-a; leaf.rotation.z=0.35; leaf.castShadow=false; world.add(leaf); }
@@ -174,10 +175,17 @@ function lightMast(x,z){
   const head=box(1.5,0.25,0.5,0x8a8a92); head.position.set(x,9.1,z); head.castShadow=false; world.add(head);
   for(let i=-1;i<=1;i++){ const l=sph(0.14,0xfff2cc,{emissive:0xffe9a0,emissiveIntensity:1.2},8); l.position.set(x+i*0.45,8.95,z+0.2); l.castShadow=false; world.add(l); }
 }
-// acacia (doornboom van de woestijnvlakte)
+// acacia (doornboom van de woestijnvlakte) — GLTF-model met fallback
 function acacia(x,z,s){ s=s||1;
+  if(Assets.spawn('acacia',x,z,s)) return;
   const tr=cyl(0.1*s,0.16*s,1.6*s,0x5a4630,{roughness:1},7); tr.position.set(x,0.8*s,z); tr.rotation.z=(Math.random()-.5)*0.2; world.add(tr);
   const cr=sph(1.25*s,0x4a6b35,{roughness:1},10); cr.position.set(x,1.9*s,z); cr.scale.set(1.35,0.34,1.35); cr.castShadow=false; world.add(cr);
+}
+// Nabawi-parasol (GLTF) met procedurele fallback
+function nabawiParasol(x,z,s){
+  if(Assets.spawn('parasol',x,z,s||1,0)) return;
+  const pole=cyl(0.09,0.11,3.4,0xe6e0d0); pole.position.set(x,1.7,z); pole.castShadow=false; world.add(pole);
+  const um=cyl(1.85,0.12,0.8,0xf4efe2,{roughness:.95},4); um.rotation.y=Math.PI/4; um.position.set(x,3.7,z); um.castShadow=false; world.add(um);
 }
 // Nabawi-stijl lantaarnpaal met bollenkrans
 function nabawiLamp(x,z){
