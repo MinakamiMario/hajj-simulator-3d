@@ -55,6 +55,19 @@ function texSand(rep){
       for(let px=0;px<=s;px+=32){ x.lineTo(px,y0+Math.sin(px*.04+i)*6); } x.stroke(); }
   },rep||20);
 }
+// gebedstapijt: rode banen met saff-lijn en subtiele medaillons (gebedshal-stijl)
+function texCarpet(rep){
+  return canvasTex('carpet',256,(x,s)=>{
+    x.fillStyle='#7e2620'; x.fillRect(0,0,s,s);
+    for(let i=0;i<1500;i++){ x.fillStyle=`rgba(0,0,0,${Math.random()*.09})`;
+      x.fillRect(Math.random()*s,Math.random()*s,1.5,1.5); }
+    x.fillStyle='#5e1a16'; x.fillRect(0,s*0.8,s,s*0.2);          // donkere saff-baan
+    x.strokeStyle='#c9a84c'; x.lineWidth=3;
+    x.beginPath(); x.moveTo(0,s*0.8); x.lineTo(s,s*0.8); x.stroke();
+    x.strokeStyle='rgba(201,168,76,.3)'; x.lineWidth=2;
+    for(let cx2=s*0.125;cx2<s;cx2+=s*0.25){ x.beginPath(); x.arc(cx2,s*0.4,s*0.06,0,6.28); x.stroke(); }
+  },rep||8);
+}
 // asfalt met lichte slijtage
 function texAsphalt(rep){
   return canvasTex('asphalt',256,(x,s)=>{

@@ -108,7 +108,7 @@ const QUIZZES={
   8:{q:'Wat zeg je bij elke worp?',a:['Bismillah','Allahu Akbar','Alhamdulillah'],ok:1,info:'Bij elke steen: Allahu Akbar.'},
   9:{q:'Wat geeft meer beloning volgens de Profeet ﷺ?',a:['Taqsir (inkorten)','Halq (kaalscheren)','Geen verschil'],ok:1,info:'De Profeet ﷺ vroeg 3× vergeving voor wie scheert, 1× voor wie inkort.'},
   11:{q:'Is het bezoek aan Medina onderdeel van de Hajj?',a:['Ja, het is verplicht','Nee — het is een aanbevolen ziyarah','Alleen voor mannen'],ok:1,info:'De ziyarah naar Medina is aanbevolen, maar geen rite of voorwaarde van de Hajj.'},
-  12:{q:'Wat zei de Profeet ﷺ over 2 rak\'ah in Quba?',a:['Beloning van een Hajj','Beloning van een Umrah','Beloning van 100 gebeden'],ok:1,info:'Wie zich thuis reinigt en in Quba 2 rak\'ah bidt, heeft de beloning van een Umrah.'},
+  13:{q:'Wat zei de Profeet ﷺ over 2 rak\'ah in Quba?',a:['Beloning van een Hajj','Beloning van een Umrah','Beloning van 100 gebeden'],ok:1,info:'Wie zich thuis reinigt en in Quba 2 rak\'ah bidt, heeft de beloning van een Umrah.'},
 };
 function askQuiz(sceneIdx,then){
   const qz=QUIZZES[sceneIdx];

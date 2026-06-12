@@ -199,8 +199,8 @@ SCENES.push({
 /* 11 — MEDINA: MASJID AN-NABAWI + AL-BAQI (ziyarah, geen Hajj-rite) */
 SCENES.push({
   id:11, loc:'🕌 Medina — Masjid an-Nabawi', ar:'المَسجِد النَّبَوِي',
-  task:'🎯 1) Bid in de Rawda  2) Geef salam aan de Profeet ﷺ  3) Bezoek al-Baqi',
-  story:`Welkom in <strong>Medina al-Munawwarah</strong> — de verlichte stad. Dit bezoek (ziyarah) is <em>aanbevolen maar geen onderdeel van de Hajj</em>.<br><br>1️⃣ Bid 2 rak'ah in de <strong>Rawda</strong> (het groene tapijt) — "een tuin van de tuinen van het Paradijs".<br>2️⃣ Geef rustig <strong>salam</strong> aan de Profeet ﷺ en aan Abu Bakr en Umar bij de gouden afscheiding.<br>3️⃣ Bezoek <strong>al-Baqi</strong> — de oude begraafplaats naast de moskee (poort rechts 🌴), waar veel metgezellen en familie van de Profeet ﷺ rusten.`,
+  task:'🎯 Bezoek al-Baqi 🌴 en ga dan de moskee binnen via Bab as-Salam',
+  story:`Welkom in <strong>Medina al-Munawwarah</strong> — de verlichte stad. Dit bezoek (ziyarah) is <em>aanbevolen maar geen onderdeel van de Hajj</em>.<br><br>🌴 Bezoek eerst <strong>al-Baqi</strong> — de oude begraafplaats naast de moskee (poort rechts), waar veel metgezellen en familie van de Profeet ﷺ rusten.<br><br>🕌 Ga daarna door de groene poort <strong>Bab as-Salam</strong> de moskee binnen voor de Rawda en de salam aan de Profeet ﷺ.`,
   spawn:{x:0,z:10,face:Math.PI,bounds:{minX:-15,maxX:17,minZ:-4.2,maxZ:13}},
   light:{amb:0xc8d2e0,ambI:0.9,dir:0xfff0d8,dirI:1.0,sky:0x9cc0e4,exp:0.92},
   fog:{near:34,far:140},
@@ -210,20 +210,19 @@ SCENES.push({
     // ===== gevel met twee verdiepingen arcades =====
     const facade=box(30,7,0.6,0xead9b8,{roughness:.9}); facade.position.set(0,3.5,-5); world.add(facade);
     camOccluders.push(facade);
-    for(let x=-13;x<=13;x+=2.2){
+    for(let x=-13;x<=13;x+=2.2){ if(Math.abs(x)<1.3) continue;
       const arch=box(1.3,2.6,0.7,0x9a7a4a,{roughness:.85}); arch.position.set(x,1.3,-4.95); world.add(arch);
       const archTop=sph(0.65,0x9a7a4a,{roughness:.85},10); archTop.position.set(x,2.6,-4.95); archTop.scale.set(1,0.6,1); world.add(archTop);
       const arch2=box(1.0,1.7,0.5,0xb89a64,{roughness:.85}); arch2.position.set(x,4.6,-4.9); world.add(arch2);
       const arch2T=sph(0.5,0xb89a64,{roughness:.85},10); arch2T.position.set(x,5.5,-4.9); arch2T.scale.set(1,0.55,1); world.add(arch2T);
     }
     const roofline=box(30.4,0.5,0.9,0xd9c89e); roofline.position.set(0,7.2,-5); world.add(roofline);
-    // witte binnenzuilen met gouden band (zoals in de gebedshal)
-    for(let x=-12;x<=12;x+=2.4){
-      const col=cyl(0.16,0.2,3.0,0xf4efe4,{roughness:.85},12); col.position.set(x,1.5,-3.9); world.add(col);
-      const band=cyl(0.21,0.21,0.1,0xc9a84c,{metalness:.5,roughness:.4},12); band.position.set(x,2.3,-3.9); band.castShadow=false; world.add(band);
-      const cap=sph(0.3,0xdfd8c6,{roughness:.9},10); cap.position.set(x,3.1,-3.9); cap.scale.set(1,0.5,1); cap.castShadow=false; world.add(cap);
-      colliders.push({minX:x-0.28,maxX:x+0.28,minZ:-4.18,maxZ:-3.62});
-    }
+    // Bab as-Salam: gouden portaal met groene deuren
+    const portal=box(3.6,4.4,0.5,0xc9a84c,{metalness:.45,roughness:.4}); portal.position.set(0,2.2,-4.92); world.add(portal);
+    const portalTop=sph(1.5,0xc9a84c,{metalness:.45,roughness:.4},14); portalTop.position.set(0,4.4,-4.92); portalTop.scale.set(1,0.6,0.35); world.add(portalTop);
+    [-0.8,0.8].forEach(dx=>{ const deur=box(1.45,3.3,0.18,0x1f6b45,{roughness:.6}); deur.position.set(dx,1.65,-4.72); world.add(deur);
+      for(let yy=0.7;yy<=2.7;yy+=0.5){ const stud=sph(0.05,0xc9a84c,{metalness:.6},6); stud.position.set(dx,yy,-4.6); stud.castShadow=false; world.add(stud); } });
+    const babLbl=textSprite('بَاب السَّلَام','#f0d080'); babLbl.position.set(0,5.4,-4.6); world.add(babLbl);
     // DE GROENE KOEPEL boven de kamer van de Profeet ﷺ
     const drum=cyl(1.9,2.1,1.8,0xe2d4b0,{roughness:.9},20); drum.position.set(4.5,7.9,-6.6); world.add(drum);
     const dome=sph(2.2,0x1f7a4d,{roughness:.45,metalness:.15},26); dome.position.set(4.5,9.4,-6.6); dome.scale.set(1,1.05,1); world.add(dome);
@@ -240,20 +239,6 @@ SCENES.push({
       const pole=cyl(0.09,0.11,3.4,0xe6e0d0); pole.position.set(px,1.7,pz); pole.castShadow=false; world.add(pole);
       const um=cyl(1.85,0.12,0.8,0xf4efe2,{roughness:.95},4); um.rotation.y=Math.PI/4; um.position.set(px,3.7,pz); um.castShadow=false; world.add(um);
     }); }
-    // interieur: rode tapijten met gebedslijnen + de groene RAWDA
-    const redCarpet=box(22,0.04,4,0x8a2a22,{roughness:1}); redCarpet.position.set(-1,0.05,-2.2); world.add(redCarpet);
-    for(let x=-11;x<=9;x+=2){ const lijn=box(0.05,0.05,4,0x6a1f1a); lijn.position.set(x,0.06,-2.2); lijn.castShadow=false; world.add(lijn); }
-    const rawda=box(4.6,0.05,2.6,0x2e8a55,{roughness:1,emissive:0x0f3a20,emissiveIntensity:.3}); rawda.position.set(-2.5,0.07,-2.2); world.add(rawda);
-    const rawdaLbl=textSprite('الرَّوضَة','#9af0b4'); rawdaLbl.position.set(-2.5,2.4,-2.2); world.add(rawdaLbl);
-    // witte Rawda-zuilen met groene band (zo herken je de Rawda echt)
-    [-4.4,-2.5,-0.6].forEach(x=>{ const rc=cyl(0.13,0.16,2.6,0xf6f2e8,{roughness:.85},10); rc.position.set(x,1.3,-3.4); world.add(rc);
-      const gb=cyl(0.17,0.17,0.16,0x2e8a55,{roughness:.7},10); gb.position.set(x,1.0,-3.4); gb.castShadow=false; world.add(gb); });
-    // de gouden afscheiding van de kamer van de Profeet ﷺ
-    const grille=box(3.2,2.2,0.25,0x9a7a2a,{metalness:.6,roughness:.35,emissive:0x3a2c08,emissiveIntensity:.4}); grille.position.set(4.5,1.1,-3.2); world.add(grille);
-    camOccluders.push(grille);
-    colliders.push({minX:2.8,maxX:6.2,minZ:-3.5,maxZ:-2.95});
-    for(let x=-1.3;x<=1.3;x+=0.33){ const bar=cyl(0.03,0.03,2.1,0xc9a84c,{metalness:.7,roughness:.3}); bar.position.set(4.5+x,1.1,-3.05); world.add(bar); }
-    const grLbl=emojiSprite('🕊️',0.5); grLbl.position.set(4.5,2.9,-3.2); world.add(grLbl);
     // ===== AL-BAQI: de oude begraafplaats naast de moskee =====
     const sand=box(7,0.05,11,0xffffff,{map:texSand(6),roughness:1}); sand.position.set(13.4,0.05,6.5); world.add(sand);
     const wallSegs=[
@@ -283,27 +268,20 @@ SCENES.push({
     world.add(makeCrowd(24,-2,5,16));
     addWanderers(7,{minX:-12,maxX:7,minZ:1,maxZ:9});
     everyMs(()=>spawnDhikrAt(-1,2),3200);
-    // ===== volgorde: Rawda → salam → (aanbevolen) al-Baqi =====
-    State.rawdaDone=false; State.salamDone=false; State.baqiDone=false;
-    setProgress("1️⃣ Bid 2 rak'ah in de Rawda (groen tapijt)");
-    Zone.add({ id:'rawda', x:-2.5, z:-1.2, r:1.4, icon:'🤲', label:"Bid in de Rawda", noConsume:true,
-      action:()=>{ if(State.rawdaDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
-        openChoice({ ar:'الرَّوضَة الشَّرِيفَة', sub:'"Tussen mijn huis en mijn minbar ligt een tuin van de tuinen van het Paradijs" (Bukhari & Muslim)',
-          txt:"Je staat op het groene tapijt van de Rawda. Bid hier 2 rak'ah — volg de bewegingen rustig. (Tegenwoordig reserveer je dit moment via de Nusuk-app.)",
-          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.rawdaDone=true;
-            Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z); learnDua('salawat');
-              showFeedback("✅ Wat een bijzondere plek. Ga nu rustig naar de gouden afscheiding voor de salam. ➡️",true,5000);
-              setProgress('2️⃣ Geef salam bij de gouden afscheiding'); }); }}]}); }});
-    Zone.add({ id:'salam', x:4.5, z:-1.8, r:1.5, icon:'🕊️', label:'Geef salam', noConsume:true,
-      action:()=>{ if(!State.rawdaDone){ showFeedback('Bid eerst 2 rak\'ah in de Rawda (groen tapijt, links). 🤲',false,3000); return; }
-        if(State.salamDone){ showFeedback('Je hebt je salam al gegeven. 🕊️',true,2000); return; }
-        openChoice({ ar:'السَّلَام عَلَيكَ يَا رَسُولَ الله', sub:'Sta rustig, met respect — niet dringen, stem zacht',
-          txt:'Je staat voor de kamer van de Profeet ﷺ. Geef je salam:<br><br><em>"As-salamu alayka ya Rasulallah"</em> 🕊️<br>Een stap verder: salam aan <strong>Abu Bakr</strong>, en daarna aan <strong>Umar</strong> (moge Allah tevreden met hen zijn).',
-          choices:[{txt:'🕊️ Geef de salam en loop rustig door', action:()=>{ State.salamDone=true; State.medinaDone=true; Sound.success();
-            spawnTextAt('السَّلَامُ عَلَيكَ يَا رَسُولَ الله', Player.x, 2.4, Player.z, '#bfe8c0');
-            showFeedback('✅ Salam gegeven — kalm en vol respect. Bezoek nu al-Baqi (poort rechts 🌴), of ga door naar Quba.',true,6000);
-            setProgress('3️⃣ Aanbevolen: bezoek al-Baqi (poort rechts)');
-            showNextBtn('Naar moskee Quba →'); }}]}); }});
+    // ===== volgorde: (aanbevolen) al-Baqi → de moskee binnen =====
+    State.baqiDone=false;
+    setProgress('🌴 Bezoek al-Baqi (poort rechts) en ga dan naar binnen 🕌');
+    Zone.add({ id:'enter', x:0, z:-3.5, r:1.5, icon:'🕌', label:'Ga de moskee binnen', noConsume:true,
+      action:()=>{
+        if(!State.baqiDone){
+          openChoice({ ar:'بَاب السَّلَام', sub:'De Poort van de Vrede',
+            txt:'Wil je eerst <strong>al-Baqi</strong> bezoeken (aanbevolen — poort rechts 🌴), of meteen de moskee binnengaan?',
+            choices:[
+              {txt:'🕌 Naar binnen', action:()=>{ showFeedback('🕌 Je stapt met je rechtervoet naar binnen, met een du\'a voor de poorten van genade.',true,2500); Game.next(); }},
+              {txt:'🌴 Eerst al-Baqi bezoeken', action:()=>{ showFeedback('🌴 De poort van al-Baqi is rechts naast de moskee.',true,3000); }}
+            ]}); return; }
+        showFeedback('🕌 Je stapt met je rechtervoet naar binnen, met een du\'a voor de poorten van genade.',true,2500);
+        Game.next(); }});
     Zone.add({ id:'baqi', x:10.0, z:6.5, r:1.4, icon:'🌴', label:'Groet de mensen van al-Baqi', noConsume:true,
       action:()=>{ if(State.baqiDone){ showFeedback('Je hebt de mensen van al-Baqi al gegroet. 🤲',true,2200); return; }
         openChoice({ ar:'بَقِيع الغَرقَد', sub:'De oude begraafplaats van Medina — hier rusten o.a. Uthman, vrouwen en kinderen van de Profeet ﷺ en vele metgezellen',
@@ -315,9 +293,100 @@ SCENES.push({
   }
 });
 
+/* 12 — BINNEN IN MASJID AN-NABAWI */
+SCENES.push({
+  id:12, loc:'🕌 In de gebedshal — Masjid an-Nabawi', ar:'الرَّوضَة الشَّرِيفَة',
+  task:"🎯 1) Bid 2 rak'ah in de Rawda  2) Geef salam aan de Profeet ﷺ",
+  story:`Je stapt door <strong>Bab as-Salam</strong> de koele gebedshal binnen — rode tapijten, witte zuilen met gouden kapitelen, kroonluchters.<br><br>1️⃣ Loop naar het <strong>groene tapijt van de Rawda</strong> — "een tuin van de tuinen van het Paradijs" — en bid er 2 rak'ah.<br>2️⃣ Geef daarna <strong>salam</strong> bij de gouden afscheiding van de kamer van de Profeet ﷺ — rustig, met zachte stem.`,
+  spawn:{x:0,z:6.4,face:Math.PI,bounds:{minX:-11.4,maxX:9.3,minZ:-7.1,maxZ:7.3}},
+  light:{amb:0xd8c8a8,ambI:0.85,dir:0xffe8c0,dirI:0.45,sky:0x14120e,exp:0.7,hemiI:0.3},
+  fog:{near:40,far:120},
+  cam:{dist:5.4,height:2.2,pitch:0.26,maxY:4.6,bound:{minX:-11.8,maxX:9.7,minZ:-7.6,maxZ:7.7}},
+  build(){
+    // vloer: gebedstapijt met saff-banen richting qibla
+    const floor=box(24,0.06,17,0xffffff,{map:texCarpet(7),roughness:1}); floor.position.set(-1,0.03,0); world.add(floor);
+    // wanden + plafond (cast geen schaduw, anders wordt de hal zwart)
+    const wallC=0xe8dcc2;
+    [[24,0.4,-1,-8.2],[24,0.4,-1,8.2]].forEach(w=>{ const m=box(w[0],5.6,w[1],wallC,{roughness:.95}); m.position.set(w[2],2.8,w[3]); m.castShadow=false; world.add(m); });
+    [[-12.2],[10.2]].forEach(w=>{ const m=box(0.4,5.6,17,wallC,{roughness:.95}); m.position.set(w[0],2.8,0); m.castShadow=false; world.add(m); });
+    const ceil=box(24,0.3,17,0xf2e9d4,{roughness:1}); ceil.position.set(-1,5.75,0); ceil.castShadow=false; world.add(ceil);
+    const trim=box(24,0.18,0.18,0xc9a84c,{metalness:.4,roughness:.4}); trim.position.set(-1,5.1,-7.95); trim.castShadow=false; world.add(trim);
+    // boogvensters met warm avondlicht
+    for(let z=-6;z<=6;z+=3){ [-12,10].forEach(wx=>{
+      const win=box(0.12,1.6,1.1,0xffd9a0,{emissive:0xffc070,emissiveIntensity:.7}); win.position.set(wx,3.4,z); win.castShadow=false; world.add(win);
+    }); }
+    // zuilen met gouden kapitelen + boogkappen
+    [-9.5,-5,-0.5,4].forEach(cx=>[-4,0,4].forEach(cz=>{
+      const col=cyl(0.3,0.34,4.4,0xf6f1e4,{roughness:.8},14); col.position.set(cx,2.2,cz); world.add(col);
+      const capRing=cyl(0.42,0.36,0.3,0xc9a84c,{metalness:.5,roughness:.35},14); capRing.position.set(cx,4.5,cz); capRing.castShadow=false; world.add(capRing);
+      const arch=sph(0.85,0xefe7d2,{roughness:.9},12); arch.position.set(cx,5.0,cz); arch.scale.set(1.5,0.55,1.5); arch.castShadow=false; world.add(arch);
+      colliders.push({minX:cx-0.45,maxX:cx+0.45,minZ:cz-0.45,maxZ:cz+0.45});
+    }));
+    // kroonluchters
+    [[-5,-2],[2,2],[-9,3]].forEach(p=>{
+      const ring=cyl(0.7,0.7,0.16,0xc9a84c,{metalness:.6,roughness:.3},16); ring.position.set(p[0],3.9,p[1]); ring.castShadow=false; world.add(ring);
+      const chain=cyl(0.03,0.03,1.6,0x8a7a3a); chain.position.set(p[0],4.9,p[1]); chain.castShadow=false; world.add(chain);
+      for(let i=0;i<6;i++){ const a=(i/6)*Math.PI*2; const bulb=sph(0.09,0xfff0c8,{emissive:0xffd070,emissiveIntensity:1.2},8);
+        bulb.position.set(p[0]+Math.cos(a)*0.55,3.82,p[1]+Math.sin(a)*0.55); bulb.castShadow=false; world.add(bulb); }
+      const pl=new THREER.PointLight(0xffd9a0,0.75,13); pl.position.set(p[0],3.6,p[1]); world.add(pl);
+    });
+    // qibla-wand: MIHRAB (gouden nis) + MINBAR (preekstoel)
+    const mihrabFrame=box(2.0,3.4,0.3,0xc9a84c,{metalness:.5,roughness:.35}); mihrabFrame.position.set(-2.5,1.7,-7.95); world.add(mihrabFrame);
+    const niche=box(1.4,2.8,0.25,0x2a4a3a,{emissive:0x14301f,emissiveIntensity:.5}); niche.position.set(-2.5,1.4,-7.85); world.add(niche);
+    const nicheTop=sph(0.7,0xc9a84c,{metalness:.5,roughness:.35},12); nicheTop.position.set(-2.5,3.4,-7.92); nicheTop.scale.set(1,0.75,0.3); world.add(nicheTop);
+    const mb=new THREER.Group();
+    for(let i=0;i<4;i++){ const tr=box(1.0,0.28,0.5,0xe8dfca,{roughness:.85}); tr.position.set(0,0.14+i*0.28,0.8-i*0.5); mb.add(tr); }
+    [-0.5,0.5].forEach(s2=>{ const rail=box(0.08,1.3,2.4,0xd9cdaf,{roughness:.85}); rail.position.set(s2,0.85,0.05); mb.add(rail); });
+    const canopy=sph(0.6,0x1f7a4d,{roughness:.5},12); canopy.position.set(0,2.6,-0.85); canopy.scale.set(1,0.7,1); mb.add(canopy);
+    [-0.45,0.45].forEach(s2=>{ const post=cyl(0.05,0.05,1.6,0xc9a84c,{metalness:.4},8); post.position.set(s2,1.8,-0.85); mb.add(post); });
+    mb.position.set(-5.4,0,-6.7); world.add(mb);
+    colliders.push({minX:-6.1,maxX:-4.7,minZ:-7.4,maxZ:-5.5});
+    // DE RAWDA: groen tapijt + wit-groene zuilen
+    const rawda=box(5.4,0.05,3.2,0x2e8a55,{roughness:1,emissive:0x0f3a20,emissiveIntensity:.35}); rawda.position.set(-1.2,0.08,-5.6); world.add(rawda);
+    const rawdaLbl=textSprite('الرَّوضَة','#9af0b4'); rawdaLbl.position.set(-1.2,2.9,-5.6); world.add(rawdaLbl);
+    [-3.4,-1.2,1.0].forEach(x=>{ const rc=cyl(0.16,0.2,4.4,0xf8f5ea,{roughness:.8},12); rc.position.set(x,2.2,-6.6); world.add(rc);
+      const gb=cyl(0.22,0.22,0.5,0x2e8a55,{roughness:.6},12); gb.position.set(x,1.3,-6.6); gb.castShadow=false; world.add(gb);
+      colliders.push({minX:x-0.3,maxX:x+0.3,minZ:-6.9,maxZ:-6.3}); });
+    // de gouden afscheiding van de Heilige Kamer (oostkant)
+    const grille=box(0.3,2.6,5.0,0x9a7a2a,{metalness:.6,roughness:.35,emissive:0x3a2c08,emissiveIntensity:.4}); grille.position.set(8.6,1.3,-4.4); world.add(grille);
+    for(let z=-6.6;z<=-2.3;z+=0.36){ const bar=cyl(0.035,0.035,2.5,0xc9a84c,{metalness:.7,roughness:.3},8); bar.position.set(8.4,1.3,z); world.add(bar); }
+    const grTop=box(0.5,0.3,5.4,0x6b5012,{metalness:.5,roughness:.4}); grTop.position.set(8.6,2.75,-4.4); grTop.castShadow=false; world.add(grTop);
+    colliders.push({minX:8.0,maxX:9.4,minZ:-7.2,maxZ:-1.8});
+    camOccluders.push(grille);
+    const grLbl=emojiSprite('🕊️',0.55); grLbl.position.set(8.2,3.4,-4.4); world.add(grLbl);
+    // biddende rijen (saff) richting qibla + rustige lopers
+    for(let r=0;r<2;r++){ for(let x=-9;x<=6;x+=1.7){
+      if(Math.random()<0.2) continue;
+      const p=pilgrimMesh(); p.position.set(x+(Math.random()-.5)*0.3,0,1.6+r*1.9); p.rotation.y=0; p.userData.ph=Math.random()*6.28; world.add(p);
+    }}
+    addWanderers(4,{minX:-10,maxX:7,minZ:3,maxZ:6.5});
+    everyMs(()=>spawnDhikrAt(-1,0),3400);
+    // ===== taken: Rawda → salam =====
+    State.rawdaDone=false; State.salamDone=false;
+    setProgress("1️⃣ Bid 2 rak'ah in de Rawda (groen tapijt vooraan)");
+    Zone.add({ id:'rawda', x:-1.2, z:-5.0, r:1.5, icon:'🤲', label:"Bid in de Rawda", noConsume:true,
+      action:()=>{ if(State.rawdaDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
+        openChoice({ ar:'الرَّوضَة الشَّرِيفَة', sub:'"Tussen mijn huis en mijn minbar ligt een tuin van de tuinen van het Paradijs" (Bukhari & Muslim)',
+          txt:"Je staat op het groene tapijt van de Rawda. Bid hier 2 rak'ah — volg de bewegingen rustig. (Tegenwoordig reserveer je dit moment via de Nusuk-app.)",
+          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.rawdaDone=true;
+            Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z); learnDua('salawat');
+              showFeedback("✅ Wat een bijzondere plek. Ga nu rustig naar de gouden afscheiding voor de salam. ➡️",true,5000);
+              setProgress('2️⃣ Geef salam bij de gouden afscheiding (rechts)'); }); }}]}); }});
+    Zone.add({ id:'salam', x:7.3, z:-4.4, r:1.5, icon:'🕊️', label:'Geef salam', noConsume:true,
+      action:()=>{ if(!State.rawdaDone){ showFeedback('Bid eerst 2 rak\'ah in de Rawda (groen tapijt). 🤲',false,3000); return; }
+        if(State.salamDone){ showFeedback('Je hebt je salam al gegeven. 🕊️',true,2000); return; }
+        openChoice({ ar:'السَّلَام عَلَيكَ يَا رَسُولَ الله', sub:'Sta rustig, met respect — niet dringen, stem zacht',
+          txt:'Je staat voor de kamer van de Profeet ﷺ. Geef je salam:<br><br><em>"As-salamu alayka ya Rasulallah"</em> 🕊️<br>Een stap verder: salam aan <strong>Abu Bakr</strong>, en daarna aan <strong>Umar</strong> (moge Allah tevreden met hen zijn).',
+          choices:[{txt:'🕊️ Geef de salam en loop rustig door', action:()=>{ State.salamDone=true; State.medinaDone=true; Sound.success();
+            spawnTextAt('السَّلَامُ عَلَيكَ يَا رَسُولَ الله', Player.x, 2.4, Player.z, '#bfe8c0');
+            showFeedback('✅ Salam gegeven — kalm en vol respect. De Profeet ﷺ zei: "Wie mij groet, Allah stuurt mijn ziel terug zodat ik zijn groet beantwoord."',true,6000);
+            showNextBtn('Naar moskee Quba →'); }}]}); }});
+  }
+});
+
 /* 12 — QUBA (eerste moskee van de islam) */
 SCENES.push({
-  id:12, loc:'🕌 Moskee Quba — Medina', ar:'مَسجِد قُبَاء',
+  id:13, loc:'🕌 Moskee Quba — Medina', ar:'مَسجِد قُبَاء',
   task:"🎯 Bid 2 rak'ah in Quba (beloning van een Umrah)",
   story:`<strong>Quba</strong> — de allereerste moskee van de islam, gebouwd door de Profeet ﷺ zelf bij aankomst in Medina.<br><br>De Profeet ﷺ zei: <em>"Wie zich thuis reinigt en naar Quba komt en er 2 rak'ah bidt, heeft de beloning van een Umrah."</em>`,
   spawn:{x:0,z:7,face:Math.PI,bounds:{minX:-8,maxX:8,minZ:-2,maxZ:8}},
@@ -357,7 +426,7 @@ SCENES.push({
 
 /* 13 — HOME */
 SCENES.push({
-  id:13, loc:'🏠 Thuis — Je bent terug', ar:'العَودَة',
+  id:14, loc:'🏠 Thuis — Je bent terug', ar:'العَودَة',
   task:'🎯 Loop naar de voordeur',
   story:`Je bent thuis. Je familie wacht. Je bent veranderd — dat voel je diep van binnen.`,
   spawn:{x:0,z:4.4,face:Math.PI,bounds:{minX:-4.6,maxX:4.6,minZ:-4.6,maxZ:4.6}},

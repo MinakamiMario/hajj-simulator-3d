@@ -51,7 +51,7 @@ function loadScene(id){
   Cam.yaw=Player.faceY; Cam.pitch=C.pitch!==undefined?C.pitch:0.32;
   Cam.update();
   showSceneTitle(s);
-  const AMBIENTS=['night','outdoor','plane','crowd','crowd','crowd','outdoor','night','crowd','outdoor','crowd','crowd','outdoor','outdoor'];
+  const AMBIENTS=['night','outdoor','plane','crowd','crowd','crowd','outdoor','night','crowd','outdoor','crowd','crowd','crowd','outdoor','outdoor'];
   Sound.setAmbient(AMBIENTS[id]||null);
   updateHUD(s); setTask(s);
 }
