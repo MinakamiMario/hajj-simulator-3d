@@ -5,7 +5,7 @@
 const Zone = {
   list:[], current:null,
   clear(){ this.list.forEach(z=>{ if(z.ring)world.remove(z.ring); if(z.sprite)world.remove(z.sprite); });
-    this.list=[]; this.current=null; clearLabels(); updatePrompt(); },
+    this.list=[]; this.current=null; clearLabels(); updatePrompt(); Guide.refresh(); },
   add(z){
     z.done=false; z.y=z.y||0;
     if(z.pickup){
@@ -18,6 +18,7 @@ const Zone = {
       z.ring.position.set(z.x,z.y+0.03,z.z); world.add(z.ring);
     }
     this.list.push(z);
+    if(z.guide) Guide.refresh();
   },
   check(){
     let near=null,bestD=1e9;
@@ -40,6 +41,61 @@ const Zone = {
     }
     if(z.ring){ z.ring.material.color.set(0x27ae60); z.ring.material.opacity=0.3; }
     if(this.current===z)this.current=null; updatePrompt();
+    Guide.refresh();
+  }
+};
+
+// ============================================================
+//  GUIDE — gouden baken + randpijl naar het actieve doel
+// ============================================================
+const Guide = {
+  grp:null, tip:null, ring:null, target:null,
+  refresh(){
+    // wijs naar de eerste niet-afgeronde zone met guide:true
+    const t=Zone.list.find(z=>z.guide && !z.done) || null;
+    if(t===this.target && this.grp) return;
+    this.clear();
+    if(!t || !world) return;
+    this.target=t;
+    const g=new THREER.Group();
+    const beam=new THREER.Mesh(new THREER.CylinderGeometry(0.14,0.4,6,12,1,true),
+      new THREER.MeshBasicMaterial({color:0xffd870,transparent:true,opacity:.26,depthWrite:false,side:THREER.DoubleSide}));
+    beam.position.y=3.2; g.add(beam);
+    const tip=new THREER.Mesh(new THREER.ConeGeometry(0.32,0.6,12),
+      new THREER.MeshBasicMaterial({color:0xffd870}));
+    tip.rotation.x=Math.PI; tip.position.y=2.3; g.add(tip); this.tip=tip;
+    const ring=glowRing(0.95,0xffd870); ring.position.y=0.06; g.add(ring); this.ring=ring;
+    g.position.set(t.x,(t.y||0),t.z); world.add(g); this.grp=g;
+  },
+  clear(){
+    if(this.grp && world) world.remove(this.grp);
+    this.grp=null; this.tip=null; this.ring=null; this.target=null;
+    const a=document.getElementById('guide-arrow'); if(a)a.style.display='none';
+  },
+  update(){
+    const a=document.getElementById('guide-arrow');
+    if(!this.grp || !this.target){ if(a)a.style.display='none'; return; }
+    const now=clock?clock.elapsedTime:0;
+    if(this.tip) this.tip.position.y=2.3+Math.sin(now*3.2)*0.3;
+    if(this.ring){ const s=1+Math.sin(now*3.2)*0.14; this.ring.scale.set(s,s,s); }
+    if(!a) return;
+    // randpijl: alleen tonen als het doel niet (goed) in beeld is
+    const t=this.target;
+    const v=new THREER.Vector3(t.x,(t.y||0)+1.2,t.z); v.project(camera);
+    const behind=v.z>1;
+    let sx=(v.x*0.5+0.5)*window.innerWidth, sy=(-v.y*0.5+0.5)*window.innerHeight;
+    if(behind){ sx=window.innerWidth-sx; sy=window.innerHeight*0.96; }
+    const m=52, W=window.innerWidth, H=window.innerHeight;
+    const inView=!behind && sx>=m && sx<=W-m && sy>=m && sy<=H-m;
+    if(inView){ a.style.display='none'; return; }
+    const cx=W/2, cy=H/2;
+    let dx=sx-cx, dy=sy-cy; const len=Math.hypot(dx,dy)||1; dx/=len; dy/=len;
+    const tE=Math.min((cx-m)/Math.max(1e-6,Math.abs(dx)), (cy-m)/Math.max(1e-6,Math.abs(dy)));
+    const d=Math.hypot(t.x-Player.x,t.z-Player.z);
+    a.style.display='flex';
+    a.style.left=(cx+dx*tE)+'px'; a.style.top=(cy+dy*tE)+'px';
+    a.querySelector('.ga-rot').style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
+    a.querySelector('.ga-dist').textContent=Math.round(d)+'m';
   }
 };
 // small burst of glowing particles

@@ -8,6 +8,7 @@ let frameHook=null;
 let paused=false;
 let encounter=null;
 let colliders=[];
+let terrainFn=null;   // hoogteprofiel van de scène (heuvels)
 function blocked(x,z){ for(const c of colliders){ if(x>c.minX&&x<c.maxX&&z>c.minZ&&z<c.maxZ)return true; } return false; }
 
 const SCENES=[];
@@ -50,11 +51,11 @@ SCENES.push({
     const frame=box(1.45,2.66,0.06,0xc9a84c,{emissive:0x5a4410,emissiveIntensity:.4}); frame.position.set(0,1.33,-4.92); world.add(frame);
     const knob=sph(0.06,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6}); knob.position.set(0.45,1.2,-4.78); world.add(knob);
 
-    Zone.add({ id:'mat', x:-0.6, z:0.4, r:1.0, icon:'🤲', label:'Maak Niyyah',
+    Zone.add({ id:'mat', x:-0.6, z:0.4, r:1.0, icon:'🤲', label:'Maak Niyyah', guide:true,
       action:()=>{ Player.setPose('dua');
         showFeedback('✅ In je hart maak je de intentie voor de Hajj — hardop hoeft niet. Een warm gevoel trekt door je borst. Pak je koffer en ga naar buiten.',true,5500);
         setTimeout(()=>{ Player.setPose('stand');
-          Zone.add({ id:'exit', x:0, z:-3.7, r:1.1, icon:'🚪', label:'Ga naar buiten',
+          Zone.add({ id:'exit', x:0, z:-3.7, r:1.1, icon:'🚪', label:'Ga naar buiten', guide:true,
             action:()=>{ showFeedback('🚖 Je stapt naar buiten — de taxi naar de luchthaven staat klaar.',true,3500); showNextBtn('Naar de luchthaven →'); }});
         },1200);
       }});
@@ -214,16 +215,17 @@ SCENES.push({
       choices:[{txt:'🤲 Spreek de Niyyah uit', action:()=>{ Sound.success(); showFeedback('✅ "Labbayka Allahumma Hajjan." Je intentie is gemaakt.',true,3000); setTimeout(seatedTalbiyah,1100); }}]}); }
     function seatedTalbiyah(){ openChoice({ ar:'التَّلبِية', sub:'', txt:'Spreek de <strong>Talbiyah</strong> uit:<br><br><em>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</em><br>"Hier ben ik, o Allah, hier ben ik."',
       choices:[{txt:'🗣️ Spreek de Talbiyah', action:()=>{ Sound.success(); learnDua('talbiyah'); showFeedback('✅ Labbayka Allahumma labbayk! Je bent nu in staat van Ihraam. ✈️',true,4000); showNextBtn('Aankomst Mekka →'); }}]}); }
-    function sitDown(){ Player.x=sx; Player.z=sz; Player.faceY=0; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
+    function sitDown(){ const sz2=Zone.list.find(q=>q.id==='seat'); if(sz2&&!sz2.done)Zone.markDone(sz2);
+      Player.x=sx; Player.z=sz; Player.faceY=0; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
       Cam.yaw=0; Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
 
     if(!Char.ihram){
-      Zone.add({ id:'lav', x:-0.3, z:3.7, r:1.1, icon:'🚻', label:'Trek Ihraam aan', noConsume:true,
+      Zone.add({ id:'lav', x:-0.3, z:3.7, r:1.1, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
         action:(z)=>{ if(Char.ihram)return; Char.ihram=true; Player.build(); Sound.step();
           showFeedback(Char.gender==='female'?'🧕 Voor de vrouw is de Ihraam geen witte kleding: je gewone bedekkende kleding ís je Ihraam (gezicht en handen blijven onbedekt — geen niqab of handschoenen). Je bent er klaar voor.':'🤍 In het toilet trek je de twee witte Ihraam-doeken aan (izar en rida). Je outfit verandert.',true,Char.gender==='female'?5000:3500);
           Zone.markDone(z); instruct(); }});
     }
-    Zone.add({ id:'seat', x:0.3, z:sz, r:1.0, icon:'🪑', label:'Ga zitten', noConsume:true,
+    Zone.add({ id:'seat', x:0.3, z:sz, r:1.0, icon:'🪑', label:'Ga zitten', noConsume:true, guide:true,
       action:()=>{ if(!Char.ihram){ showFeedback('⚠️ Trek eerst je Ihraam aan in het toilet (achterin).',false,2800); return; } sitDown(); }});
     instruct();
   }
@@ -245,7 +247,7 @@ SCENES.push({
     const oc=makeOrbitCrowd(60); oc.position.set(0,0,-3); world.add(oc);
     addWanderers(8,{minX:-10,maxX:10,minZ:4,maxZ:11});
     everyMs(()=>spawnDhikrAt(0,-3),2600);
-    Zone.add({ id:'pray', x:0, z:4.5, r:1.3, icon:'🤲', label:"Du'a voor Ka'ba",
+    Zone.add({ id:'pray', x:0, z:4.5, r:1.5, icon:'🤲', label:"Du'a voor Ka'ba", guide:true,
       action:()=>{ Player.setPose('dua'); learnDua('kaaba');
         showFeedback("✅ Je heft je handen op. \"Allahumma anta as-Salam wa minka as-Salam...\" Tranen lopen over je wangen.",true,5000);
         showNextBtn('Begin Tawaf →'); }});
@@ -265,22 +267,23 @@ SCENES.push({
     const maqam=box(0.5,0.9,0.5,0xc9a84c,{metalness:.5,roughness:.3,emissive:0x5a4410,emissiveIntensity:.4}); maqam.position.set(2.2,0.45,5.6); world.add(maqam);
     const mqGlass=box(0.56,0.5,0.56,0xbfe6ff,{transparent:true,opacity:0.25}); mqGlass.position.set(2.2,1.05,5.6); world.add(mqGlass);
     Zone.add({ id:'maqam', x:2.2, z:6.6, r:1.1, icon:'🕌', label:"2 rak'ah bij Maqam Ibrahim", noConsume:true,
-      action:()=>{ if(State.tawaf<7){ showFeedback('Maak eerst je 7 rondes af. 🕋',false,2500); return; }
+      action:(zz)=>{ if(State.tawaf<7){ showFeedback('Maak eerst je 7 rondes af. 🕋',false,2500); return; }
         if(State.maqamDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
         openChoice({ ar:'مَقَام إِبرَاهِيم', sub:'"En neem de Maqam Ibrahim als gebedsplaats" (2:125)',
           txt:"Achter deze steen — met de voetafdruk van Ibrahim (a.s.) — bid je 2 rak'ah. Sunnah: al-Kafirun in de eerste, al-Ikhlas in de tweede rak'ah.",
-          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.maqamDone=true;
+          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.maqamDone=true; if(zz)Zone.markDone(zz);
             showFeedback("🕌 Je bidt 2 rak'ah achter de Maqam — volg de bewegingen.",true,3000);
             Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z);
               showFeedback("✅ Gebed voltooid. Drink nu Zamzam 💧, daarna verder naar Sa'i.",true,5000);
+              const zm=Zone.list.find(q=>q.id==='zamzam'); if(zm&&!zm.done){ zm.guide=true; Guide.refresh(); }
               showNextBtn("Naar Sa'i →"); }); }}]}); }});
     // Zamzam-station
     [[-3.6,6.2],[-4.4,6.2]].forEach(p=>{ const cooler=cyl(0.28,0.32,0.95,0xb8860b,{metalness:.4,roughness:.4}); cooler.position.set(p[0],0.48,p[1]); world.add(cooler);
       const tap=box(0.06,0.06,0.14,0xd9d2c2); tap.position.set(p[0],0.62,p[1]-0.34); world.add(tap); });
     const cups=box(0.5,0.3,0.3,0xeae4d6); cups.position.set(-4.0,0.15,5.7); world.add(cups);
     Zone.add({ id:'zamzam', x:-4.0, z:7.0, r:1.2, icon:'💧', label:'Drink Zamzam', noConsume:true,
-      action:()=>{ if(State.zamzamDone){ showFeedback('Alhamdulillah, je hebt al gedronken. 💧',true,2000); return; }
-        State.zamzamDone=true; State.zamzamBottle=true; Sound.pickup(); sparkle(Player.x,1.4,Player.z); learnDua('zamzam');
+      action:(zz)=>{ if(State.zamzamDone){ showFeedback('Alhamdulillah, je hebt al gedronken. 💧',true,2000); return; }
+        State.zamzamDone=true; State.zamzamBottle=true; if(zz)Zone.markDone(zz); Sound.pickup(); sparkle(Player.x,1.4,Player.z); learnDua('zamzam');
         showFeedback('💧 Zamzam! Drink staand, in drie teugen, met een du\'a — dit water stroomt al sinds Hajar en Ismail. Je vult ook een flesje 🧴 voor onderweg.',true,6000); }});
   },
   onExit(){ frameHook=null; }
@@ -330,7 +333,7 @@ SCENES.push({
       p.userData.walk={x:startX,min:-6.5,max:6.5,sp:1.4+Math.random()*0.9,dir:Math.random()>.5?1:-1,ph:Math.random()*6.28};
       world.add(p);
     }
-    Zone.add({ id:'safa', x:-7, z:0, r:1.5, icon:'⛰️', label:'Safa', auto:true, noConsume:true, action:()=>saiTouch('safa') });
+    Zone.add({ id:'safa', x:-7, z:0, r:1.5, icon:'⛰️', label:'Safa', auto:true, noConsume:true, guide:true, action:()=>saiTouch('safa') });
     Zone.add({ id:'marwa',x:7,  z:0, r:1.5, icon:'⛰️', label:'Marwa',auto:true, noConsume:true, action:()=>saiTouch('marwa') });
     showFeedback('🟩 Tussen de groene lampen joggen de mannen een stukje — vrouwen lopen gewoon door.',true,4500);
     sceneTimeout(saiEncounter,6000);
@@ -340,6 +343,9 @@ SCENES.push({
 function saiTouch(which){
   if(which==='safa') learnDua('safa');
   if(State.saiLast===which)return; State.saiLast=which; State.sai++; Sound.step();
+  // baken wijst steeds naar de andere heuvel
+  Zone.list.forEach(z=>{ if(z.id==='safa'||z.id==='marwa'){ z.guide=(z.id!==which); } });
+  Guide.refresh();
   setProgress(`🏃 ${State.sai}/7`);
   showFeedback(`✅ ${which==='safa'?'Bij Safa':'Bij Marwa'} — ${State.sai}/7`,true,1800);
   // re-arm both zones

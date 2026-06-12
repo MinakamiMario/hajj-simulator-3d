@@ -9,7 +9,7 @@ function sceneTimeout(fn,ms){ const id=setTimeout(fn,ms); sceneIntervals.push(id
 function clearSceneIntervals(){ sceneIntervals.forEach(id=>{ clearInterval(id); clearTimeout(id); }); sceneIntervals=[]; }
 function loadScene(id){
   const s=SCENES[id]; State.scene=id; frameHook=null; jamPillar=null;
-  encounter=null; paused=false; closeChoice(); colliders=[]; camOccluders.length=0;
+  encounter=null; paused=false; closeChoice(); colliders=[]; camOccluders.length=0; terrainFn=null;
   clearSceneIntervals();
   clearWorld(); Zone.clear();
   document.querySelectorAll('.feedback-bar,.next-bar,.sim-bar').forEach(n=>n.remove());

@@ -7,18 +7,49 @@
 SCENES.push({
   id:6, loc:'🌄 Vlakte van Arafat — 9 Dhul Hijjah', ar:'يَوم عَرَفَة',
   task:'🎯 Loop naar Jabal al-Rahma en hef je handen op',
-  story:`<strong>"الحَجُّ عَرَفَة"</strong> — "De Hajj IS Arafat." Loop naar de Jabal al-Rahma en maak du'a tot zonsondergang.`,
-  spawn:{x:0,z:9,face:Math.PI,bounds:{minX:-17,maxX:17,minZ:-2,maxZ:14}},
+  story:`<strong>"الحَجُّ عَرَفَة"</strong> — "De Hajj IS Arafat."<br><br>Voor je ligt de <strong>Jabal al-Rahma</strong> (Berg van Genade), met de witte obelisk op de top — hier hield de Profeet ﷺ zijn afscheidspreek. Volg het gouden baken 🔆, beklim het pad en maak du'a tot zonsondergang.`,
+  spawn:{x:0,z:9,face:Math.PI,bounds:{minX:-17,maxX:17,minZ:-13.5,maxZ:14}},
   light:{amb:0xffcaa0,ambI:0.8,dir:0xff9a40,dirI:1.1,sky:0xd87830,exp:0.8},
   fog:{near:34,far:130},
   build(){
     groundTex(texSand(30),160);
-    // mountain (cone)
-    const mtn=cyl(0.1,5,6,0x6b4020,{roughness:1},6); mtn.position.set(0,3,-7); world.add(mtn);
-    const cap=cyl(0.1,1.4,1.6,0x8a5a30,{roughness:1},6); cap.position.set(0,6.3,-7); world.add(cap);
-    const pole=cyl(0.05,0.05,1.8,0xe8e2d4); pole.position.set(0,7.2,-7); world.add(pole); // white marker pillar
-    // low sun
-    const sun=sph(2.4,0xffd070,{emissive:0xffb050,emissiveIntensity:1}); sun.position.set(0,3.4,-24); world.add(sun);
+    // ===== JABAL AL-RAHMA: beklimbare granietheuvel met witte obelisk =====
+    const HILL={x:0,z:-13,r:8.8,h:4.4};
+    const terr=(x,z)=>{ const d=Math.hypot(x-HILL.x,z-HILL.z); if(d>=HILL.r)return 0;
+      const t=1-d/HILL.r; return HILL.h*t*t*(3-2*t); };          // glad koepelprofiel
+    terrainFn=terr;
+    // heuvel-mesh die exact het loopprofiel volgt (lathe van hetzelfde profiel)
+    const pts=[]; for(let i=16;i>=0;i--){ const rr=HILL.r*i/16; pts.push(new THREER.Vector2(rr,terr(HILL.x+rr,HILL.z))); }
+    const hillM=new THREER.Mesh(new THREER.LatheGeometry(pts,40), mat(0x84745e,{roughness:1}));
+    hillM.position.set(HILL.x,0,HILL.z); hillM.receiveShadow=true; hillM.castShadow=false; world.add(hillM);
+    // granietblokken op de flanken
+    for(let i=0;i<30;i++){ const a=Math.random()*Math.PI*2, rr=1.5+Math.random()*(HILL.r-1.2);
+      const bx=HILL.x+Math.cos(a)*rr, bz=HILL.z+Math.sin(a)*rr;
+      if(bz>HILL.z+HILL.r*0.88) continue;                         // pad vrijhouden
+      const rk=sph(0.5+Math.random()*1.1,[0x77684f,0x8a7a64,0x6e604c][i%3],{roughness:1},9);
+      rk.position.set(bx,terr(bx,bz)*0.8,bz); rk.scale.set(1.3,0.5+Math.random()*0.3,1.1);
+      rk.rotation.y=Math.random()*3; rk.castShadow=false; world.add(rk); }
+    // trappad van de voet naar de top (lichtere steenplaten)
+    for(let i=0;i<=11;i++){ const pz=HILL.z+HILL.r-0.4 - i*((HILL.r-0.6)/11);
+      const st=box(1.7,0.14,0.8,0xc4b496,{roughness:.95}); st.position.set(0,terr(0,pz)+0.05,pz);
+      st.rotation.x=-0.1; st.castShadow=false; world.add(st); }
+    // witte obelisk op de top (het herkenningspunt van Arafat)
+    const topY=terr(HILL.x,HILL.z);
+    const plat=cyl(1.7,2.0,0.5,0xd8cdb4,{roughness:.9},14); plat.position.set(HILL.x,topY+0.2,HILL.z); plat.castShadow=false; world.add(plat);
+    const obelisk=box(0.85,3.6,0.85,0xf2efe6,{roughness:.7,emissive:0x55503e,emissiveIntensity:.25});
+    obelisk.position.set(HILL.x,topY+2.3,HILL.z); world.add(obelisk);
+    colliders.push({minX:HILL.x-0.7,maxX:HILL.x+0.7,minZ:HILL.z-0.7,maxZ:HILL.z+0.7});
+    camOccluders.push(obelisk);
+    const obLbl=textSprite('جَبَل الرَّحمَة — Jabal al-Rahma','#ffe2a0'); obLbl.scale.set(4.4,1.3,1); obLbl.position.set(HILL.x,topY+5.4,HILL.z); world.add(obLbl);
+    // pelgrims op de flanken, handen geheven in du'a
+    for(let i=0;i<9;i++){ const a=(i/9)*Math.PI*2+0.3, rr=2.2+Math.random()*4.5;
+      const px2=HILL.x+Math.cos(a)*rr, pz2=HILL.z+Math.sin(a)*rr;
+      const p=pilgrimMesh(); p.position.set(px2,terr(px2,pz2),pz2); p.rotation.y=Math.PI;
+      if(p.userData.arms)p.userData.arms.rotation.x=-1.9;          // geheven handen
+      world.add(p); }
+    everyMs(()=>spawnDhikrAt(HILL.x,HILL.z+4),3400);
+    // laagstaande zon achter de heuvel
+    const sun=sph(2.4,0xffd070,{emissive:0xffb050,emissiveIntensity:1}); sun.position.set(6,4.5,-30); world.add(sun);
     // verre bergrand rond de vlakte
     mountainRange(80,0x5a4030,16);
     // white tents + umbrellas at the edges
@@ -28,7 +59,7 @@ SCENES.push({
     minaTentField(-20,2,5,7,2.6); minaTentField(20,2,5,7,2.6);
     [[-4,8],[5,7],[-8,11],[9,11]].forEach(p=>{ const um=cyl(0.04,1.0,0.5,0xd8d2c0,{roughness:1},8); um.position.set(p[0],2.0,p[1]); um.castShadow=false; world.add(um);
       const up=cyl(0.04,0.04,2.0,0x6a5a40); up.position.set(p[0],1.0,p[1]); up.castShadow=false; world.add(up); });
-    world.add(makeCrowd(55,0,2,0,{min:3,max:14}));
+    world.add(makeCrowd(50,0,4,0,{min:3,max:9}));
     addWanderers(10,{minX:-14,maxX:14,minZ:0,maxZ:13});
     everyMs(()=>spawnDhikrAt(0,2),3000);
     // dorstige oudere pelgrim in de hitte
@@ -44,7 +75,7 @@ SCENES.push({
               showFeedback('✅ "JazakAllahu khayran, mijn kind." De beste mensen zijn zij die anderen tot nut zijn — en op Arafat weegt elke goede daad zwaar.',true,6000); }},
             {txt:'Doorlopen', action:()=>{ showFeedback('Je loopt door... maar zijn blik blijft je bij. Misschien toch teruggaan?',false,3500); }}
           ]}); }});
-    Zone.add({ id:'mtn', x:0, z:-3, r:1.6, icon:'🤲', label:"Du'a",
+    Zone.add({ id:'mtn', x:0, z:-9.6, y:terr(0,-9.6), r:2.0, icon:'🤲', label:"Du'a op Jabal al-Rahma", guide:true,
       action:()=>{ Player.setPose('dua'); learnDua('arafat');
         showFeedback("SubhanAllah. Allah daalt neer en spreekt trots over de mensen op Arafat. Geen dag worden meer mensen bevrijd dan vandaag.",true,6000);
         showNextBtn('Naar Muzdalifah →'); }});
@@ -75,7 +106,7 @@ SCENES.push({
     const pos=[[-3,-2],[2,-3],[3,2],[-2,3],[-4,1],[4,-1],[1,3],[-1,-4],[3.5,3.5],[-3.5,-3.5],[0,-3]];
     pos.forEach((p,i)=>{
       const stone=sph(0.13,0x8a8478,{roughness:1}); stone.position.set(p[0],0.1,p[1]); stone.scale.set(1,.7,1); world.add(stone);
-      Zone.add({ id:'stone-'+i, x:p[0], z:p[1], y:0.1, r:0.8, trigR:0.95, pickup:true, glow:true, icon:'🪨', label:'Raap op',
+      Zone.add({ id:'stone-'+i, x:p[0], z:p[1], y:0.1, r:0.8, trigR:0.95, pickup:true, glow:true, icon:'🪨', label:'Raap op', guide:true,
         action:(z)=>{ world.remove(stone); State.stonesCol++; setProgress(`🪨 ${State.stonesCol}/7 steentjes`);
           if(State.stonesCol>=7){ showFeedback('✅ 7 steentjes! Je bidt Maghrib + Isha samen, dan rust je.',true,4000); showNextBtn('Eid al-Adha → Jamarat'); } }});
     });
@@ -115,7 +146,7 @@ SCENES.push({
     addWanderers(5,{minX:-6,maxX:6,minZ:1.5,maxZ:6.5});
     everyMs(()=>spawnTextAt('اللّٰهُ أَكبَر',(Math.random()-.5)*5,2.2,1+Math.random()*3),3200);
     State.stonesThrown=0;
-    Zone.add({ id:'throw', x:0, z:1.6, r:1.6, icon:'💎', label:'Gooi steen', noConsume:true,
+    Zone.add({ id:'throw', x:0, z:1.6, r:1.6, icon:'💎', label:'Gooi steen', noConsume:true, guide:true,
       action:(z)=>{ if(State.stonesThrown>=7)return; State.stonesThrown++; if(State.stonesThrown===1)learnDua('takbir'); setProgress(`💎 ${State.stonesThrown}/7 gegooid`);
         throwStone(Player.x,Player.z,0,-2.5);
         spawnTextAt('اللّٰهُ أَكبَر',Player.x,2.3,Player.z-0.5);
@@ -163,13 +194,13 @@ SCENES.push({
     const sheepSign=emojiSprite('🐑',0.9); sheepSign.position.set(-4,2.3,0.5); world.add(sheepSign);
     const clerk=makePilgrim(0x3a5a4a); clerk.position.set(-4,0,-0.2); clerk.rotation.y=0; clerk.userData.ph=Math.random()*6.28; world.add(clerk);
     State.hadiDone=false;
-    Zone.add({ id:'hadi', x:-4, z:1.8, r:1.2, icon:'🐑', label:'Regel je Hadi (offer)', noConsume:true,
+    Zone.add({ id:'hadi', x:-4, z:1.8, r:1.2, icon:'🐑', label:'Regel je Hadi (offer)', noConsume:true, guide:true,
       action:(z)=>{ if(State.hadiDone){ showFeedback('Je Hadi is al geregeld. 🐑',true,2000); return; }
         State.hadiDone=true; Zone.markDone(z); Sound.success();
         showFeedback('🐑 Hadi geregeld via een tegoedbon — het vlees gaat naar de armen. "Hun vlees noch bloed bereikt Allah, maar jullie taqwa bereikt Hem." (22:37)',true,6000);
         setProgress('✂️ Nu naar de barbier'); }});
     setProgress('🐑 Regel eerst je Hadi (loket links)');
-    Zone.add({ id:'barber', x:0, z:-0.6, r:1.4, icon:'✂️', label:'Naar barbier', noConsume:true,
+    Zone.add({ id:'barber', x:0, z:-0.6, r:1.4, icon:'✂️', label:'Naar barbier', noConsume:true, guide:true,
       action:(z)=>{ if(!State.hadiDone){ showFeedback('⚠️ Regel eerst je Hadi bij het loket 🐑 — de volgorde op deze dag: stenigen → offeren → scheren.',false,3500); return; }
         openChoice({ ar:'الحَلق أو التَّقصِير', sub:'Kies je Tahallul', txt:'Hoe doe je je haar?',
         choices:[
@@ -271,7 +302,7 @@ SCENES.push({
     // ===== volgorde: (aanbevolen) al-Baqi → de moskee binnen =====
     State.baqiDone=false;
     setProgress('🌴 Bezoek al-Baqi (poort rechts) en ga dan naar binnen 🕌');
-    Zone.add({ id:'enter', x:0, z:-3.5, r:1.5, icon:'🕌', label:'Ga de moskee binnen', noConsume:true,
+    Zone.add({ id:'enter', x:0, z:-3.5, r:1.5, icon:'🕌', label:'Ga de moskee binnen', noConsume:true, guide:true,
       action:()=>{
         if(!State.baqiDone){
           openChoice({ ar:'بَاب السَّلَام', sub:'De Poort van de Vrede',
@@ -364,20 +395,20 @@ SCENES.push({
     // ===== taken: Rawda → salam =====
     State.rawdaDone=false; State.salamDone=false;
     setProgress("1️⃣ Bid 2 rak'ah in de Rawda (groen tapijt vooraan)");
-    Zone.add({ id:'rawda', x:-1.2, z:-5.0, r:1.5, icon:'🤲', label:"Bid in de Rawda", noConsume:true,
-      action:()=>{ if(State.rawdaDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
+    Zone.add({ id:'rawda', x:-1.2, z:-5.0, r:1.5, icon:'🤲', label:"Bid in de Rawda", noConsume:true, guide:true,
+      action:(zz)=>{ if(State.rawdaDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
         openChoice({ ar:'الرَّوضَة الشَّرِيفَة', sub:'"Tussen mijn huis en mijn minbar ligt een tuin van de tuinen van het Paradijs" (Bukhari & Muslim)',
           txt:"Je staat op het groene tapijt van de Rawda. Bid hier 2 rak'ah — volg de bewegingen rustig. (Tegenwoordig reserveer je dit moment via de Nusuk-app.)",
-          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.rawdaDone=true;
+          choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.rawdaDone=true; if(zz)Zone.markDone(zz);
             Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z); learnDua('salawat');
               showFeedback("✅ Wat een bijzondere plek. Ga nu rustig naar de gouden afscheiding voor de salam. ➡️",true,5000);
               setProgress('2️⃣ Geef salam bij de gouden afscheiding (rechts)'); }); }}]}); }});
-    Zone.add({ id:'salam', x:7.3, z:-4.4, r:1.5, icon:'🕊️', label:'Geef salam', noConsume:true,
-      action:()=>{ if(!State.rawdaDone){ showFeedback('Bid eerst 2 rak\'ah in de Rawda (groen tapijt). 🤲',false,3000); return; }
+    Zone.add({ id:'salam', x:7.3, z:-4.4, r:1.5, icon:'🕊️', label:'Geef salam', noConsume:true, guide:true,
+      action:(zz)=>{ if(!State.rawdaDone){ showFeedback('Bid eerst 2 rak\'ah in de Rawda (groen tapijt). 🤲',false,3000); return; }
         if(State.salamDone){ showFeedback('Je hebt je salam al gegeven. 🕊️',true,2000); return; }
         openChoice({ ar:'السَّلَام عَلَيكَ يَا رَسُولَ الله', sub:'Sta rustig, met respect — niet dringen, stem zacht',
           txt:'Je staat voor de kamer van de Profeet ﷺ. Geef je salam:<br><br><em>"As-salamu alayka ya Rasulallah"</em> 🕊️<br>Een stap verder: salam aan <strong>Abu Bakr</strong>, en daarna aan <strong>Umar</strong> (moge Allah tevreden met hen zijn).',
-          choices:[{txt:'🕊️ Geef de salam en loop rustig door', action:()=>{ State.salamDone=true; State.medinaDone=true; Sound.success();
+          choices:[{txt:'🕊️ Geef de salam en loop rustig door', action:()=>{ State.salamDone=true; State.medinaDone=true; Sound.success(); if(zz)Zone.markDone(zz);
             spawnTextAt('السَّلَامُ عَلَيكَ يَا رَسُولَ الله', Player.x, 2.4, Player.z, '#bfe8c0');
             showFeedback('✅ Salam gegeven — kalm en vol respect. De Profeet ﷺ zei: "Wie mij groet, Allah stuurt mijn ziel terug zodat ik zijn groet beantwoord."',true,6000);
             showNextBtn('Naar moskee Quba →'); }}]}); }});
@@ -414,9 +445,9 @@ SCENES.push({
     world.add(makeCrowd(12,0,3,12));
     addWanderers(4,{minX:-6,maxX:6,minZ:1,maxZ:7});
     State.qubaDone=false;
-    Zone.add({ id:'quba', x:0, z:0.4, r:1.5, icon:'🤲', label:"Bid 2 rak'ah", noConsume:true,
-      action:()=>{ if(State.qubaDone)return;
-        State.qubaDone=true;
+    Zone.add({ id:'quba', x:0, z:0.4, r:1.5, icon:'🤲', label:"Bid 2 rak'ah", noConsume:true, guide:true,
+      action:(zz)=>{ if(State.qubaDone)return;
+        State.qubaDone=true; if(zz)Zone.markDone(zz);
         showFeedback("🕌 Je bidt 2 rak'ah in Quba — volg de bewegingen.",true,2500);
         Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z);
           showFeedback("✅ 2 rak'ah in Quba — met de beloning van een Umrah, in shaa Allah. Tijd om naar huis te gaan. 🏠",true,5500);
@@ -485,7 +516,7 @@ SCENES.push({
           showFeedback('🎁 Je deelt Zamzam 🧴 en dadels 🌴 uit — zoals hajji\'s al eeuwen doen. De gezichten van je familie stralen. Alhamdulillah!',true,5500); }});
     }
 
-    Zone.add({ id:'door', x:0, z:-3.6, r:1.3, icon:'🚪', label:'Naar je familie',
+    Zone.add({ id:'door', x:0, z:-3.6, r:1.3, icon:'🚪', label:'Naar je familie', guide:true,
       action:()=>{ showFeedback('🏆 Mabroek! Je bent een Hajji. Je familie omhelst je.',true,3000); setTimeout(()=>renderEnding(),2200); }});
   }
 });

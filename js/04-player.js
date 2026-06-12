@@ -78,9 +78,9 @@ const Player = {
       const KNEEL={legL:-1.35,legR:-1.35,kneeL:2.4,kneeR:2.4};   // zittend op de hielen
       const P={
         qiyam:    {armLx:-1.25,armRx:-1.25,elbL:1.4,elbR:1.4,armLz:-0.12,armRz:0.12},
-        ruku:     {bodyRx:-0.95,armLx:-0.55,armRx:-0.55,elbL:0.1,elbR:0.1,rootY:-0.06},
+        ruku:     {bodyRx:-0.92,armLx:-0.5,armRx:-0.5,elbL:0.05,elbR:0.05,kneeL:0.12,kneeR:0.12},
         itidal:   {elbL:0.12,elbR:0.12},
-        sujud:    Object.assign({rootY:-0.6,bodyRx:-0.85,armLx:-1.3,armRx:-1.3,elbL:0.25,elbR:0.25},KNEEL),
+        sujud:    Object.assign({rootY:-0.5,bodyRx:-1.32,armLx:-0.3,armRx:-0.3,elbL:0.35,elbR:0.35},KNEEL),
         julus:    Object.assign({rootY:-0.6,bodyRx:-0.06,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
         tashahhud:Object.assign({rootY:-0.6,bodyRx:-0.06,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
         salamR:   Object.assign({rootY:-0.6,bodyRx:-0.05,bodyRy:-0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
@@ -129,9 +129,15 @@ const Player = {
     pa.armL.rotation.x=b.armLx;  pa.armR.rotation.x=b.armRx;
     pa.armL.rotation.z=b.armLz;  pa.armR.rotation.z=b.armRz;
     if(pa.elbL){ pa.elbL.rotation.x=b.elbL; pa.elbR.rotation.x=b.elbR; }
-    pa.body.position.y=b.bodyY;  pa.body.rotation.z=b.bodyRz; pa.body.rotation.y=b.bodyRy;
-    pa.body.rotation.x=b.bodyRx;                               // buigen (ruku/sujud)
-    this.obj.position.y=(this.sitting?-0.42:0)+b.rootY;        // zakken naar de grond
+    pa.body.rotation.z=b.bodyRz; pa.body.rotation.y=b.bodyRy;
+    // buigen (ruku/sujud) om een HEUP-scharnier: romp kantelt, heupen blijven boven de voeten
+    const hipH=0.45;
+    pa.body.rotation.x=b.bodyRx;
+    pa.body.position.y=b.bodyY + hipH*(1-Math.cos(b.bodyRx));
+    pa.body.position.z=-hipH*Math.sin(b.bodyRx);
+    const ty=(typeof terrainFn==='function'&&terrainFn)?terrainFn(this.x,this.z):0;   // heuvels (Jabal al-Rahma)
+    Player.y0=ty;
+    this.obj.position.y=(this.sitting?-0.42:0)+b.rootY+ty;     // zakken naar de grond + terreinhoogte
   },
   interact(){ Sound.init(); Zone.trigger(); }
 };
@@ -157,7 +163,7 @@ const Cam = {
     // occlusie: blokkeert een groot object het zicht, trek de camera er dan vóór
     if(camOccluders.length && typeof THREER!=='undefined' && camera){
       this._ray=this._ray||new THREER.Raycaster();
-      const ox=Player.x, oy=this.lookH, oz=Player.z;
+      const ox=Player.x, oy=Player.y0+this.lookH, oz=Player.z;
       const dx=camX-ox, dy=camY-oy, dz=camZ-oz;
       const len=Math.hypot(dx,dy,dz)||1;
       this._ray.set(new THREER.Vector3(ox,oy,oz), new THREER.Vector3(dx/len,dy/len,dz/len));
@@ -167,7 +173,7 @@ const Cam = {
         camX=ox+dx/len*d; camY=Math.max(0.8,oy+dy/len*d); camZ=oz+dz/len*d; }
     }
     camera.position.set(camX,camY,camZ);
-    camera.lookAt(Player.x,this.lookH,Player.z);
+    camera.lookAt(Player.x,Player.y0+this.lookH,Player.z);
   },
   forward(){ // ground-plane forward (toward where camera looks)
     return {x:-Math.sin(this.yaw), z:-Math.cos(this.yaw)};

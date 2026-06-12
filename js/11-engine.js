@@ -81,6 +81,7 @@ function animate(){
     if(frameHook && !paused)frameHook();
     Cam.update();
     updateLabelPositions();
+    Guide.update();
     // ambient life: orbiting crowd (tawaf), walkers (sai), swaying pilgrims
     world.traverse(o=>{
       const u=o.userData; if(!u)return;
