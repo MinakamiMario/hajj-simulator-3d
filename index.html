@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>حج — Hajj Simulator 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="screen-intro" class="screen active">
+  <canvas id="intro-stars"></canvas>
+  <div class="intro-wrap">
+    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    <div class="intro-kaaba-wrap"><div class="kaaba-css"></div><div class="kaaba-glow"></div></div>
+    <h1 class="title-ar">رحلة الحج</h1>
+    <p class="title-nl">Hajj Simulator · 3D <span class="build-tag" id="build-tag"></span></p>
+    <p class="intro-desc">Een 3D third-person reis door de Hajj.<br>Loop, kijk rond, beleef de rituelen.</p>
+    <div class="tags"><span>🎮 3D</span><span>🕹️ WASD + joystick</span><span>🖱️ Sleep om te kijken</span><span>⇧ Shift = rennen</span></div>
+    <button class="btn-cta" onclick="Game.toCharSelect()">Bismillah — Kies je personage</button>
+    <div class="scene-jump-wrap">
+      <label for="scene-jump">of oefen één scène:</label>
+      <select id="scene-jump" onchange="State.startScene=+this.value"></select>
+    </div>
+  </div>
+</div>
+
+<!-- CHARACTER SELECT / CUSTOMIZE -->
+<div id="screen-char" class="screen">
+  <div class="char-wrap">
+    <h2 class="char-select-title">Wie ben jij?</h2>
+    <p class="char-select-sub">Stel je personage samen <span class="build-tag" id="build-tag2"></span></p>
+    <div class="char-build">
+      <div class="pv-box"><canvas id="pv-canvas"></canvas></div>
+      <div class="pv-controls" id="pv-controls"></div>
+    </div>
+    <button class="btn-cta" id="btn-confirm-char" onclick="Game.start()">Begin de reis →</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="screen-game" class="screen">
+  <canvas id="gl-canvas"></canvas>
+  <div id="labels"></div>
+  <div class="hud">
+    <div class="hud-loc" id="hud-loc">🏠 Thuis</div>
+    <div class="hud-right">
+      <span class="hud-num" id="hud-num">1 / 12</span>
+      <div class="hud-track"><div class="hud-fill" id="hud-fill"></div></div>
+      <button class="hud-help" id="btn-duas" onclick="showDuaBook()" title="Mijn Du'a-boek">📖</button>
+      <button class="hud-help" id="btn-sound" onclick="Game.toggleSound()" title="Geluid aan/uit">🔊</button>
+      <button class="hud-help" onclick="Game.showStory()" title="Verhaal lezen">📜</button>
+    </div>
+  </div>
+  <div class="task-bar" id="task-bar">
+    <div class="task-ar" id="task-ar"></div>
+    <div class="task-txt" id="task-txt">Welkom</div>
+    <div class="task-prog" id="task-prog"></div>
+  </div>
+  <div class="joystick" id="joystick"><div class="joy-knob" id="joy-knob"></div></div>
+  <div class="look-hint" id="look-hint">Sleep rechts op het scherm om rond te kijken</div>
+  <button class="btn-action" id="btn-action" onclick="Player.interact()">
+    <span class="ba-letter">A</span><span class="ba-hint">actie</span>
+  </button>
+  <div id="vignette"></div>
+  <div class="scene-title" id="scene-title"><div class="st-ar" id="st-ar"></div><div class="st-loc" id="st-loc"></div></div>
+  <div id="fade"></div>
+</div>
+
+<!-- STORY MODAL -->
+<div id="modal-story" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-ar" id="modal-ar"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div class="modal-txt" id="modal-txt"></div>
+    <div class="modal-actions"><button class="btn-cta" onclick="Game.closeStory()">Sluiten</button></div>
+  </div>
+</div>
+
+<!-- CHOICE MODAL -->
+<div id="modal-choice" class="modal hidden">
+  <div class="modal-box">
+    <div class="modal-ar" id="mc-ar"></div>
+    <div class="modal-sub" id="mc-sub"></div>
+    <div class="modal-txt" id="mc-txt"></div>
+    <div class="modal-actions" id="mc-actions"></div>
+  </div>
+</div>
+
+<!-- END -->
+<div id="screen-end" class="screen">
+  <div class="end-stars"></div>
+  <div class="end-wrap">
+    <div class="end-quote">الحَجُّ المَبرُورُ لَيسَ لَهُ جَزَاءٌ إِلَّا الجَنَّة</div>
+    <div class="end-hadith">— Sahih Bukhari & Muslim</div>
+    <div class="end-badge">🏆</div>
+    <h2 class="end-title">مَبروك — Je bent een Hajji!</h2>
+    <p class="end-sub">Moge Allah jouw Hajj aanvaarden. آمين</p>
+    <div class="end-list" id="end-list"></div>
+    <button class="btn-cta" style="margin-top:1.5rem" onclick="Game.restart()">Opnieuw beginnen</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="js/00-globals.js"></script>
+<script src="js/01-helpers.js"></script>
+<script src="js/02-gfx.js"></script>
+<script src="js/03-avatar.js"></script>
+<script src="js/04-player.js"></script>
+<script src="js/05-zones.js"></script>
+<script src="js/06-ui.js"></script>
+<script src="js/07-env.js"></script>
+<script src="js/08-scenes-a.js"></script>
+<script src="js/09-scenes-b.js"></script>
+<script src="js/10-loader.js"></script>
+<script src="js/11-engine.js"></script>
+<script src="js/12-customize.js"></script>
+<script src="js/13-main.js"></script>
+</body>
+</html>
