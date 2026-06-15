@@ -166,22 +166,24 @@ function makeAvatar(o){
 
   // ===== ARMEN (één vloeiende taps toelopende mouw, hand met duim) =====
   function arm(side){
-    const ag=new THREER.Group(); ag.position.set(side*B(0.155),1.63,0);
+    // schouder dichter op de romp + iets hoger, zodat de arm aan het lichaam vastzit
+    const ag=new THREER.Group(); ag.position.set(side*B(0.132),1.648,0);
     const capCol=ihram?skin:cloth;
-    const cap=sph(0.052,capCol,ihram?skinM:clothM,12); cap.position.y=0.012; ag.add(cap); // ronde schouderkap
-    const inner=new THREER.Group(); inner.rotation.z=side*0.13; ag.add(inner); // lichte spreiding
+    // grotere schouder ("deltoid") die romp en bovenarm overlapt en zo verbindt
+    const cap=sph(0.075,capCol,ihram?skinM:clothM,14); cap.position.set(-side*0.012,0.01,0); cap.scale.set(1.05,0.92,1.0); ag.add(cap);
+    const inner=new THREER.Group(); inner.rotation.z=side*0.05; ag.add(inner); // arm hangt vrijwel recht langs het lichaam
     const isCas=(!ihram&&gender==='male'&&o.outfit==='casual');
     const el=new THREER.Group(); el.position.y=-0.3; inner.add(el);            // ELLEBOOG-gewricht
     if(ihram){
-      const up=cyl(0.044,0.052,0.3,skin,skinM,14); up.position.y=-0.15; inner.add(up);
+      const up=cyl(0.044,0.052,0.3,skin,skinM,14); up.position.y=-0.135; inner.add(up);
       const jb=sph(0.044,skin,skinM,10); el.add(jb);
       const fo=cyl(0.036,0.044,0.26,skin,skinM,14); fo.position.y=-0.13; el.add(fo);
     } else if(isCas){
-      const up=cyl(0.05,0.057,0.3,cloth,clothM,14); up.position.y=-0.15; inner.add(up);
+      const up=cyl(0.05,0.057,0.3,cloth,clothM,14); up.position.y=-0.135; inner.add(up);
       const jb=sph(0.044,skin,skinM,10); el.add(jb);
       const fo=cyl(0.035,0.044,0.26,skin,skinM,14); fo.position.y=-0.13; el.add(fo);
     } else {
-      const up=cyl(0.047,0.058,0.3,cloth,clothM,14); up.position.y=-0.15; inner.add(up);
+      const up=cyl(0.047,0.058,0.3,cloth,clothM,14); up.position.y=-0.135; inner.add(up);
       const jb=sph(0.047,cloth,clothM,10); el.add(jb);
       const fo=cyl(0.04,0.047,0.26,cloth,clothM,14); fo.position.y=-0.13; el.add(fo);
       const cuff=cyl(0.041,0.041,0.035,shade(cloth,0.9),clothM,12); cuff.position.y=-0.275; el.add(cuff);

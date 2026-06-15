@@ -104,12 +104,12 @@ const Player = {
       if(this._lastS!==undefined && ((this._lastS<0)!==(S<0))) Sound.footstep();   // voetstap op elke pas
       this._lastS=S;
       const lift=x=>Math.max(0,x);
-      const amp=this.running?1.25:1;
-      t.legL=S*0.55*amp;            t.legR=-S*0.55*amp;
-      t.kneeL=lift(-C)*0.75*amp;    t.kneeR=lift(C)*0.75*amp;            // knie buigt in de zwaaifase
-      t.armLx=-S*0.42*amp;          t.armRx=S*0.42*amp;
-      t.elbL=0.25+lift(S)*0.35;     t.elbR=0.25+lift(-S)*0.35;           // elleboog veert mee
-      t.armLz=-0.04; t.armRz=0.04;
+      const amp=this.running?1.2:1;
+      t.legL=S*0.5*amp;             t.legR=-S*0.5*amp;
+      t.kneeL=lift(-C)*0.7*amp;     t.kneeR=lift(C)*0.7*amp;             // knie buigt in de zwaaifase
+      t.armLx=-S*0.26*amp;          t.armRx=S*0.26*amp;                  // rustiger armzwaai vanuit de schouder
+      t.elbL=0.2+lift(S)*0.22;      t.elbR=0.2+lift(-S)*0.22;            // elleboog veert licht mee
+      t.armLz=-0.06; t.armRz=0.06;                                      // armen blijven dicht langs het lichaam
       t.bodyY=Math.abs(S)*0.045*amp;
       t.bodyRz=S*0.035;                                                  // heupzwaai
       t.bodyRy=S*0.06;                                                   // schouders draaien licht tegen
