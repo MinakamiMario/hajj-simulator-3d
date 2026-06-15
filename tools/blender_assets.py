@@ -84,7 +84,18 @@ def build_kaaba():
     parts.append(box('body', W, D, H, (0, 0, 0.35 + H / 2), M['kiswah']))
     bandY = 0.35 + H * 0.66                                            # hizam-band op ~2/3 hoogte
     # gouden hizam-band, licht uitstekend rondom
-    parts.append(box('hizam', W + 0.06, D + 0.06, 0.5, (0, 0, bandY), M['gold']))
+    parts.append(box('hizam', W + 0.06, D + 0.06, 0.46, (0, 0, bandY), M['gold']))
+    # verhoogde boven- en onderrand van de band (vangt env-licht → leest als geborduurde rand)
+    for dz in (0.20, -0.20):
+        parts.append(box('hizam_rail', W + 0.12, D + 0.12, 0.06, (0, 0, bandY + dz), M['gold']))
+    # kalligrafie-suggestie: rij kleine verticale ribbels rond de hele band (reliëf zonder normal-map)
+    hx, hy = W / 2 + 0.065, D / 2 + 0.065
+    for sy in (hy, -hy):                                               # voor- en achterzijde
+        for k in range(9):
+            parts.append(box('orn', 0.075, 0.05, 0.22, (-W / 2 + (k + 0.5) * (W / 9), sy, bandY), M['gold']))
+    for sx in (hx, -hx):                                               # linker- en rechterzijde
+        for k in range(9):
+            parts.append(box('orn', 0.05, 0.075, 0.22, (sx, -D / 2 + (k + 0.5) * (D / 9), bandY), M['gold']))
     # gouden deur (Bab) op de +Y-zijde, iets uit het midden en boven de grond
     parts.append(box('door', 0.95, 0.08, 1.7, (0.55, D / 2 + 0.02, 0.35 + 1.15), M['gold']))
     # Hajar al-Aswad: zilveren omlijsting + zwarte steen op de oosthoek
@@ -152,9 +163,35 @@ def build_arch():
     parts.append(arch)
     export(parts, 'arch_haram.glb')
 
+# ---------------- ROTSEN (procedurele displacement, 3 varianten) ----------------
+def build_rocks():
+    import bmesh, random as rnd
+    cols = [(0.40, 0.34, 0.26), (0.47, 0.41, 0.33), (0.33, 0.29, 0.23)]
+    for idx in range(3):
+        reset()
+        rm = mat('rock%d' % idx, cols[idx], 0.0, 0.96)
+        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1.0)
+        o = bpy.context.active_object; o.name = 'rock'
+        me = o.data; bm = bmesh.new(); bm.from_mesh(me)
+        rnd.seed((idx + 1) * 13)
+        for v in bm.verts:
+            n = v.normal.copy()
+            f = (0.32 * math.sin(v.co.x * 2.6 + idx) + 0.30 * math.cos(v.co.y * 3.1 - idx)
+                 + 0.26 * math.sin(v.co.z * 2.2 + idx * 2) + rnd.uniform(-0.14, 0.14))
+            v.co = v.co + n * (f * 0.55)
+            v.co.z *= 0.72                                             # iets afgeplat
+        minz = min(v.co.z for v in bm.verts)
+        for v in bm.verts:
+            v.co.z -= minz                                            # voet op de grond (z=0)
+        bm.normal_update(); bm.to_mesh(me); bm.free()
+        me.materials.append(rm)
+        bpy.ops.object.shade_flat()                                   # facetten → graniet-look
+        export([o], 'rock%d.glb' % (idx + 1))
+
 if __name__ == '__main__':
     print('Blender-assets bouwen ->', os.path.abspath(OUT))
     build_kaaba()
     build_dome()
     build_arch()
+    build_rocks()
     print('klaar')

@@ -305,10 +305,10 @@ SCENES.push({
       const wall=box(19,2.6,0.25,0xe2dccb,{roughness:.95}); wall.position.set(0,1.3,s*2.2); world.add(wall);
       for(let x=-8;x<=8;x+=2){ const pil=cyl(0.16,0.2,2.6,0xd6cfbc); pil.position.set(x,1.3,s*1.95); world.add(pil); }
     });
-    // Safa & Marwa as rock mounds
+    // Safa & Marwa as rock mounds — gesculpte Blender-rotsen met fallback
     [['safa',-8],[null,8]].forEach((h,i)=>{ const x=i===0?-8:8;
-      const rock=sph(1.7,0x8a7a62,{roughness:1},14); rock.position.set(x,0.5,0); rock.scale.set(1.4,0.85,1.1); world.add(rock);
-      const rock2=sph(1.0,0x9a8a70,{roughness:1},12); rock2.position.set(x+(i?-0.8:0.8),0.9,0.4); world.add(rock2);
+      const rock=rockAt(x,0,2.4,0); rock.scale.multiplyScalar(1.0);
+      rockAt(x+(i?-0.9:0.9),0.5,1.5,0);
       colliders.push(i===0 ? {minX:-10,maxX:-6.6,minZ:-1.6,maxZ:1.6} : {minX:6.6,maxX:10,minZ:-1.6,maxZ:1.6});
       camOccluders.push(rock);
     });

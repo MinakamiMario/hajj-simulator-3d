@@ -23,15 +23,13 @@ SCENES.push({
     const hillM=new THREER.Mesh(new THREER.LatheGeometry(pts,40), mat(0x84745e,{roughness:1}));
     hillM.position.set(HILL.x,0,HILL.z); hillM.receiveShadow=true; hillM.castShadow=false; world.add(hillM);
     // granietblokken op de flanken — solide, en het trappad blijft vrij
-    for(let i=0;i<30;i++){ const a=Math.random()*Math.PI*2, rr=1.5+Math.random()*(HILL.r-1.2);
+    for(let i=0;i<16;i++){ const a=Math.random()*Math.PI*2, rr=1.5+Math.random()*(HILL.r-1.2);
       const bx=HILL.x+Math.cos(a)*rr, bz=HILL.z+Math.sin(a)*rr;
       if(bz>HILL.z+HILL.r*0.88) continue;                         // zuidkant open
       if(Math.abs(bx)<1.8 && bz>HILL.z-1) continue;               // corridor van het trappad
-      const rad=0.5+Math.random()*1.1;
-      const rk=sph(rad,[0x77684f,0x8a7a64,0x6e604c][i%3],{roughness:1},9);
-      rk.position.set(bx,terr(bx,bz)*0.8,bz); rk.scale.set(1.3,0.5+Math.random()*0.3,1.1);
-      rk.rotation.y=Math.random()*3; rk.castShadow=false; world.add(rk);
-      colliders.push({minX:bx-rad*1.05,maxX:bx+rad*1.05,minZ:bz-rad*0.85,maxZ:bz+rad*0.85});
+      const rad=0.9+Math.random()*1.4;
+      rockAt(bx,bz,rad,terr(bx,bz)*0.8);
+      colliders.push({minX:bx-rad*0.7,maxX:bx+rad*0.7,minZ:bz-rad*0.7,maxZ:bz+rad*0.7});
     }
     // trappad van de voet naar de top (lichtere steenplaten)
     for(let i=0;i<=11;i++){ const pz=HILL.z+HILL.r-0.4 - i*((HILL.r-0.6)/11);

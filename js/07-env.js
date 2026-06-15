@@ -131,10 +131,11 @@ function haramSurround(cx,cz,r){
   // witte mataf-vloer rond de Ka'ba (met marmer-textuur)
   const mataf=cyl(r-3.5,r-3.5,0.06,0xffffff,{roughness:.85,map:texMarble(Math.max(8,r-6))},48);
   mataf.position.set(cx,0.04,cz); mataf.receiveShadow=true; mataf.castShadow=false; world.add(mataf);
-  // onderste arcade
+  // onderste arcade — Blender-boogmodule (echte arcade) met procedurele fallback
   const nPil=Math.max(30,Math.round(r*2.1));
   for(let i=0;i<nPil;i++){ const a=(i/nPil)*Math.PI*2;
     const px=cx+Math.cos(a)*r, pz=cz+Math.sin(a)*r;
+    if(Assets.spawn('arch_haram',px,pz,1.0,Math.PI/2-a)){ const m=world.children[world.children.length-1]; m.traverse(o=>{o.castShadow=false;}); continue; }
     const pil=cyl(0.3,0.36,4.6,0xd9d2c2,{roughness:.9}); pil.position.set(px,2.3,pz); pil.castShadow=false; world.add(pil);
     const arch=sph(0.58,0xd9d2c2,{roughness:.9},10); arch.position.set(px,4.7,pz); arch.scale.set(1,0.7,1); arch.castShadow=false; world.add(arch);
   }
@@ -173,6 +174,14 @@ function palmTree(x,z,s){
   for(let i=0;i<6;i++){ const a=(i/6)*Math.PI*2; const leaf=box(1.5*s,0.06,0.32*s,0x2e6b38,{roughness:1});
     leaf.position.set(x+Math.cos(a)*0.7*s,2.7*s,z+Math.sin(a)*0.7*s); leaf.rotation.y=-a; leaf.rotation.z=0.35; leaf.castShadow=false; world.add(leaf); }
   const dates=sph(0.16*s,0x8a5a20,{roughness:.8},8); dates.position.set(x+0.2*s,2.5*s,z); dates.castShadow=false; world.add(dates);
+}
+// rots neerzetten: Blender-model (3 varianten) met procedurele blob-fallback
+function rockAt(x,z,scale,y,col){
+  const key='rock'+(1+Math.floor(Math.random()*3));
+  const m=Assets.spawn(key,x,z,scale,Math.random()*Math.PI*2,y||0);
+  if(m){ m.traverse(o=>{o.castShadow=false;}); return m; }
+  const rk=sph(scale*0.9,col||0x8a7a64,{roughness:1},10); rk.position.set(x,(y||0)+scale*0.4,z);
+  rk.scale.set(1.2,0.6,1.0); rk.rotation.y=Math.random()*3; rk.castShadow=false; world.add(rk); return rk;
 }
 // hoge schijnwerpermast (Arafat/Mina)
 function lightMast(x,z){

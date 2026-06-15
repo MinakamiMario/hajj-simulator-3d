@@ -1,5 +1,5 @@
 'use strict';
-const BUILD='v4.7';
+const BUILD='v4.8';
 /* ============================================================
    HAJJ SIMULATOR 3D — third-person engine (Three.js r128)
    v4: modulaire structuur, betere graphics, grotere wereld

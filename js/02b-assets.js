@@ -11,6 +11,9 @@ const Assets = {
     kaaba:   'assets/models/kaaba.glb',
     dome_nabawi: 'assets/models/dome_nabawi.glb',
     arch_haram:  'assets/models/arch_haram.glb',
+    rock1:   'assets/models/rock1.glb',
+    rock2:   'assets/models/rock2.glb',
+    rock3:   'assets/models/rock3.glb',
   },
   cache: {}, started: false,
   preload(){
