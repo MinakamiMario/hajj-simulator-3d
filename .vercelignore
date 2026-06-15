@@ -1,0 +1,8 @@
+# alleen de speelbare site uploaden — geen tooling/bron-assets
+.git
+.claude
+tools
+memory
+ROADMAP.md
+original-v3.4.html
+*.blend

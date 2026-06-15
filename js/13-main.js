@@ -32,4 +32,6 @@ window.addEventListener('load',()=>{
   const sel=el('scene-jump');
   if(sel){ SCENES.forEach((sc,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=(i+1)+'. '+sc.loc; sel.appendChild(op); });
     sel.value=0; State.startScene=0; }
+  // PWA: service worker registreren (offline-speelbaar + installeerbaar)
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
 });
