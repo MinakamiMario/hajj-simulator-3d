@@ -188,10 +188,105 @@ def build_rocks():
         bpy.ops.object.shade_flat()                                   # facetten → graniet-look
         export([o], 'rock%d.glb' % (idx + 1))
 
+# ---------------- NABAWI-GEBEDSHAL: GI gebakken naar vertex-kleuren ----------------
+def build_nabawi_interior():
+    import bmesh
+    reset()
+    sc = bpy.context.scene
+    sc.render.engine = 'CYCLES'
+    sc.cycles.samples = 128
+    try: sc.cycles.device = 'CPU'
+    except Exception: pass
+    # warme ambient via world
+    w = bpy.data.worlds.new('hallworld'); sc.world = w; w.use_nodes = True
+    bg = w.node_tree.nodes.get('Background')
+    bg.inputs[0].default_value = (0.85, 0.74, 0.55, 1); bg.inputs[1].default_value = 0.28
+
+    W, D, H = 23.0, 16.4, 5.7
+    cream = mat('hallcream', (0.87, 0.81, 0.69), 0.0, 0.92)
+
+    # één mesh met rasteroppervlakken (vloer + 4 muren + plafond), normalen naar binnen
+    bm = bmesh.new()
+    def surface(o, u, v, nu, nv):
+        ox, oy, oz = o
+        rows = []
+        for j in range(nv + 1):
+            row = []
+            for i in range(nu + 1):
+                p = (ox + u[0] * i / nu + v[0] * j / nv,
+                     oy + u[1] * i / nu + v[1] * j / nv,
+                     oz + u[2] * i / nu + v[2] * j / nv)
+                row.append(bm.verts.new(p))
+            rows.append(row)
+        bm.verts.ensure_lookup_table()
+        for j in range(nv):
+            for i in range(nu):
+                bm.faces.new((rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]))
+    nx, ny, nz = 34, 24, 10
+    surface((-W/2, -D/2, 0.02), (W, 0, 0), (0, D, 0), nx, ny)            # vloer
+    surface((-W/2, -D/2, H), (W, 0, 0), (0, D, 0), nx, ny)              # plafond
+    surface((-W/2, -D/2, 0), (W, 0, 0), (0, 0, H), nx, nz)             # muur -Y
+    surface((-W/2,  D/2, 0), (W, 0, 0), (0, 0, H), nx, nz)             # muur +Y
+    surface((-W/2, -D/2, 0), (0, D, 0), (0, 0, H), ny, nz)             # muur -X
+    surface(( W/2, -D/2, 0), (0, D, 0), (0, 0, H), ny, nz)             # muur +X
+    me = bpy.data.meshes.new('hall'); bm.to_mesh(me); bm.free()
+    o = bpy.data.objects.new('hall', me); bpy.context.collection.objects.link(o)
+    o.data.materials.append(cream)
+    # normalen consistent naar binnen
+    bpy.context.view_layer.objects.active = o; o.select_set(True)
+    bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='SELECT')
+    bpy.ops.mesh.normals_make_consistent(inside=True)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.object.shade_smooth()
+    # kleurattribuut voor de bake
+    me.color_attributes.new('bake', 'FLOAT_COLOR', 'POINT')
+
+    # warme lichtbronnen: 'vensters' langs de lange muren + 2 kroonluchters
+    def area(loc, rot, energy, size, col):
+        bpy.ops.object.light_add(type='AREA', location=loc); L = bpy.context.active_object
+        L.data.energy = energy; L.data.size = size; L.data.color = col; L.rotation_euler = rot
+    for yy in (-5, 0, 5):
+        area((-W/2 + 0.3, yy, 3.4), (0, math.radians(90), 0), 220, 2.4, (1.0, 0.82, 0.55))
+        area(( W/2 - 0.3, yy, 3.4), (0, math.radians(-90), 0), 220, 2.4, (1.0, 0.82, 0.55))
+    for xx in (-6, 4):
+        bpy.ops.object.light_add(type='POINT', location=(xx, 0, 4.4)); L = bpy.context.active_object
+        L.data.energy = 600; L.data.color = (1.0, 0.86, 0.62)
+
+    # bake GI naar vertex-kleuren
+    sc.render.bake.target = 'VERTEX_COLORS'
+    bpy.context.view_layer.objects.active = o
+    bpy.ops.object.select_all(action='DESELECT'); o.select_set(True)
+    try:
+        bpy.ops.object.bake(type='COMBINED')
+        print('  bake OK (Cycles COMBINED -> vertex colors)')
+    except Exception as e:
+        print('  bake FOUT:', e)
+    # materiaal de vertex-kleur laten tonen zodat de export ze meeneemt
+    o.data.materials.clear()
+    vm = bpy.data.materials.new('hallbaked'); vm.use_nodes = True
+    nt = vm.node_tree; bsdf = nt.nodes.get('Principled BSDF')
+    attr = nt.nodes.new('ShaderNodeVertexColor'); attr.layer_name = 'bake'
+    nt.links.new(attr.outputs['Color'], bsdf.inputs['Base Color'])
+    o.data.materials.append(vm)
+    # lampen weg vóór export (alleen de schil exporteren)
+    for L in [x for x in bpy.data.objects if x.type in ('LIGHT',)]:
+        bpy.data.objects.remove(L, do_unlink=True)
+    bpy.ops.object.select_all(action='DESELECT'); o.select_set(True)
+    bpy.context.view_layer.objects.active = o
+    path = os.path.join(OUT, 'nabawi_interior.glb')
+    try:
+        bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=True,
+                                  export_apply=True, export_yup=True, export_vertex_color='ACTIVE')
+    except TypeError:
+        bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=True,
+                                  export_apply=True, export_yup=True)
+    print('  EXPORT %-16s %6.1f kB' % ('nabawi_interior.glb', os.path.getsize(path) / 1024))
+
 if __name__ == '__main__':
     print('Blender-assets bouwen ->', os.path.abspath(OUT))
     build_kaaba()
     build_dome()
     build_arch()
     build_rocks()
+    build_nabawi_interior()
     print('klaar')

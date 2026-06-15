@@ -382,12 +382,17 @@ SCENES.push({
   build(){
     // vloer: gebedstapijt met saff-banen richting qibla
     const floor=box(24,0.06,17,0xffffff,{map:texCarpet(7),roughness:1}); floor.position.set(-1,0.03,0); world.add(floor);
-    // wanden + plafond (cast geen schaduw, anders wordt de hal zwart)
-    const wallC=0xe8dcc2;
-    [[24,0.4,-1,-8.2],[24,0.4,-1,8.2]].forEach(w=>{ const m=box(w[0],5.6,w[1],wallC,{roughness:.95}); m.position.set(w[2],2.8,w[3]); m.castShadow=false; world.add(m); });
-    [[-12.2],[10.2]].forEach(w=>{ const m=box(0.4,5.6,17,wallC,{roughness:.95}); m.position.set(w[0],2.8,0); m.castShadow=false; world.add(m); });
-    const ceil=box(24,0.3,17,0xf2e9d4,{roughness:1}); ceil.position.set(-1,5.75,0); ceil.castShadow=false; world.add(ceil);
-    const trim=box(24,0.18,0.18,0xc9a84c,{metalness:.4,roughness:.4}); trim.position.set(-1,5.1,-7.95); trim.castShadow=false; world.add(trim);
+    // hal-schil met GI gebakken in vertex-kleuren (Blender Cycles), unlit getoond — warme sfeer.
+    // Fallback: vlakke procedurele wanden + plafond als het model niet laadt.
+    const shell=Assets.spawn('nabawi_interior',-1,0,1,0);
+    if(shell){ shell.traverse(o=>{ if(o.isMesh){ o.material=new THREER.MeshBasicMaterial({vertexColors:true}); o.castShadow=false; o.receiveShadow=false; } }); }
+    else {
+      const wallC=0xe8dcc2;
+      [[24,0.4,-1,-8.2],[24,0.4,-1,8.2]].forEach(w=>{ const m=box(w[0],5.6,w[1],wallC,{roughness:.95}); m.position.set(w[2],2.8,w[3]); m.castShadow=false; world.add(m); });
+      [[-12.2],[10.2]].forEach(w=>{ const m=box(0.4,5.6,17,wallC,{roughness:.95}); m.position.set(w[0],2.8,0); m.castShadow=false; world.add(m); });
+      const ceil=box(24,0.3,17,0xf2e9d4,{roughness:1}); ceil.position.set(-1,5.75,0); ceil.castShadow=false; world.add(ceil);
+      const trim=box(24,0.18,0.18,0xc9a84c,{metalness:.4,roughness:.4}); trim.position.set(-1,5.1,-7.95); trim.castShadow=false; world.add(trim);
+    }
     // boogvensters met warm avondlicht
     for(let z=-6;z<=6;z+=3){ [-12,10].forEach(wx=>{
       const win=box(0.12,1.6,1.1,0xffd9a0,{emissive:0xffc070,emissiveIntensity:.7}); win.position.set(wx,3.4,z); win.castShadow=false; world.add(win);

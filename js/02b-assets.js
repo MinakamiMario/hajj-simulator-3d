@@ -14,6 +14,7 @@ const Assets = {
     rock1:   'assets/models/rock1.glb',
     rock2:   'assets/models/rock2.glb',
     rock3:   'assets/models/rock3.glb',
+    nabawi_interior: 'assets/models/nabawi_interior.glb',
   },
   cache: {}, started: false,
   preload(){
