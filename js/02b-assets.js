@@ -8,6 +8,9 @@ const Assets = {
     palm:    'assets/models/palm.glb',
     acacia:  'assets/models/acacia.glb',
     parasol: 'assets/models/parasol.glb',
+    kaaba:   'assets/models/kaaba.glb',
+    dome_nabawi: 'assets/models/dome_nabawi.glb',
+    arch_haram:  'assets/models/arch_haram.glb',
   },
   cache: {}, started: false,
   preload(){
@@ -26,10 +29,10 @@ const Assets = {
   },
   ready(key){ return !!this.cache[key]; },
   // plaats een kloon in de wereld; null als het model (nog) niet geladen is
-  spawn(key, x, z, s, ry){
+  spawn(key, x, z, s, ry, y){
     const src = this.cache[key]; if(!src) return null;
     const m = src.clone(true);
-    m.position.set(x, 0, z);
+    m.position.set(x, y || 0, z);
     if(s) m.scale.setScalar(s);
     m.rotation.y = (ry !== undefined) ? ry : Math.random() * Math.PI * 2;
     world.add(m); return m;

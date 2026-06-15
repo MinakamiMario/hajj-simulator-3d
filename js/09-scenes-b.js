@@ -286,10 +286,12 @@ SCENES.push({
     [-0.8,0.8].forEach(dx=>{ const deur=box(1.45,3.3,0.18,0x1f6b45,{roughness:.6}); deur.position.set(dx,1.65,-4.72); world.add(deur);
       for(let yy=0.7;yy<=2.7;yy+=0.5){ const stud=sph(0.05,0xc9a84c,{metalness:.6},6); stud.position.set(dx,yy,-4.6); stud.castShadow=false; world.add(stud); } });
     const babLbl=textSprite('بَاب السَّلَام','#f0d080'); babLbl.position.set(0,5.4,-4.6); world.add(babLbl);
-    // DE GROENE KOEPEL boven de kamer van de Profeet ﷺ
-    const drum=cyl(1.9,2.1,1.8,0xe2d4b0,{roughness:.9},20); drum.position.set(4.5,7.9,-6.6); world.add(drum);
-    const dome=sph(2.2,0x1f7a4d,{roughness:.45,metalness:.15},26); dome.position.set(4.5,9.4,-6.6); dome.scale.set(1,1.05,1); world.add(dome);
-    const domeTip=cyl(0.02,0.2,1.0,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6}); domeTip.position.set(4.5,11.6,-6.6); world.add(domeTip);
+    // DE GROENE KOEPEL boven de kamer van de Profeet ﷺ — Blender-model met procedurele fallback
+    if(!Assets.spawn('dome_nabawi',4.5,-6.6,1.55,0,6.9)){
+      const drum=cyl(1.9,2.1,1.8,0xe2d4b0,{roughness:.9},20); drum.position.set(4.5,7.9,-6.6); world.add(drum);
+      const dome=sph(2.2,0x1f7a4d,{roughness:.45,metalness:.15},26); dome.position.set(4.5,9.4,-6.6); dome.scale.set(1,1.05,1); world.add(dome);
+      const domeTip=cyl(0.02,0.2,1.0,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6}); domeTip.position.set(4.5,11.6,-6.6); world.add(domeTip);
+    }
     // rij zilveren koepeltjes op het dak
     [-10,-6,-2,2,8,12].forEach(x=>{ const sd=sph(0.7,0xd8d4c8,{roughness:.5,metalness:.2},14); sd.position.set(x,7.5,-6.2); sd.scale.set(1,0.75,1); sd.castShadow=false; world.add(sd); });
     // zes slanke minaretten met balkon

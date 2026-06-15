@@ -21,6 +21,13 @@ function loadScene(id){
   world.add(sky.dome);
   if(lum(skyC)<0.10) world.add(makeStarField(340));
   scene.background=new THREER.Color(skyC);
+  // omgevings-reflectie uit een losse sky-scène (raakt de hoofdscène niet) → metallic goud/marmer spiegelt de lucht
+  if(pmremGen){
+    if(envRT)envRT.dispose();
+    const envScene=new THREER.Scene();
+    const ed=makeSky(skyC).dome; ed.scale.setScalar(0.2); envScene.add(ed);   // kleine dome binnen camerabereik
+    envRT=pmremGen.fromScene(envScene,0.0,0.1,200); scene.environment=envRT.texture;
+  }
   const fogCfg=s.fog||{near:26,far:80};
   scene.fog=new THREER.Fog(sky.horizon, fogCfg.near, fogCfg.far);
   // per-scène belichting (color grade): L.exp stuurt de tone-mapping exposure

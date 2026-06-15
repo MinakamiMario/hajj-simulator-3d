@@ -25,6 +25,8 @@ function initThree(){
   dirLight.shadow.camera.left=-18; dirLight.shadow.camera.right=18;
   dirLight.shadow.camera.top=18; dirLight.shadow.camera.bottom=-18;
   scene.add(dirLight);
+  // PMREM: prefilterde omgevings-reflectie zodat metallic goud/marmer de lucht spiegelt
+  pmremGen=new THREER.PMREMGenerator(renderer); pmremGen.compileCubemapShader();
   clock=new THREER.Clock();
   window.addEventListener('resize',()=>{ camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth,window.innerHeight); });

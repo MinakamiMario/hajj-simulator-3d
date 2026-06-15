@@ -110,14 +110,19 @@ function taxi(x,z){
   g.position.set(x,0,z); g.rotation.y=Math.PI/2; world.add(g); return g;
 }
 function kaaba(x,z){
+  // collider + occlusie-proxy (onzichtbaar maar wél raybaar) + sfeerlicht — altijd, los van het model
+  colliders.push({minX:x-2.0,maxX:x+2.0,minZ:z-2.0,maxZ:z+2.0});
+  const proxy=new THREER.Mesh(new THREER.BoxGeometry(3.4,3.7,3.4),
+    new THREER.MeshBasicMaterial({colorWrite:false,depthWrite:false}));
+  proxy.position.set(x,1.85,z); world.add(proxy); camOccluders.push(proxy);
+  const light=new THREER.PointLight(0xffd070,0.8,16); light.position.set(x,4,z); world.add(light);
+  // echt Blender-model (gebakken-PBR); valt terug op procedurele dozen als de GLB niet laadt
+  if(Assets.spawn('kaaba',x,z,1,0)) return;
   const g=new THREER.Group();
   const c=box(3.2,3.6,3.2,0x080808,{roughness:.6,metalness:.1}); c.position.y=1.8; g.add(c);
-  colliders.push({minX:x-2.0,maxX:x+2.0,minZ:z-2.0,maxZ:z+2.0});   // je kunt er niet doorheen lopen
-  camOccluders.push(c);                                            // en de camera niet doorheen kijken
   const band=box(3.26,0.5,3.26,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6,metalness:.4,roughness:.4});
   band.position.y=2.55; g.add(band);
   const door=box(0.9,1.4,0.06,0x8a6a1c,{metalness:.5,roughness:.4}); door.position.set(0.6,1.0,1.61); g.add(door);
-  const light=new THREER.PointLight(0xffd070,0.8,16); light.position.set(0,4,0); g.add(light);
   g.position.set(x,0,z); world.add(g); return g;
 }
 // surrounding mosque: mataf floor, two-tier arcade ring, tall minarets, floodlights
