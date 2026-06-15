@@ -16,8 +16,8 @@ const SCENES=[];
 /* 0 — NIYYAH (bedroom night) */
 SCENES.push({
   id:0, loc:'🏠 Je slaapkamer — 02:17', ar:'النِّيَّة',
-  task:'🎯 Maak je Niyyah (intentie), en ga dan naar buiten',
-  story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe (WASD / joystick), druk op <strong>A</strong> — en ga daarna naar de <strong>deur</strong>.`,
+  task:'🎯 Maak je Niyyah (intentie), en ga dan slapen — morgen begint de reis',
+  story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe (WASD / joystick), druk op <strong>A</strong> — en ga daarna naar je <strong>bed</strong>. Morgenochtend pak je je koffer.`,
   spawn:{x:0,z:4.2,face:Math.PI,bounds:{minX:-4.5,maxX:4.5,minZ:-4.5,maxZ:4.5}},
   light:{amb:0x46588a,ambI:1.0,dir:0x9aaae0,dirI:0.65,sky:0x0e0b24,exp:0.42},
   build(){
@@ -53,10 +53,10 @@ SCENES.push({
 
     Zone.add({ id:'mat', x:-0.6, z:0.4, r:1.0, icon:'🤲', label:'Maak Niyyah', guide:true,
       action:()=>{ Player.setPose('dua');
-        showFeedback('✅ In je hart maak je de intentie voor de Hajj — hardop hoeft niet. Een warm gevoel trekt door je borst. Pak je koffer en ga naar buiten.',true,5500);
+        showFeedback('✅ In je hart maak je de intentie voor de Hajj — hardop hoeft niet. Een warm gevoel trekt door je borst. Ga nu slapen; morgenochtend pak je je koffer.',true,5500);
         setTimeout(()=>{ Player.setPose('stand');
-          Zone.add({ id:'exit', x:0, z:-3.7, r:1.1, icon:'🚪', label:'Ga naar buiten', guide:true,
-            action:()=>{ showFeedback('🚖 Je stapt naar buiten — de taxi naar de luchthaven staat klaar.',true,3500); showNextBtn('Naar de luchthaven →'); }});
+          Zone.add({ id:'sleep', x:-3.4, z:-2.4, r:1.2, icon:'😴', label:'Ga slapen', guide:true,
+            action:()=>{ showFeedback('🌙 Je slaapt vol voorpret. De volgende ochtend begint je reis met inpakken.',true,3500); showNextBtn('De volgende ochtend →'); }});
         },1200);
       }});
   }

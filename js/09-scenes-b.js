@@ -575,12 +575,20 @@ function tawafScene(){
   const ring=new THREER.Mesh(new THREER.RingGeometry(4.2,4.4,64),
     new THREER.MeshBasicMaterial({color:0xc9a84c,transparent:true,opacity:.3,side:THREER.DoubleSide}));
   ring.rotation.x=-Math.PI/2; ring.position.y=0.02; world.add(ring);
-  // black stone marker
-  const stone=box(0.4,0.8,0.2,0x111016,{emissive:0x3a2a10,emissiveIntensity:.4}); stone.position.set(4.4,0.4,0); world.add(stone);
+  // ===== START: de Zwarte Steen (Hajar al-Aswad) — duidelijk gemarkeerd =====
+  const stone=box(0.5,1.0,0.3,0x111016,{emissive:0x3a2a10,emissiveIntensity:.5}); stone.position.set(4.4,0.5,0); world.add(stone);
+  const stoneFrame=box(0.7,1.2,0.18,0xc9a84c,{metalness:1,roughness:.3}); stoneFrame.position.set(4.55,0.6,0); world.add(stoneFrame);
+  // groene startlijn op de mataf (de echte groene lijn die de start/eind-lijn markeert)
+  const startLine=box(0.45,0.05,4.2,0x2fd95f,{emissive:0x18b23e,emissiveIntensity:.8}); startLine.position.set(5.8,0.07,0); startLine.castShadow=false; world.add(startLine);
+  const startLbl=textSprite('🟢 Begin & eind hier · الحَجَر الأَسوَد','#9af0b4'); startLbl.scale.set(5.0,1.25,1); startLbl.position.set(6.6,2.0,0); world.add(startLbl);
+  // Rukn al-Yamani: de hoek vlak vóór de Zwarte Steen — vanaf hier de Rabbana-du'a
+  const yam=box(0.45,1.0,0.45,0x7a6a48,{roughness:.6,emissive:0x2a2212,emissiveIntensity:.3}); yam.position.set(2.7,0.5,2.7); world.add(yam);
+  const yamLbl=textSprite('الرُّكن اليَمَاني · Rukn al-Yamani','#f0d080'); yamLbl.scale.set(4.2,1.1,1); yamLbl.position.set(3.6,2.3,3.6); world.add(yamLbl);
     State.tawaf=0; State.tawafAngle=null; State.tawafAccum=0; State.tawafSimOffered=false;
-    setProgress('🕋 Ronde 0/7 — loop rond');
+    setProgress('🕋 Ronde 0/7 — start bij de groene lijn');
+  sceneTimeout(()=>showFeedback('🟢 Begin bij de <strong>Zwarte Steen</strong> (groene lijn). Loop <strong>tegen de klok in</strong> met de Ka\'ba aan je <strong>linkerhand</strong>.<br>Tussen <em>Rukn al-Yamani</em> en de Zwarte Steen zeg je: <em>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً</em>.',true,8000),700);
   everyMs(spawnDhikr,2200);
-  sceneTimeout(angryEncounter,7000);
+  sceneTimeout(angryEncounter,9000);
   frameHook=()=>{
     const a=Math.atan2(Player.z,Player.x);
     if(State.tawafAngle===null){ State.tawafAngle=a; return; }
