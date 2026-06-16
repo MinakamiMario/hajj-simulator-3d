@@ -40,12 +40,13 @@ function glowRing(r,color){
 }
 
 // crowd of simple white-cloth pilgrims
-function pilgrimMesh(col,skinCol){
+function pilgrimMesh(col,skinCol,gender){
   const p=new THREER.Group();
   const skins=[0xead0b0,0xd4ab7d,0xc9a06a,0xa9764a,0x8a5a34,0x6e4526];
   const sk=skinCol||skins[Math.floor(Math.random()*skins.length)];
   const hairC=[0x161009,0x2a1c10,0x3a2a18,0x4a4a4a][Math.floor(Math.random()*4)];
-  const female=!col && Math.random()<0.35;            // mix of women in the crowd
+  // gender: 'f' forceert vrouw, 'm' forceert man; anders willekeurig (zoals voorheen)
+  const female = gender==='f' ? true : gender==='m' ? false : (!col && Math.random()<0.35);
   const ihramStyle=!col && !female && Math.random()<0.6;
   const robeCol = col || (female
     ? [0x2a2a34,0x1f2630,0x3a2a3e,0x26323a,0x141418][Math.floor(Math.random()*5)]

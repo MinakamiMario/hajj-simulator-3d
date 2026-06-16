@@ -33,6 +33,14 @@ const Player = {
     this.pose=p;
     if(p==='dua' && was!=='dua' && typeof duaGlow==='function') duaGlow(this.x,this.z);
   },
+  // draai de speler (en camera) naar een punt — gebruikt om richting de qibla/Ka'ba te bidden
+  faceTowards(tx,tz){
+    const dx=tx-this.x, dz=tz-this.z;
+    if(dx===0 && dz===0) return;
+    this.faceY=Math.atan2(-dx,-dz);
+    this.updateTransform();
+    if(typeof Cam!=='undefined') Cam.yaw=this.faceY;
+  },
   // ---- salat: echt gebed met de juiste bewegingen ----
   salat:null,
   praySalat(rakat,cb){

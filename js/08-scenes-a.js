@@ -165,8 +165,13 @@ SCENES.push({
       const base=box(0.16,1.05,11,0xe8e6e2); base.position.set(wx,0.55,0); world.add(base);
       const top =box(0.16,1.0,11,0xe2e0da);  top.position.set(wx,2.45,0); world.add(top);
       for(let i=-4;i<=4;i++){ const fz=i*1.18;
-        const frame=box(0.14,0.6,0.52,0xf6f4ee); frame.position.set(wx,1.75,fz); world.add(frame);
-        const glass=box(0.08,0.46,0.4,0xbfe6ff,{transparent:true,opacity:0.22,emissive:0x9fd0ff,emissiveIntensity:.35}); glass.position.set(wx,1.75,fz); world.add(glass);
+        // afgeronde bezel (afgeplatte bol = zachte raamomlijsting)
+        const bezel=sph(0.33,0xf6f4ee,{roughness:.6},16); bezel.scale.set(0.12,1.0,0.78); bezel.position.set(wx,1.78,fz); bezel.castShadow=false; world.add(bezel);
+        // ovaal raampje: afgeplatte cilinder op z'n kant = vliegtuigraam, helder verlicht
+        const glass=cyl(0.24,0.24,0.07,0xddf2ff,{transparent:true,opacity:0.55,emissive:0xbfe6ff,emissiveIntensity:.85},20);
+        glass.rotation.z=Math.PI/2; glass.scale.set(1.0,1.0,0.78); glass.position.set(wx+side*0.02,1.78,fz); glass.castShadow=false; world.add(glass);
+        // dun zonnescherm erboven
+        const shade=box(0.05,0.12,0.46,0xe8e4dc); shade.position.set(wx-side*0.01,2.05,fz); shade.castShadow=false; world.add(shade);
       }
     });
     // overhead bins + cabin lights
@@ -216,8 +221,8 @@ SCENES.push({
     function seatedTalbiyah(){ openChoice({ ar:'التَّلبِية', sub:'', txt:'Spreek de <strong>Talbiyah</strong> uit:<br><br><em>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</em><br>"Hier ben ik, o Allah, hier ben ik."',
       choices:[{txt:'🗣️ Spreek de Talbiyah', action:()=>{ Sound.success(); learnDua('talbiyah'); showFeedback('✅ Labbayka Allahumma labbayk! Je bent nu in staat van Ihraam. ✈️',true,4000); showNextBtn('Aankomst Mekka →'); }}]}); }
     function sitDown(){ const sz2=Zone.list.find(q=>q.id==='seat'); if(sz2&&!sz2.done)Zone.markDone(sz2);
-      Player.x=sx; Player.z=sz; Player.faceY=0; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
-      Cam.yaw=0; Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
+      Player.x=sx; Player.z=sz; Player.faceY=Math.PI; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
+      Cam.yaw=Math.PI; Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
 
     if(!Char.ihram){
       Zone.add({ id:'lav', x:-0.3, z:3.7, r:1.1, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
@@ -249,7 +254,7 @@ SCENES.push({
     addWanderers(8,{minX:-10,maxX:10,minZ:4,maxZ:11});
     everyMs(()=>spawnDhikrAt(0,-3),2600);
     Zone.add({ id:'pray', x:0, z:4.5, r:1.5, icon:'🤲', label:"Du'a voor Ka'ba", guide:true,
-      action:()=>{ Player.setPose('dua'); learnDua('kaaba');
+      action:()=>{ Player.faceTowards(0,-3); Player.setPose('dua'); learnDua('kaaba');   // richt naar de Ka'ba
         showFeedback("✅ Je heft je handen op. \"Allahumma anta as-Salam wa minka as-Salam...\" Tranen lopen over je wangen.",true,5000);
         showNextBtn('Begin Tawaf →'); }});
   }
@@ -275,6 +280,7 @@ SCENES.push({
           txt:"Achter deze steen — met de voetafdruk van Ibrahim (a.s.) — bid je 2 rak'ah. Sunnah: al-Kafirun in de eerste, al-Ikhlas in de tweede rak'ah.",
           choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.maqamDone=true; if(zz)Zone.markDone(zz);
             showFeedback("🕌 Je bidt 2 rak'ah achter de Maqam — volg de bewegingen.",true,3000);
+            Player.faceTowards(0,0);                                 // bid richting de Ka'ba
             Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z);
               showFeedback("✅ Gebed voltooid. Drink nu Zamzam 💧, daarna verder naar Sa'i.",true,5000);
               const zm=Zone.list.find(q=>q.id==='zamzam'); if(zm&&!zm.done){ zm.guide=true; Guide.refresh(); }

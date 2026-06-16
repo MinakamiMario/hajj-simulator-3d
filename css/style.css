@@ -169,3 +169,21 @@ details.faq p{margin:.5rem .2rem 0;color:#cfc6b0;font-size:.88rem;line-height:1.
 .gids-close{flex:0 0 auto;background:none;border:none;color:rgba(240,220,160,.5);font-size:.95rem;cursor:pointer;padding:.05rem .2rem;line-height:1;}
 .gids-close:hover{color:var(--gold2);}
 @media (max-width:520px){ .gids{bottom:160px;} .gids-txt{font-size:.86rem;} }
+
+/* ===== PER-SCENE CHECKLIST (afvinklijst) ===== */
+.checklist{position:absolute;top:104px;left:8px;z-index:27;max-width:min(56%,300px);
+  background:rgba(4,6,12,.82);border:1px solid rgba(201,168,76,.3);border-radius:12px;
+  padding:.45rem .6rem;backdrop-filter:blur(10px);box-shadow:0 6px 24px rgba(0,0,0,.4);}
+.cl-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;cursor:pointer;}
+.cl-title{font-size:.72rem;font-weight:700;letter-spacing:.04em;color:var(--gold);text-transform:uppercase;}
+.cl-badge{font-size:.7rem;font-weight:700;color:var(--gold2);background:rgba(201,168,76,.14);
+  border:1px solid rgba(201,168,76,.35);border-radius:99px;padding:.05rem .45rem;}
+.cl-list{margin-top:.4rem;display:flex;flex-direction:column;gap:.28rem;}
+.checklist.collapsed .cl-list{display:none;}
+.cl-item{display:flex;align-items:flex-start;gap:.4rem;font-size:.78rem;line-height:1.3;color:#e8e2d0;transition:opacity .25s,color .25s;}
+.cl-item .cl-mark{flex:0 0 auto;font-size:.8rem;}
+.cl-item.done{color:#7fd9a8;}
+.cl-item.done .cl-label{text-decoration:line-through;opacity:.75;}
+.cl-item.opt{opacity:.7;}
+.cl-item.opt em{color:var(--gold);font-style:normal;font-size:.66rem;}
+@media (max-width:520px){ .checklist{top:98px;max-width:60%;} .cl-item{font-size:.74rem;} }

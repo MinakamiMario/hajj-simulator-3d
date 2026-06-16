@@ -100,7 +100,7 @@ SCENES.push({
             {txt:'Doorlopen', action:()=>{ showFeedback('Je loopt door... maar zijn blik blijft je bij. Misschien toch teruggaan?',false,3500); }}
           ]}); }});
     Zone.add({ id:'mtn', x:0, z:-9.6, y:terr(0,-9.6), r:2.0, icon:'🤲', label:"Du'a op Jabal al-Rahma", guide:true,
-      action:()=>{ Player.setPose('dua'); learnDua('arafat');
+      action:()=>{ Player.faceTowards(0,-13); Player.setPose('dua'); learnDua('arafat');   // richt op de Berg/qibla
         showFeedback("SubhanAllah. Allah daalt neer en spreekt trots over de mensen op Arafat. Geen dag worden meer mensen bevrijd dan vandaag.",true,6000);
         showNextBtn('Naar Muzdalifah →'); }});
   }
@@ -127,7 +127,8 @@ SCENES.push({
       const h=sph(0.14,0xc9a06a); h.position.set(p[0],0.22,p[1]-0.8); h.castShadow=false; world.add(h); });
     addWanderers(5,{minX:-9,maxX:9,minZ:-9,maxZ:9});
     State.stonesCol=0;
-    const pos=[[-3,-2],[2,-3],[3,2],[-2,3],[-4,1],[4,-1],[1,3],[-1,-4],[3.5,3.5],[-3.5,-3.5],[0,-3]];
+    const pos=[[-3,-2],[2,-3],[3,2],[-2,3],[-5,1],[5,-1],[1,3],[-1,-4],[4.5,4.5],[-4.5,-4.5],[0,-3.5],
+               [-6,-3],[6,3],[-6.5,4],[6.5,-4],[3.5,-6],[-3.5,6],[0,6.5]];
     pos.forEach((p,i)=>{
       const stone=sph(0.13,0x8a8478,{roughness:1}); stone.position.set(p[0],0.1,p[1]); stone.scale.set(1,.7,1); world.add(stone);
       Zone.add({ id:'stone-'+i, x:p[0], z:p[1], y:0.1, r:0.8, trigR:0.95, pickup:true, glow:true, icon:'🪨', label:'Raap op', guide:true,
@@ -166,7 +167,7 @@ SCENES.push({
     // pebbles already in the basin + lamp posts
     for(let i=0;i<10;i++){ const pb=sph(0.07,0x9a948a); pb.position.set((Math.random()-.5)*3,0.12,-2.5+(Math.random()-.5)*2); pb.castShadow=false; world.add(pb); }
     [[-5,4],[5,4]].forEach(p=>lampPost(p[0],p[1]));
-    world.add(makeCrowd(22,0,3.4,0,{min:3.6,max:6.4}));
+    world.add(makeCrowd(22,0,-2.5,0,{min:4.2,max:6.8}));   // rond de pijler, buiten de bak (binnenstraal 4.2 > bakwand ~3.1)
     addWanderers(5,{minX:-6,maxX:6,minZ:1.5,maxZ:6.5});
     everyMs(()=>spawnTextAt('اللّٰهُ أَكبَر',(Math.random()-.5)*5,2.2,1+Math.random()*3),3200);
     State.stonesThrown=0;
@@ -174,7 +175,7 @@ SCENES.push({
       action:(z)=>{ if(State.stonesThrown>=7)return; State.stonesThrown++; if(State.stonesThrown===1)learnDua('takbir'); setProgress(`💎 ${State.stonesThrown}/7 gegooid`);
         throwStone(Player.x,Player.z,0,-2.5);
         spawnTextAt('اللّٰهُ أَكبَر',Player.x,2.3,Player.z-0.5);
-        if(State.stonesThrown>=7){ Zone.markDone(z); showFeedback('✅ Allahu Akbar! De shaytaan is symbolisch verdreven.',true,4000); showNextBtn('Naar de barbier →'); } }});
+        if(State.stonesThrown>=7){ Zone.markDone(z); showFeedback('✅ Allahu Akbar! De shaytaan is symbolisch verdreven.',true,4000); showNextBtn('Naar de kapper →'); } }});
     setProgress('💎 0/7 gegooid');
   }
 });
@@ -200,9 +201,9 @@ function dustPuff(x,y,z){
 
 /* 9 — HALQ */
 SCENES.push({
-  id:9, loc:'✂️ Bij de barbier — Mina', ar:'الحَلق',
-  task:'🎯 Loop naar de barbier en kies Halq of Taqsir',
-  story:`Het is 10 Dhul Hijjah, de dag van Eid. Eerst regel je je <strong>Hadi</strong> (offerdier) bij het loket 🐑 — daarna naar de barbier voor Halq of Taqsir.`,
+  id:9, loc:'✂️ Bij de kapper — Mina', ar:'الحَلق',
+  task:'🎯 Loop naar de kapper en kies Halq of Taqsir',
+  story:`Het is 10 Dhul Hijjah, de dag van Eid. Eerst regel je je <strong>Hadi</strong> (offerdier) bij het loket 🐑 — daarna naar de kapper voor Halq of Taqsir.`,
   spawn:{x:0,z:4,face:Math.PI,bounds:{minX:-6,maxX:6,minZ:-1,maxZ:6}},
   light:{amb:0x404058,ambI:0.7,dir:0xc8c8d8,dirI:0.7,sky:0x121028,exp:0.55},
   build(){
@@ -222,9 +223,9 @@ SCENES.push({
       action:(z)=>{ if(State.hadiDone){ showFeedback('Je Hadi is al geregeld. 🐑',true,2000); return; }
         State.hadiDone=true; Zone.markDone(z); Sound.success();
         showFeedback('🐑 Hadi geregeld via een tegoedbon — het vlees gaat naar de armen. "Hun vlees noch bloed bereikt Allah, maar jullie taqwa bereikt Hem." (22:37)',true,6000);
-        setProgress('✂️ Nu naar de barbier'); }});
+        setProgress('✂️ Nu naar de kapper'); }});
     setProgress('🐑 Regel eerst je Hadi (loket links)');
-    Zone.add({ id:'barber', x:0, z:-0.6, r:1.4, icon:'✂️', label:'Naar barbier', noConsume:true, guide:true,
+    Zone.add({ id:'barber', x:0, z:-0.6, r:1.4, icon:'✂️', label:'Naar kapper', noConsume:true, guide:true,
       action:(z)=>{ if(!State.hadiDone){ showFeedback('⚠️ Regel eerst je Hadi bij het loket 🐑 — de volgorde op deze dag: stenigen → offeren → scheren.',false,3500); return; }
         openChoice({ ar:'الحَلق أو التَّقصِير', sub:'Kies je Tahallul', txt:'Hoe doe je je haar?',
         choices:[
@@ -438,12 +439,17 @@ SCENES.push({
     colliders.push({minX:8.0,maxX:9.4,minZ:-7.2,maxZ:-1.8});
     camOccluders.push(grille);
     const grLbl=emojiSprite('🕊️',0.55); grLbl.position.set(8.2,3.4,-4.4); world.add(grLbl);
-    // biddende rijen (saff) richting qibla + rustige lopers
-    for(let r=0;r<2;r++){ for(let x=-9;x<=6;x+=1.7){
+    // biddende rijen (saff) richting qibla — gescheiden mannen-/vrouwengedeelte.
+    // De Rawda heeft aparte toegang/tijden voor mannen en vrouwen; hier tonen we
+    // het mannengedeelte (links, qibla-zijde) en het vrouwengedeelte (rechts), met tussenruimte.
+    const saff=(gen,x0,x1)=>{ for(let r=0;r<2;r++){ for(let x=x0;x<=x1;x+=1.7){
       if(Math.random()<0.2) continue;
-      const p=pilgrimMesh(); p.position.set(x+(Math.random()-.5)*0.3,0,1.6+r*1.9); p.rotation.y=0; p.userData.ph=Math.random()*6.28; world.add(p);
-    }}
-    addWanderers(4,{minX:-10,maxX:7,minZ:3,maxZ:6.5});
+      const p=pilgrimMesh(null,null,gen); p.position.set(x+(Math.random()-.5)*0.3,0,1.6+r*1.9); p.rotation.y=0; p.userData.ph=Math.random()*6.28; world.add(p);
+    }} };
+    saff('m',-9,-2.5);    // mannengedeelte (qibla-zijde)
+    saff('f', 0.5, 6);    // vrouwengedeelte (apart, met tussenruimte)
+    addWanderers(3,{minX:-10,maxX:-3,minZ:3,maxZ:6.5},'m');   // lopers blijven binnen hun eigen zijde
+    addWanderers(3,{minX:0,maxX:7,minZ:3,maxZ:6.5},'f');
     everyMs(()=>spawnDhikrAt(-1,0),3400);
     // ===== taken: Rawda → salam =====
     State.rawdaDone=false; State.salamDone=false;
@@ -451,8 +457,9 @@ SCENES.push({
     Zone.add({ id:'rawda', x:-1.2, z:-5.0, r:1.5, icon:'🤲', label:"Bid in de Rawda", noConsume:true, guide:true,
       action:(zz)=>{ if(State.rawdaDone){ showFeedback('Je hebt hier al gebeden. 🤲',true,2000); return; }
         openChoice({ ar:'الرَّوضَة الشَّرِيفَة', sub:'"Tussen mijn huis en mijn minbar ligt een tuin van de tuinen van het Paradijs" (Bukhari & Muslim)',
-          txt:"Je staat op het groene tapijt van de Rawda. Bid hier 2 rak'ah — volg de bewegingen rustig. (Tegenwoordig reserveer je dit moment via de Nusuk-app.)",
+          txt:"Je staat op het groene tapijt van de Rawda. Bid hier 2 rak'ah — volg de bewegingen rustig.<br><br><em>Mannen en vrouwen bezoeken de Rawda op aparte tijden, via gescheiden toegang. Je reserveert je moment via de Nusuk-app.</em>",
           choices:[{txt:"🤲 Bid 2 rak'ah", action:()=>{ State.rawdaDone=true; if(zz)Zone.markDone(zz);
+            Player.faceTowards(Player.x, Player.z-10);               // bid richting de qibla (mihrab, -z)
             Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z); learnDua('salawat');
               showFeedback("✅ Wat een bijzondere plek. Ga nu rustig naar de gouden afscheiding voor de salam. ➡️",true,5000);
               setProgress('2️⃣ Geef salam bij de gouden afscheiding (rechts)'); }); }}]}); }});
@@ -499,6 +506,7 @@ SCENES.push({
       action:(zz)=>{ if(State.qubaDone)return;
         State.qubaDone=true; if(zz)Zone.markDone(zz);
         showFeedback("🕌 Je bidt 2 rak'ah in Quba — volg de bewegingen.",true,2500);
+        Player.faceTowards(Player.x, Player.z-10);                  // bid richting de qibla (-z, de moskee)
         Player.praySalat(2, ()=>{ Sound.success(); sparkle(Player.x,1.6,Player.z);
           showFeedback("✅ 2 rak'ah in Quba — met de beloning van een Umrah, in shaa Allah. Tijd om naar huis te gaan. 🏠",true,5500);
           showNextBtn('Naar huis →'); }); }});
@@ -590,7 +598,8 @@ function tawafScene(){
   // 2-regelig label hóóg boven de Zwarte-Steen-markering (boven de menigte) → naam↔hoek meteen duidelijk
   const startLbl=textSprite('الحَجَر الأَسوَد\n🟢 Zwarte Steen — start','#9af0b4',{h:0.95}); startLbl.position.set(4.6,3.0,0); world.add(startLbl);
   // Rukn al-Yamani: de hoek vlak vóór de Zwarte Steen — vanaf hier de Rabbana-du'a
-  const yam=box(0.45,1.0,0.45,0x7a6a48,{roughness:.6,emissive:0x2a2212,emissiveIntensity:.3}); yam.position.set(2.7,0.5,2.7); world.add(yam);
+  const yamDisc=cyl(0.6,0.6,0.06,0xc9a84c,{metalness:.6,roughness:.4},20); yamDisc.position.set(2.7,0.05,2.7); yamDisc.castShadow=false; world.add(yamDisc);
+  const yam=cyl(0.14,0.18,0.9,0x7a6a48,{roughness:.6,emissive:0x2a2212,emissiveIntensity:.3},12); yam.position.set(2.7,0.48,2.7); world.add(yam);
   const yamLbl=textSprite('الرُّكن اليَمَاني\nRukn al-Yamani','#f0d080',{h:0.9}); yamLbl.position.set(2.9,2.85,2.9); world.add(yamLbl);
     State.tawaf=0; State.tawafAngle=null; State.tawafAccum=0; State.tawafSimOffered=false;
     setProgress('🕋 Ronde 0/7 — start bij de groene lijn');
@@ -678,9 +687,9 @@ function spawnTextAt(txt,x,y,z,color){
     if(t>1.15){ clearInterval(iv); world.remove(s); } },16);
 }
 // wandering pilgrims: walk between random points, greet you when you come close
-function addWanderers(n,area){
+function addWanderers(n,area,gender){
   for(let i=0;i<n;i++){
-    const p=pilgrimMesh();
+    const p=pilgrimMesh(null,null,gender);
     const rx=()=>area.minX+Math.random()*(area.maxX-area.minX);
     const rz=()=>area.minZ+Math.random()*(area.maxZ-area.minZ);
     p.position.set(rx(),0,rz());

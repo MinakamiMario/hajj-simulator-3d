@@ -42,6 +42,7 @@ const Zone = {
     if(z.ring){ z.ring.material.color.set(0x27ae60); z.ring.material.opacity=0.3; }
     if(this.current===z)this.current=null; updatePrompt();
     Guide.refresh();
+    if(typeof Checklist!=='undefined') Checklist.refresh();   // vink checklist-items af die aan een zone hangen
   }
 };
 

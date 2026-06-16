@@ -74,7 +74,7 @@ const NARRATION = {
       "Wij doen het hem na: zeven steentjes naar de pijler, bij elke worp 'Allahu Akbar'. Het is geen woede tegen een steen, maar jouw eigen 'nee' tegen het kwaad.",
       "Blijf rustig, duw niemand. Kracht zit in beheersing, niet in haast." ],
   9:[ "Het is de dag van Eid al-Adha. Eerst regel je je offerdier, de Hadi — in navolging van Ibrahim ﷺ; het vlees gaat naar wie het nodig heeft.",
-      "Daarna naar de barbier. Mannen scheren het hoofd kaal (halq) of korten het in (taqsir); vrouwen knippen een klein stukje van hun haar, zo'n vingertopje lang.",
+      "Daarna naar de kapper. Mannen scheren het hoofd kaal (halq) of korten het in (taqsir); vrouwen knippen een klein stukje van hun haar, zo'n vingertopje lang.",
       "Met die knip kom je deels uit ihraam — de meeste verboden vervallen weer; alleen de omgang met je echtgenoot blijft nog tot na de Tawaf al-Ifada. Het voelt als een nieuw begin." ],
   10:[ "We keren terug naar de Ka'ba voor de Tawaf al-Ifada — een kernzuil van de Hajj. Opnieuw zeven ronden, nu uit ihraam.",
        "Voel het verschil met de eerste keer: toen kwam je vol verlangen, nu kom je vervuld — na Arafat, Muzdalifah en Mina.",

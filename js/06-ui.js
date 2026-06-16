@@ -5,7 +5,7 @@
 function el(id){return document.getElementById(id);}
 function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); el(id).classList.add('active'); }
 function setTask(s){ el('task-ar').textContent=s.ar||''; el('task-txt').textContent=s.task||''; el('task-prog').textContent=''; }
-function setProgress(t){ el('task-prog').textContent=t||''; }
+function setProgress(t){ el('task-prog').textContent=t||''; if(typeof Checklist!=='undefined') Checklist.refresh(); }
 function updateHUD(s){ el('hud-loc').textContent=s.loc; el('hud-num').textContent=`${s.id+1} / ${SCENES.length}`;
   el('hud-fill').style.width=((s.id+1)/SCENES.length*100)+'%'; }
 let titleTimer;
@@ -98,25 +98,48 @@ function closeChoice(){ el('modal-choice').classList.add('hidden'); }
 
 // ---- Quiz tussen scènes ----
 const QUIZZES={
-  0:{q:'Waar zit de Niyyah (intentie)?',a:['In je hart',"Op je tong — je moet 'm hardop zeggen",'Op een gebedskleed'],ok:0,info:'De Niyyah zit in het hart; hardop uitspreken hoeft niet.'},
+  0:{q:'Waar zit de Niyyah (intentie)?',a:['In je hart',"Op je tong — je moet 'm hardop zeggen",'Op een gebedskleed'],ok:0,info:'De Niyyah zit in het hart; hardop uitspreken hoeft niet.',
+     term:'Niyyah', ar:'النِّيَّة',
+     explain:'De <strong>Niyyah</strong> is je innerlijke besluit om een daad van aanbidding voor Allah te verrichten — ze leeft in het <strong>hart</strong>. Voor de Hajj/Umrah neem je de Niyyah bij de Miqaat. Veel pelgrims spreken er woorden bij (zoals "Labbayka Hajjan"), maar dat hardop zeggen is geen voorwaarde; de kern is je hart.'},
   1:{q:'Wat is verboden in staat van Ihraam?',a:['Een horloge dragen','Parfum gebruiken','Sandalen dragen'],ok:1,info:'Parfum, haar/nagels knippen en (voor mannen) genaaide kleding zijn niet toegestaan.'},
-  2:{q:'Wanneer moet je uiterlijk in Ihraam zijn?',a:['Bij aankomst in het hotel','Vóór het passeren van de Miqaat',"Pas bij de Ka'ba"],ok:1,info:'Je mag de Miqaat niet zonder Ihraam passeren.'},
+  2:{q:'Wanneer moet je uiterlijk in Ihraam zijn?',a:['Bij aankomst in het hotel','Vóór het passeren van de Miqaat',"Pas bij de Ka'ba"],ok:1,info:'Je mag de Miqaat niet zonder Ihraam passeren.',
+     term:'Miqaat', ar:'المِيقَات',
+     explain:'De <strong>Miqaat</strong> is de vastgestelde grens rond Mekka waar je in staat van Ihraam moet zijn vóór je hem passeert met de intentie van Hajj of Umrah. Er zijn er vijf, elk voor pelgrims uit een bepaalde richting (bv. Dhul-Hulayfah voor wie uit Medina komt). Passeer je de Miqaat zonder Ihraam terwijl je Hajj/Umrah wilt verrichten, dan keer je terug om hem alsnog vanaf de Miqaat aan te nemen.'},
   4:{q:'In welke richting loop je de Tawaf?',a:['Met de klok mee','Tegen de klok in — Ka\'ba links','Maakt niet uit'],ok:1,info:"Tegen de klok in, met de Ka'ba aan je linkerhand — 7 rondes."},
   5:{q:'Waarom joggen mannen tussen de groene lampen?',a:['Om sneller klaar te zijn','Ter herinnering aan het rennen van Hajar','Omdat het daar koeler is'],ok:1,info:'Het herdenkt Hajar die tussen Safa en Marwa rende, zoekend naar water.'},
-  6:{q:'De Profeet ﷺ zei: "De Hajj is ___"',a:['Tawaf','Arafat','Mina'],ok:1,info:'Wie de wuquf op Arafat (9 Dhul Hijjah) mist, mist de Hajj.'},
+  6:{q:'De Profeet ﷺ zei: "De Hajj is ___"',a:['Tawaf','Arafat','Mina'],ok:1,info:'Wie de wuquf op Arafat (9 Dhul Hijjah) mist, mist de Hajj.',
+     term:'Wuquf op Arafat', ar:'يَوم عَرَفَة',
+     explain:'De <strong>wuquf</strong> (het "staan") op de vlakte van <strong>Arafat</strong> op 9 Dhul Hijjah is de kernzuil van de Hajj. De Profeet ﷺ zei: "De Hajj is Arafat." Wie dit moment mist — al is het maar even, tussen de middag en de volgende dageraad — heeft de Hajj van dat jaar gemist. Het is een dag van smeekbede en vergeving.'},
   7:{q:'Hoeveel steentjes raap je voor Jamarat al-Aqaba?',a:['7','21','70'],ok:0,info:'7 steentjes voor de grote jamarah op 10 Dhul Hijjah.'},
   8:{q:'Wat zeg je bij elke worp?',a:['Bismillah','Allahu Akbar','Alhamdulillah'],ok:1,info:'Bij elke steen: Allahu Akbar.'},
   9:{q:'Wat geeft meer beloning volgens de Profeet ﷺ?',a:['Taqsir (inkorten)','Halq (kaalscheren)','Geen verschil'],ok:1,info:'De Profeet ﷺ vroeg 3× vergeving voor wie scheert, 1× voor wie inkort.'},
   11:{q:'Is het bezoek aan Medina onderdeel van de Hajj?',a:['Ja, het is verplicht','Nee — het is een aanbevolen ziyarah','Alleen voor mannen'],ok:1,info:'De ziyarah naar Medina is aanbevolen, maar geen rite of voorwaarde van de Hajj.'},
   13:{q:'Wat zei de Profeet ﷺ over 2 rak\'ah in Quba?',a:['Beloning van een Hajj','Beloning van een Umrah','Beloning van 100 gebeden'],ok:1,info:'Wie zich thuis reinigt en in Quba 2 rak\'ah bidt, heeft de beloning van een Umrah.'},
 };
+// uitleg-HTML (explain valt terug op info). Herbruikbaar door de info-knop.
+function quizExplainHtml(qz,correct){
+  const head=qz.term?'<div style="color:var(--gold);font-weight:700;margin-bottom:.2rem">'+qz.term+'</div>':'';
+  const body=qz.explain||qz.info||'';
+  const mark=correct===true?'✅ Goed beantwoord.':correct===false?'❌ Niet helemaal.':'';
+  return (mark?'<div style="margin-bottom:.4rem;font-weight:600">'+mark+'</div>':'')+head+
+         '<div style="font-size:.88rem;line-height:1.5;color:#e8e0cc">'+body+'</div>';
+}
+function showQuizInfo(sceneIdx){
+  const qz=QUIZZES[sceneIdx]; if(!qz)return;
+  openChoice({ ar:qz.ar||'إِفَادَة', sub:qz.term?('Uitleg — '+qz.term):'Uitleg',
+    txt:quizExplainHtml(qz,null), choices:[{txt:'Sluiten', action:()=>{}}] });
+}
 function askQuiz(sceneIdx,then){
   const qz=QUIZZES[sceneIdx];
   if(!qz||qz.asked){ then(); return; }
   qz.asked=true; State.quizTotal=(State.quizTotal||0)+1; paused=true;
   openChoice({ ar:'سُؤَال', sub:'Quizvraag', txt:'🧠 '+qz.q,
-    choices:qz.a.map((txt,i)=>({txt:txt, action:()=>{ paused=false;
-      if(i===qz.ok){ State.quiz=(State.quiz||0)+1; Sound.success(); showFeedback('✅ Goed! '+qz.info,true,4000); }
-      else { Sound.bad(); showFeedback('❌ Helaas. '+qz.info,false,4500); }
-      setTimeout(then,650); }})) });
+    choices:qz.a.map((txt,i)=>({txt:txt, action:()=>{
+      const correct=(i===qz.ok);
+      if(correct){ State.quiz=(State.quiz||0)+1; Sound.success(); } else { Sound.bad(); }
+      // toon de UITLEG in een eigen paneeltje met één 'Verder'-knop (niet auto-weg)
+      openChoice({ ar:qz.ar||'إِفَادَة', sub:qz.term?('Uitleg — '+qz.term):'Uitleg',
+        txt:quizExplainHtml(qz,correct),
+        choices:[{txt:'Verder ▸', action:()=>{ paused=false; setTimeout(then,150); }}] });
+    }})) });
 }
