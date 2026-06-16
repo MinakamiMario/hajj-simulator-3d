@@ -42,12 +42,12 @@ SCENES.push({
     obelisk.position.set(HILL.x,topY+2.3,HILL.z); world.add(obelisk);
     colliders.push({minX:HILL.x-0.7,maxX:HILL.x+0.7,minZ:HILL.z-0.7,maxZ:HILL.z+0.7});
     camOccluders.push(obelisk);
-    const obLbl=textSprite('جَبَل الرَّحمَة — Jabal al-Rahma','#ffe2a0'); obLbl.scale.set(4.4,1.3,1); obLbl.position.set(HILL.x,topY+5.4,HILL.z); world.add(obLbl);
+    const obLbl=textSprite('جَبَل الرَّحمَة — Jabal al-Rahma','#ffe2a0',{h:1.05}); obLbl.position.set(HILL.x,topY+5.4,HILL.z); world.add(obLbl);
     // pelgrims op de flanken, handen geheven in du'a
     for(let i=0;i<9;i++){ const a=(i/9)*Math.PI*2+0.3, rr=2.2+Math.random()*4.5;
       const px2=HILL.x+Math.cos(a)*rr, pz2=HILL.z+Math.sin(a)*rr;
       const p=pilgrimMesh(); p.position.set(px2,terr(px2,pz2),pz2); p.rotation.y=Math.PI;
-      if(p.userData.arms)p.userData.arms.rotation.x=-1.9;          // geheven handen
+      pilgrimDua(p);                                               // natuurlijk geheven handen (du'a)
       world.add(p); }
     everyMs(()=>spawnDhikrAt(HILL.x,HILL.z+4),3400);
     // laagstaande zon achter de heuvel
@@ -65,7 +65,7 @@ SCENES.push({
     [[8.5,12.5],[-8.5,12.5]].forEach(p=>{
       [-0.9,0.9].forEach(o=>{ const pl2=cyl(0.06,0.08,2.6,0x9a9a9a,{metalness:.3},8); pl2.position.set(p[0]+o,1.3,p[1]); pl2.castShadow=false; world.add(pl2); });
       const brd=box(2.6,1.1,0.12,0xf2c61e,{roughness:.6}); brd.position.set(p[0],2.6,p[1]); brd.castShadow=false; world.add(brd);
-      const brdT=textSprite('بِدَايَة عَرَفَات','#163a16'); brdT.scale.set(2.3,0.7,1); brdT.position.set(p[0],2.6,p[1]-0.2); world.add(brdT); });
+      const brdT=textSprite('بِدَايَة عَرَفَات','#163a16',{h:0.62}); brdT.position.set(p[0],2.6,p[1]-0.2); world.add(brdT); });
     // pelgrimsbussen langs de rand + watervoorraad bij de tenten
     pilgrimBus(-14,13.5,0xe8e4da,0.1); pilgrimBus(-19,13.8,0xdde8dd,-0.06); pilgrimBus(15,14,0xe2dccc,0.05);
     [[-6,11],[6.5,11.5]].forEach(p=>{ const wv=cyl(0.5,0.55,1.1,0x3a7ab8,{roughness:.5},10); wv.position.set(p[0],0.55,p[1]); wv.castShadow=false; world.add(wv);
@@ -246,6 +246,7 @@ SCENES.push({
   spawn:{x:5,z:0,face:-Math.PI/2,bounds:{minX:-11,maxX:11,minZ:-11,maxZ:11}},
   light:{amb:0x3a3654,ambI:0.8,dir:0xd8b86a,dirI:0.7,sky:0x141030,exp:0.6},
   fog:{near:34,far:150},
+  cam:{dist:9,height:3.4,pitch:0.32},                   // uitgezoomd zoals de eerste tawaf
   onEnter:()=>{ Char.ihram=false; },
   build(){ tawafScene(true); },
   onExit(){ frameHook=null; }
@@ -292,11 +293,10 @@ SCENES.push({
     }
     // rij zilveren koepeltjes op het dak
     [-10,-6,-2,2,8,12].forEach(x=>{ const sd=sph(0.7,0xd8d4c8,{roughness:.5,metalness:.2},14); sd.position.set(x,7.5,-6.2); sd.scale.set(1,0.75,1); sd.castShadow=false; world.add(sd); });
-    // zes slanke minaretten met balkon
+    // zes slanke minaretten met balkon (GLTF-model met fallback)
     [[-15,-6],[15,-6],[-9,-9.5],[9,-9.5],[-15,5],[15,5]].forEach(p=>{
-      const m=cyl(0.4,0.55,13,0xe9ddc0,{roughness:.9}); m.position.set(p[0],6.5,p[1]); m.castShadow=false; world.add(m);
-      const balc=cyl(0.8,0.8,0.3,0xd6cfbc,{roughness:.9},12); balc.position.set(p[0],10.5,p[1]); balc.castShadow=false; world.add(balc);
-      const tip=cyl(0.02,0.35,1.6,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(p[0],13.8,p[1]); tip.castShadow=false; world.add(tip); });
+      minaret(p[0],p[1],0.85);
+    });
     // de beroemde plein-parasols (GLTF-model met fallback)
     for(let px=-10;px<=10;px+=4){ [3.5,7.5].forEach(pz=>nabawiParasol(px,pz,1.05)); }
     // ===== AL-BAQI: de oude begraafplaats naast de moskee =====
@@ -412,6 +412,8 @@ SCENES.push({
         bulb.position.set(p[0]+Math.cos(a)*0.55,3.82,p[1]+Math.sin(a)*0.55); bulb.castShadow=false; world.add(bulb); }
       const pl=new THREER.PointLight(0xffd9a0,0.75,13); pl.position.set(p[0],3.6,p[1]); world.add(pl);
     });
+    // rij warme hanglantaarns tussen de zuilen (GLTF-model met fallback)
+    [-7.2,-2.7,1.7].forEach(lx=>[-2,2].forEach(lz=>hangLantern(lx,lz,4.3,0.85)));
     // qibla-wand: MIHRAB (gouden nis) + MINBAR (preekstoel)
     const mihrabFrame=box(2.0,3.4,0.3,0xc9a84c,{metalness:.5,roughness:.35}); mihrabFrame.position.set(-2.5,1.7,-7.95); world.add(mihrabFrame);
     const niche=box(1.4,2.8,0.25,0x2a4a3a,{emissive:0x14301f,emissiveIntensity:.5}); niche.position.set(-2.5,1.4,-7.85); world.add(niche);
@@ -585,10 +587,11 @@ function tawafScene(){
   const stoneFrame=box(0.7,1.2,0.18,0xc9a84c,{metalness:1,roughness:.3}); stoneFrame.position.set(4.55,0.6,0); world.add(stoneFrame);
   // groene startlijn op de mataf (de echte groene lijn die de start/eind-lijn markeert)
   const startLine=box(0.45,0.05,4.2,0x2fd95f,{emissive:0x18b23e,emissiveIntensity:.8}); startLine.position.set(5.8,0.07,0); startLine.castShadow=false; world.add(startLine);
-  const startLbl=textSprite('🟢 Begin & eind hier · الحَجَر الأَسوَد','#9af0b4'); startLbl.scale.set(5.0,1.25,1); startLbl.position.set(6.6,2.0,0); world.add(startLbl);
+  // 2-regelig label hóóg boven de Zwarte-Steen-markering (boven de menigte) → naam↔hoek meteen duidelijk
+  const startLbl=textSprite('الحَجَر الأَسوَد\n🟢 Zwarte Steen — start','#9af0b4',{h:0.95}); startLbl.position.set(4.6,3.0,0); world.add(startLbl);
   // Rukn al-Yamani: de hoek vlak vóór de Zwarte Steen — vanaf hier de Rabbana-du'a
   const yam=box(0.45,1.0,0.45,0x7a6a48,{roughness:.6,emissive:0x2a2212,emissiveIntensity:.3}); yam.position.set(2.7,0.5,2.7); world.add(yam);
-  const yamLbl=textSprite('الرُّكن اليَمَاني · Rukn al-Yamani','#f0d080'); yamLbl.scale.set(4.2,1.1,1); yamLbl.position.set(3.6,2.3,3.6); world.add(yamLbl);
+  const yamLbl=textSprite('الرُّكن اليَمَاني\nRukn al-Yamani','#f0d080',{h:0.9}); yamLbl.position.set(2.9,2.85,2.9); world.add(yamLbl);
     State.tawaf=0; State.tawafAngle=null; State.tawafAccum=0; State.tawafSimOffered=false;
     setProgress('🕋 Ronde 0/7 — start bij de groene lijn');
   sceneTimeout(()=>showFeedback('🟢 Begin bij de <strong>Zwarte Steen</strong> (groene lijn). Loop <strong>tegen de klok in</strong> met de Ka\'ba aan je <strong>linkerhand</strong>.<br>Tussen <em>Rukn al-Yamani</em> en de Zwarte Steen zeg je: <em>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً</em>.',true,8000),700);
@@ -637,13 +640,29 @@ function makeOrbitCrowd(n){
   }
   return grp;
 }
-// floating dhikr text near the Ka'ba
-function textSprite(text,color){
-  const c=document.createElement('canvas'); c.width=512; c.height=160;
-  const x=c.getContext('2d'); x.font="bold 84px Amiri, serif"; x.textAlign='center'; x.textBaseline='middle';
-  x.shadowColor='rgba(0,0,0,.7)'; x.shadowBlur=10; x.fillStyle=color||'#f0d080'; x.fillText(text,256,84);
-  const t=new THREER.CanvasTexture(c); const m=new THREER.SpriteMaterial({map:t,transparent:true,depthWrite:false});
-  const s=new THREER.Sprite(m); s.scale.set(2.6,0.8,1); return s;
+// tekstlabel/sprite: dynamisch canvas, meerdere regels ('\n'), leesbaar paneel, crisp lettertype
+function textSprite(text,color,opts){
+  opts=opts||{};
+  const fs=opts.fontSize||74, padX=30, padY=18, lineH=Math.round(fs*1.24);
+  const lines=String(text).split('\n');
+  const meas=document.createElement('canvas').getContext('2d');
+  meas.font='bold '+fs+'px Amiri, serif';
+  let tw=0; lines.forEach(l=>{ tw=Math.max(tw, Math.ceil(meas.measureText(l).width)); });
+  const h=lines.length*lineH + padY*2;
+  const c=document.createElement('canvas'); c.width=tw+padX*2; c.height=h;
+  const x=c.getContext('2d');
+  if(opts.panel!==false){                                  // afgerond donker paneel → leesbaar tegen elke achtergrond
+    const rr=24, w=c.width; x.fillStyle='rgba(8,6,16,0.55)';
+    x.beginPath(); x.moveTo(rr,5); x.lineTo(w-rr,5); x.arcTo(w-5,5,w-5,rr,rr); x.lineTo(w-5,h-rr);
+    x.arcTo(w-5,h-5,w-rr,h-5,rr); x.lineTo(rr,h-5); x.arcTo(5,h-5,5,h-rr,rr); x.lineTo(5,rr); x.arcTo(5,5,rr,5,rr); x.closePath(); x.fill();
+    x.lineWidth=3; x.strokeStyle='rgba(201,168,76,0.5)'; x.stroke();
+  }
+  x.font='bold '+fs+'px Amiri, serif'; x.textAlign='center'; x.textBaseline='middle';
+  x.shadowColor='rgba(0,0,0,.85)'; x.shadowBlur=6; x.fillStyle=color||'#f0d080';
+  lines.forEach((l,i)=>{ x.fillText(l, c.width/2, padY + lineH*(i+0.5)); });
+  const t=new THREER.CanvasTexture(c); t.anisotropy=4;
+  const m=new THREER.SpriteMaterial({map:t,transparent:true,depthWrite:false});
+  const s=new THREER.Sprite(m); const sc=opts.h||0.85; s.scale.set(sc*c.width/h, sc, 1); return s;
 }
 function spawnDhikr(){ spawnDhikrAt(0,0); }
 function spawnDhikrAt(cx,cz){
@@ -654,7 +673,7 @@ function spawnDhikrAt(cx,cz){
 // rising, fading text at a world position
 function spawnTextAt(txt,x,y,z,color){
   if(!el('screen-game').classList.contains('active'))return;
-  const s=textSprite(txt,color); s.position.set(x,y,z); world.add(s);
+  const s=textSprite(txt,color,{panel:false}); s.position.set(x,y,z); world.add(s);
   let t=0; const iv=setInterval(()=>{ t+=0.03; s.position.y+=0.02; s.material.opacity=Math.max(0,0.95-t*0.85);
     if(t>1.15){ clearInterval(iv); world.remove(s); } },16);
 }

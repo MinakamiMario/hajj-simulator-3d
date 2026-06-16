@@ -139,13 +139,16 @@ function haramSurround(cx,cz,r){
     const pil=cyl(0.3,0.36,4.6,0xd9d2c2,{roughness:.9}); pil.position.set(px,2.3,pz); pil.castShadow=false; world.add(pil);
     const arch=sph(0.58,0xd9d2c2,{roughness:.9},10); arch.position.set(px,4.7,pz); arch.scale.set(1,0.7,1); arch.castShadow=false; world.add(arch);
   }
-  const beam=cyl(r+0.5,r+0.5,0.4,0xcfc8b6,{roughness:.95},48); beam.position.set(cx,5.1,cz); beam.castShadow=false; world.add(beam);
-  // tweede verdieping: kortere zuilen + dakrand
+  // dakrand als RING (open midden): de mataf rond de Ka'ba blijft open naar de hemel, geen dak boven het centrum
+  const beam=new THREER.Mesh(new THREER.RingGeometry(r-1.5,r+2.5,64), mat(0xcfc8b6,{roughness:.95,side:THREER.DoubleSide}));
+  beam.rotation.x=-Math.PI/2; beam.position.set(cx,5.1,cz); beam.castShadow=false; beam.receiveShadow=false; world.add(beam);
+  // tweede verdieping: kortere zuilen + dakrand (ook een ring)
   for(let i=0;i<nPil;i++){ const a=((i+0.5)/nPil)*Math.PI*2;
     const px=cx+Math.cos(a)*r, pz=cz+Math.sin(a)*r;
     const pil2=cyl(0.22,0.26,2.6,0xe2dccb,{roughness:.9}); pil2.position.set(px,6.6,pz); pil2.castShadow=false; world.add(pil2);
   }
-  const beam2=cyl(r+0.4,r+0.4,0.35,0xd6cfbc,{roughness:.95},48); beam2.position.set(cx,8.05,cz); beam2.castShadow=false; world.add(beam2);
+  const beam2=new THREER.Mesh(new THREER.RingGeometry(r-1.2,r+2,64), mat(0xd6cfbc,{roughness:.95,side:THREER.DoubleSide}));
+  beam2.rotation.x=-Math.PI/2; beam2.position.set(cx,8.05,cz); beam2.castShadow=false; beam2.receiveShadow=false; world.add(beam2);
   // buitenwand achter de arcade (ring van wandsegmenten met verlichte vensters)
   for(let i=0;i<24;i++){ const a=(i/24)*Math.PI*2;
     const w=box(((r+2.2)*2*Math.PI)/24+0.1,8.2,0.3,0xd3ccb9,{roughness:.95});
@@ -153,13 +156,9 @@ function haramSurround(cx,cz,r){
     const win=box(1.0,1.6,0.08,0x6a604a,{emissive:0xffd9a0,emissiveIntensity:.25});
     win.position.set(cx+Math.cos(a)*(r+2.0),5.6,cz+Math.sin(a)*(r+2.0)); win.rotation.y=-a+Math.PI/2; win.castShadow=false; world.add(win);
   }
-  // hoge minaretten met balkon en gouden spits
+  // hoge minaretten met balkon en gouden spits (GLTF-model met fallback)
   [[r+4,r+4],[-r-4,r+4],[r+4,-r-4],[-r-4,-r-4]].forEach(p=>{
-    const m=cyl(0.55,0.75,14,0xe6e0d0,{roughness:.9}); m.position.set(cx+p[0],7,cz+p[1]); m.castShadow=false; world.add(m);
-    const balc=cyl(0.95,0.95,0.35,0xd6cfbc,{roughness:.9},14); balc.position.set(cx+p[0],11.5,cz+p[1]); balc.castShadow=false; world.add(balc);
-    const top=cyl(0.4,0.55,2.4,0xe6e0d0,{roughness:.9}); top.position.set(cx+p[0],13.0,cz+p[1]); top.castShadow=false; world.add(top);
-    const tip=cyl(0.02,0.45,1.8,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(cx+p[0],15.2,cz+p[1]); tip.castShadow=false; world.add(tip);
-    const lamp=sph(0.22,0xffe6a0,{emissive:0xffd070,emissiveIntensity:1}); lamp.position.set(cx+p[0],12.2,cz+p[1]); world.add(lamp);
+    minaret(cx+p[0],cz+p[1],1);
   });
   // schijnwerpermasten
   [[0,r-2],[0,-r+2],[r-2,0],[-r+2,0]].forEach(p=>{
@@ -182,6 +181,27 @@ function rockAt(x,z,scale,y,col){
   if(m){ m.traverse(o=>{o.castShadow=false;}); return m; }
   const rk=sph(scale*0.9,col||0x8a7a64,{roughness:1},10); rk.position.set(x,(y||0)+scale*0.4,z);
   rk.scale.set(1.2,0.6,1.0); rk.rotation.y=Math.random()*3; rk.castShadow=false; world.add(rk); return rk;
+}
+// minaret (Haram/Nabawi/Namirah) — GLTF-model (~15 m) met procedurele fallback
+function minaret(x,z,s){
+  s=s||1;
+  // balkonlamp + sfeerlicht — altijd, los van het model
+  const lamp=sph(0.2*s,0xffe6a0,{emissive:0xffd070,emissiveIntensity:1},8); lamp.position.set(x,10.4*s,z); lamp.castShadow=false; world.add(lamp);
+  const pl=new THREER.PointLight(0xffe0a0,0.4,18); pl.position.set(x,10.4*s,z); world.add(pl);
+  if(Assets.spawn('minaret',x,z,s,0)) return;
+  // fallback: procedurele stapel
+  const m=cyl(0.55*s,0.75*s,14*s,0xe6e0d0,{roughness:.9}); m.position.set(x,7*s,z); m.castShadow=false; world.add(m);
+  const balc=cyl(0.95*s,0.95*s,0.35*s,0xd6cfbc,{roughness:.9},14); balc.position.set(x,11.5*s,z); balc.castShadow=false; world.add(balc);
+  const top=cyl(0.4*s,0.55*s,2.4*s,0xe6e0d0,{roughness:.9}); top.position.set(x,13.0*s,z); top.castShadow=false; world.add(top);
+  const tip=cyl(0.02,0.45*s,1.8*s,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(x,15.2*s,z); tip.castShadow=false; world.add(tip);
+}
+// hangende lantaarn (interieur/arcade) — GLTF-model met procedurele fallback; y = ophanghoogte van het oog
+function hangLantern(x,z,y,s){
+  s=s||1; y=(y!==undefined)?y:3.4;
+  const pl=new THREER.PointLight(0xffd98a,0.5,6); pl.position.set(x,y-0.5*s,z); world.add(pl);
+  // het ophangoog zit op +0.58 in het model; verschuif zodat het oog op y komt
+  if(Assets.spawn('lantern',x,z,s,0,y-0.58*s)) return;
+  const body=cyl(0.16*s,0.12*s,0.4*s,0xc9a84c,{emissive:0xffcc66,emissiveIntensity:1.0}); body.position.set(x,y-0.4*s,z); body.castShadow=false; world.add(body);
 }
 // hoge schijnwerpermast (Arafat/Mina)
 function lightMast(x,z){

@@ -93,15 +93,24 @@ function pilgrimMesh(col,skinCol){
     // beard on some men
     if(Math.random()<0.45){ const bd=sph(0.085,hairC,{roughness:.95},8); bd.position.set(0,1.6,-0.06); bd.scale.set(1.1,0.85,0.8); bd.castShadow=false; p.add(bd); }
   }
-  // arms with elbows + hands (animatable group)
+  // armen met schouder- én elleboog-gewricht (animeerbaar, natuurlijke rusthang)
   const arms=new THREER.Group(); p.add(arms); p.userData.arms=arms;
   [-1,1].forEach(s=>{
-    const ag=new THREER.Group(); ag.position.set(s*0.21,1.42,0); arms.add(ag);
-    const up=cyl(0.045,0.052,0.26,ihramStyle?sk:robeCol,{roughness:.85},8); up.position.y=-0.14; up.rotation.z=s*0.1; up.castShadow=false; ag.add(up);
-    const fo=cyl(0.038,0.045,0.24,ihramStyle?sk:robeCol,{roughness:.8},8); fo.position.set(s*0.035,-0.39,0); fo.castShadow=false; ag.add(fo);
-    const hand=sph(0.045,sk,{roughness:.6},6); hand.position.set(s*0.04,-0.53,0); hand.scale.set(0.9,1.1,0.7); hand.castShadow=false; ag.add(hand);
+    const ag=new THREER.Group(); ag.position.set(s*0.2,1.43,0); arms.add(ag);
+    ag.rotation.x=-0.1; ag.rotation.z=s*0.06;                              // schouder hangt ontspannen, iets naar voren
+    const up=cyl(0.045,0.052,0.26,ihramStyle?sk:robeCol,{roughness:.85},8); up.position.y=-0.13; up.castShadow=false; ag.add(up);
+    const el=new THREER.Group(); el.position.y=-0.27; ag.add(el); ag.userData.elbow=el;
+    el.rotation.x=0.2;                                                     // elleboog licht gebogen (niet kaarsrecht)
+    const fo=cyl(0.038,0.045,0.24,ihramStyle?sk:robeCol,{roughness:.8},8); fo.position.y=-0.12; fo.castShadow=false; el.add(fo);
+    const hand=sph(0.045,sk,{roughness:.6},6); hand.position.set(0,-0.26,0); hand.scale.set(0.9,1.1,0.7); hand.castShadow=false; el.add(hand);
   });
   return p;
+}
+// natuurlijke du'a-houding voor een omstander: bovenarmen iets vooruit, onderarmen omhoog
+function pilgrimDua(p){
+  const arms=p.userData&&p.userData.arms; if(!arms)return;
+  arms.rotation.x=0;
+  arms.children.forEach(ag=>{ ag.rotation.x=-0.6; if(ag.userData.elbow)ag.userData.elbow.rotation.x=1.65; });
 }
 function makeCrowd(n,cx,cz,spread,radial){
   const grp=new THREER.Group();

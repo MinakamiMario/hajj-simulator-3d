@@ -6,6 +6,12 @@
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8421"],
       "port": 8421
+    },
+    {
+      "name": "counting-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd '/Users/oussama/code/MyCountingApp' && npx expo start --web --port 8082"],
+      "port": 8082
     }
   ]
 }

@@ -1,2 +1,7 @@
 .DS_Store
 .vercel
+.claude/settings.json
+# narratie-audio: ruwe wav + tussenbestanden buiten git (we shippen .mp3)
+assets/audio/gids/*.wav
+assets/audio/gids/_seed.wav
+assets/audio/gids/_arabic_test/

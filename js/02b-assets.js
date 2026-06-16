@@ -15,6 +15,9 @@ const Assets = {
     rock2:   'assets/models/rock2.glb',
     rock3:   'assets/models/rock3.glb',
     nabawi_interior: 'assets/models/nabawi_interior.glb',
+    minaret: 'assets/models/minaret.glb',
+    tent:    'assets/models/tent.glb',
+    lantern: 'assets/models/lantern.glb',
   },
   cache: {}, started: false,
   preload(){

@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=5.2">
+<link rel="stylesheet" href="css/style.css?v=6.1">
 </head>
 <body>
 
@@ -75,6 +75,16 @@
     <span class="ba-letter">A</span><span class="ba-hint">actie</span>
   </button>
   <div id="vignette"></div>
+  <!-- REISBEGELEIDER: verhalende narratie tijdens het spelen -->
+  <div id="gids" class="gids">
+    <div class="gids-ic">🧭</div>
+    <div class="gids-body">
+      <div class="gids-name">Reisbegeleider</div>
+      <div class="gids-txt" id="gids-txt"></div>
+      <div class="gids-more" id="gids-more"></div>
+    </div>
+    <button class="gids-close" id="gids-close" title="Sluiten">✕</button>
+  </div>
   <div class="scene-title" id="scene-title"><div class="st-ar" id="st-ar"></div><div class="st-loc" id="st-loc"></div></div>
   <div id="fade"></div>
 </div>
@@ -115,20 +125,21 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="js/00-globals.js?v=5.2"></script>
-<script src="js/01-helpers.js?v=5.2"></script>
-<script src="js/02-gfx.js?v=5.2"></script>
-<script src="js/02b-assets.js?v=5.2"></script>
-<script src="js/03-avatar.js?v=5.2"></script>
-<script src="js/04-player.js?v=5.2"></script>
-<script src="js/05-zones.js?v=5.2"></script>
-<script src="js/06-ui.js?v=5.2"></script>
-<script src="js/07-env.js?v=5.2"></script>
-<script src="js/08-scenes-a.js?v=5.2"></script>
-<script src="js/09-scenes-b.js?v=5.2"></script>
-<script src="js/10-loader.js?v=5.2"></script>
-<script src="js/11-engine.js?v=5.2"></script>
-<script src="js/12-customize.js?v=5.2"></script>
-<script src="js/13-main.js?v=5.2"></script>
+<script src="js/00-globals.js?v=6.1"></script>
+<script src="js/01-helpers.js?v=6.1"></script>
+<script src="js/02-gfx.js?v=6.1"></script>
+<script src="js/02b-assets.js?v=6.1"></script>
+<script src="js/03-avatar.js?v=6.1"></script>
+<script src="js/04-player.js?v=6.1"></script>
+<script src="js/05-zones.js?v=6.1"></script>
+<script src="js/06-ui.js?v=6.1"></script>
+<script src="js/07-env.js?v=6.1"></script>
+<script src="js/08-scenes-a.js?v=6.1"></script>
+<script src="js/09-scenes-b.js?v=6.1"></script>
+<script src="js/10-loader.js?v=6.1"></script>
+<script src="js/11-engine.js?v=6.1"></script>
+<script src="js/12-customize.js?v=6.1"></script>
+<script src="js/13-main.js?v=6.1"></script>
+<script src="js/14-narration.js?v=6.1"></script>
 </body>
 </html>

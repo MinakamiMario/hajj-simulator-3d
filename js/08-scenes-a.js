@@ -239,6 +239,7 @@ SCENES.push({
   spawn:{x:0,z:10,face:Math.PI,bounds:{minX:-12,maxX:12,minZ:-2,maxZ:12}},
   light:{amb:0x3a3654,ambI:0.8,dir:0xd8b86a,dirI:0.7,sky:0x141030,exp:0.6},
   fog:{near:34,far:150},
+  cam:{dist:9.5,height:3.6,pitch:0.34},                 // ruim uitgezoomd: hele Ka'ba in beeld
   build(){
     groundTex(texMarble(34),150,0xf0e8d6);
     kaaba(0,-3);
@@ -262,6 +263,7 @@ SCENES.push({
   spawn:{x:5,z:0,face:-Math.PI/2,bounds:{minX:-11,maxX:11,minZ:-11,maxZ:11}},
   light:{amb:0x3a3654,ambI:0.8,dir:0xd8b86a,dirI:0.7,sky:0x141030,exp:0.6},
   fog:{near:34,far:150},
+  cam:{dist:9,height:3.4,pitch:0.32},                   // uitgezoomd zodat Ka'ba + hoeklabels leesbaar blijven
   build(){ tawafScene();
     // Maqam Ibrahim: 2 rak'ah na de tawaf (optioneel, educatief)
     const maqam=box(0.5,0.9,0.5,0xc9a84c,{metalness:.5,roughness:.3,emissive:0x5a4410,emissiveIntensity:.4}); maqam.position.set(2.2,0.45,5.6); world.add(maqam);
@@ -321,7 +323,7 @@ SCENES.push({
       const tube=cyl(0.07,0.07,1.2,0x6affa0,{emissive:0x35e070,emissiveIntensity:1.6}); tube.rotation.x=Math.PI/2; tube.position.set(gx,2.45,s*1.2); world.add(tube);
       const gl=new THREER.PointLight(0x57f08a,0.7,6); gl.position.set(gx,2.4,s*1.2); world.add(gl);
     }); });
-    const greenLbl=textSprite('🟩 groene lichten','#9af0b4'); greenLbl.position.set(0,3.0,0); greenLbl.scale.set(3.2,1,1); world.add(greenLbl);
+    const greenLbl=textSprite('🟩 groene lichten','#9af0b4',{h:0.7}); greenLbl.position.set(0,3.0,0); world.add(greenLbl);
     // floating duas + fellow pilgrims walking back and forth (human-sized)
     everyMs(()=>spawnDhikrAt(0,0),2600);
     State.sai=0; State.saiLast=null; State.saiSimOffered=false;

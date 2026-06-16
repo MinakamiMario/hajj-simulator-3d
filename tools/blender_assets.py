@@ -44,6 +44,20 @@ def cyl(name, r, h, loc, material, verts=32):
     bpy.ops.object.shade_smooth()
     return o
 
+def cone(name, r1, r2, h, loc, material, verts=8):
+    bpy.ops.mesh.primitive_cone_add(radius1=r1, radius2=r2, depth=h, location=loc, vertices=verts)
+    o = bpy.context.active_object; o.name = name
+    o.data.materials.append(material)
+    bpy.ops.object.shade_smooth()
+    return o
+
+def sphere(name, r, loc, material, segs=24, rings=12):
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=r, location=loc, segments=segs, ring_count=rings)
+    o = bpy.context.active_object; o.name = name
+    o.data.materials.append(material)
+    bpy.ops.object.shade_smooth()
+    return o
+
 def export(objs, filename):
     bpy.ops.object.select_all(action='DESELECT')
     for o in objs: o.select_set(True)
@@ -282,11 +296,90 @@ def build_nabawi_interior():
                                   export_apply=True, export_yup=True)
     print('  EXPORT %-16s %6.1f kB' % ('nabawi_interior.glb', os.path.getsize(path) / 1024))
 
+# ---------------- MINARET (zandsteen schacht + balkon + uienkap + spits) ----------------
+def build_minaret():
+    reset(); M = materials()
+    sand  = mat('msand',  (0.90, 0.86, 0.74), 0.0, 0.7)
+    sand2 = mat('msand2', (0.82, 0.77, 0.64), 0.0, 0.75)
+    gold  = M['gold']
+    green = mat('mgreen', (0.07, 0.42, 0.22), 0.1, 0.5)
+    P = []
+    P.append(box('plinth', 1.3, 1.3, 0.5, (0, 0, 0.25), sand2))            # plint
+    P.append(box('mbase', 1.0, 1.0, 1.2, (0, 0, 1.1), sand))               # vierkante voet
+    P.append(cone('shaft', 0.62, 0.40, 8.4, (0, 0, 5.9), sand, 8))         # taps achthoekige schacht z1.7..10.1
+    P.append(cyl('balcrail', 0.96, 0.07, (0, 0, 10.0), gold, 12))          # gouden balkonrand
+    P.append(cyl('balcony', 0.92, 0.45, (0, 0, 10.25), sand2, 12))         # muezzin-balkon
+    P.append(cone('drum', 0.42, 0.34, 1.8, (0, 0, 11.9), sand, 8))         # bovenste drum z11.0..12.8
+    cap = sphere('cap', 0.5, (0, 0, 13.2), green, 16, 10)                  # groene uienkap
+    cap.scale = (0.95, 0.95, 1.5)
+    bpy.context.view_layer.objects.active = cap
+    bpy.ops.object.select_all(action='DESELECT'); cap.select_set(True)
+    bpy.ops.object.transform_apply(scale=True)
+    P.append(cap)
+    P.append(cone('spire', 0.11, 0.0, 0.9, (0, 0, 14.5), gold, 8))         # gouden spits
+    P.append(sphere('finbulb', 0.14, (0, 0, 14.6), gold, 12, 8))           # bol aan de voet van de spits
+    export(P, 'minaret.glb')
+
+# ---------------- MINA-TENT (witte piramidetent met groene zoom) ----------------
+def build_tent():
+    reset()
+    white  = mat('twhite',  (0.94, 0.92, 0.86), 0.0, 0.6)
+    white2 = mat('twhite2', (0.86, 0.83, 0.75), 0.0, 0.7)
+    green  = mat('tgreen',  (0.13, 0.45, 0.27), 0.1, 0.5)
+    sand   = mat('tsand',   (0.78, 0.70, 0.52), 0.0, 0.8)
+    dark   = mat('tdark',   (0.18, 0.14, 0.11), 0.0, 0.8)
+    P = []
+    P.append(box('walls', 2.3, 2.3, 0.6, (0, 0, 0.3), white2))             # lage wanden
+    for sx, sy, w, d in [(0, 1.15, 2.42, 0.12), (0, -1.15, 2.42, 0.12),
+                         (1.15, 0, 0.12, 2.42), (-1.15, 0, 0.12, 2.42)]:
+        P.append(box('trim', w, d, 0.13, (sx, sy, 0.6), green))            # groene daklijn-zoom
+    roof = cone('roof', 1.63, 0.0, 1.3, (0, 0, 1.25), white, 4)            # 4-zijdig piramidedak z0.6..1.9
+    roof.rotation_euler = (0, 0, math.radians(45))
+    bpy.context.view_layer.objects.active = roof
+    bpy.ops.object.select_all(action='DESELECT'); roof.select_set(True)
+    bpy.ops.object.transform_apply(rotation=True)
+    P.append(roof)
+    P.append(cyl('pole', 0.05, 0.3, (0, 0, 2.0), sand, 6))                 # nokpaaltje
+    P.append(sphere('knob', 0.1, (0, 0, 2.2), white, 10, 6))              # knop
+    P.append(box('door', 0.55, 0.06, 0.78, (0, -1.16, 0.39), dark))       # donkere ingang op -Y
+    export(P, 'tent.glb')
+
+# ---------------- HANG-LANTAARN (zeshoekige messing kooi + warm glas) ----------------
+def build_lantern():
+    reset(); M = materials()
+    gold  = M['gold']
+    glass = mat('lglass', (1.0, 0.80, 0.42), 0.0, 0.3, emiss=(1.0, 0.78, 0.40), emiss_str=3.0)
+    P = []
+    P.append(cyl('glassbody', 0.22, 0.42, (0, 0, 0.0), glass, 6))          # zeshoekig glas-corpus
+    P.append(cyl('ringB', 0.24, 0.05, (0, 0, -0.22), gold, 6))             # gouden onderring
+    P.append(cyl('ringT', 0.20, 0.05, (0, 0, 0.22), gold, 6))             # gouden bovenring
+    for i in range(6):                                                     # verticale gouden ribben
+        a = i / 6 * 2 * math.pi
+        P.append(box('rib', 0.03, 0.03, 0.46, (math.cos(a) * 0.21, math.sin(a) * 0.21, 0.0), gold))
+    P.append(sphere('finial', 0.09, (0, 0, -0.30), gold, 10, 6))           # onderfinial
+    P.append(cone('fintip', 0.05, 0.0, 0.12, (0, 0, -0.40), gold, 6))
+    P.append(cone('neck', 0.18, 0.07, 0.22, (0, 0, 0.36), gold, 6))        # bovenhals
+    bpy.ops.mesh.primitive_torus_add(location=(0, 0, 0.56), major_radius=0.06, minor_radius=0.018,
+                                     major_segments=12, minor_segments=6)
+    hook = bpy.context.active_object; hook.name = 'hook'
+    hook.data.materials.append(gold); bpy.ops.object.shade_smooth()
+    P.append(hook)                                                         # ophangoog bovenaan
+    export(P, 'lantern.glb')
+
 if __name__ == '__main__':
-    print('Blender-assets bouwen ->', os.path.abspath(OUT))
-    build_kaaba()
-    build_dome()
-    build_arch()
-    build_rocks()
-    build_nabawi_interior()
+    import sys
+    argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
+    ALL = {
+        'kaaba': build_kaaba, 'dome': build_dome, 'arch': build_arch,
+        'rocks': build_rocks, 'interior': build_nabawi_interior,
+        'minaret': build_minaret, 'tent': build_tent, 'lantern': build_lantern,
+    }
+    targets = argv if argv else list(ALL.keys())
+    print('Blender-assets bouwen ->', os.path.abspath(OUT), '| targets:', targets)
+    for t in targets:
+        fn = ALL.get(t)
+        if fn:
+            print('>>', t); fn()
+        else:
+            print('?? onbekend target:', t)
     print('klaar')

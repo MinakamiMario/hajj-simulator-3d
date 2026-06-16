@@ -61,6 +61,7 @@ function loadScene(id){
   const AMBIENTS=['night','outdoor','plane','crowd','crowd','crowd','outdoor','night','crowd','outdoor','crowd','crowd','crowd','outdoor','outdoor'];
   Sound.setAmbient(AMBIENTS[id]||null);
   updateHUD(s); setTask(s);
+  if(typeof Gids!=='undefined') Gids.start(typeof NARRATION!=='undefined'?NARRATION[id]:null);   // reisbegeleider-narratie
 }
 
 // ============================================================

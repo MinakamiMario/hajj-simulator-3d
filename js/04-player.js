@@ -55,7 +55,7 @@ const Player = {
   },
   // ---- animatie-engine: doelhoudingen + vloeiend blenden ----
   _bl:null,
-  _resetBlend(){ this._bl={legL:0,legR:0,kneeL:0,kneeR:0,armLx:0,armRx:0,armLz:0,armRz:0,elbL:0,elbR:0,bodyY:0,bodyRz:0,bodyRy:0,bodyRx:0,rootY:0}; },
+  _resetBlend(){ this._bl={legL:0,legR:0,kneeL:0,kneeR:0,armLx:0,armRx:0,armLz:0,armRz:0,elbL:0,elbR:0,footL:0,footR:0,bodyY:0,bodyRz:0,bodyRy:0,bodyRx:0,rootY:0}; },
   animate(dt){
     if(!this.obj)return;
     const pa=this.obj.userData.parts;
@@ -75,16 +75,16 @@ const Player = {
         } else this._salatEnter(sl.tl[sl.idx].st);
       }
       const st=this.salat ? this.salat.tl[this.salat.idx].st : 'qiyam';
-      const KNEEL={legL:-1.35,legR:-1.35,kneeL:2.4,kneeR:2.4};   // zittend op de hielen
+      const KNEEL={legL:-1.5,legR:-1.5,kneeL:2.7,kneeR:2.7};        // zittend op de hielen, schenen onder het lichaam
       const P={
         qiyam:    {armLx:-1.25,armRx:-1.25,elbL:1.4,elbR:1.4,armLz:-0.12,armRz:0.12},
-        ruku:     {bodyRx:-0.92,armLx:-0.5,armRx:-0.5,elbL:0.05,elbR:0.05,kneeL:0.12,kneeR:0.12},
+        ruku:     {bodyRx:-1.45,armLx:-0.2,armRx:-0.2,elbL:0.1,elbR:0.1,kneeL:0.15,kneeR:0.15},   // rug horizontaal, handen naar de knieën
         itidal:   {elbL:0.12,elbR:0.12},
-        sujud:    Object.assign({rootY:-0.5,bodyRx:-1.32,armLx:-0.3,armRx:-0.3,elbL:0.35,elbR:0.35},KNEEL),
-        julus:    Object.assign({rootY:-0.6,bodyRx:-0.06,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
-        tashahhud:Object.assign({rootY:-0.6,bodyRx:-0.06,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
-        salamR:   Object.assign({rootY:-0.6,bodyRx:-0.05,bodyRy:-0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
-        salamL:   Object.assign({rootY:-0.6,bodyRx:-0.05,bodyRy:0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        sujud:    Object.assign({rootY:-0.42,bodyRx:-1.48,armLx:-0.15,armRx:-0.15,elbL:0.55,elbR:0.55},KNEEL),  // knieën onder, voorhoofd net boven de grond
+        julus:    Object.assign({rootY:-0.45,bodyRx:-0.05,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        tashahhud:Object.assign({rootY:-0.45,bodyRx:-0.05,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        salamR:   Object.assign({rootY:-0.45,bodyRx:-0.05,bodyRy:-0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
+        salamL:   Object.assign({rootY:-0.45,bodyRx:-0.05,bodyRy:0.62,armLx:-0.55,armRx:-0.55,elbL:0.85,elbR:0.85},KNEEL),
       }[st]||{};
       for(const k in b) t[k]=0;
       Object.assign(t,P);
@@ -107,12 +107,14 @@ const Player = {
       const amp=this.running?1.2:1;
       t.legL=S*0.5*amp;             t.legR=-S*0.5*amp;
       t.kneeL=lift(-C)*0.7*amp;     t.kneeR=lift(C)*0.7*amp;             // knie buigt in de zwaaifase
-      t.armLx=-S*0.26*amp;          t.armRx=S*0.26*amp;                  // rustiger armzwaai vanuit de schouder
-      t.elbL=0.2+lift(S)*0.22;      t.elbR=0.2+lift(-S)*0.22;            // elleboog veert licht mee
+      // enkel houdt de voet vlakker → standvoet glijdt niet, zwaaivoet heft de teen (hiel-af)
+      t.footL=-t.legL*0.55 + lift(-C)*0.3*amp;   t.footR=-t.legR*0.55 + lift(C)*0.3*amp;
+      t.armLx=-S*0.30*amp;          t.armRx=S*0.30*amp;                  // armzwaai vanuit de schouder
+      t.elbL=0.2+lift(S)*0.24;      t.elbR=0.2+lift(-S)*0.24;            // elleboog veert licht mee
       t.armLz=-0.06; t.armRz=0.06;                                      // armen blijven dicht langs het lichaam
-      t.bodyY=Math.abs(S)*0.045*amp;
-      t.bodyRz=S*0.035;                                                  // heupzwaai
-      t.bodyRy=S*0.06;                                                   // schouders draaien licht tegen
+      t.bodyY=Math.abs(S)*0.05*amp;
+      t.bodyRz=S*0.045;                                                  // heupzwaai
+      t.bodyRy=S*0.07;                                                   // schouders draaien licht tegen
     } else {
       const br=Math.sin(now*1.7);                                        // idle: ademen + microbeweging
       t.legL=0; t.legR=0; t.kneeL=0.04; t.kneeR=0.04;
@@ -121,17 +123,19 @@ const Player = {
       t.bodyY=br*0.012; t.bodyRz=0; t.bodyRy=Math.sin(now*0.6)*0.02;
     }
     // 2) blend huidig → doel
+    if(t.footL===undefined){ t.footL=0; t.footR=0; }      // enkel terug naar neutraal buiten het lopen
     const k=Math.min(1,dt*(this.moving?14:7));
     for(const key in t) b[key]+= (t[key]-b[key])*k;
     // 3) pas toe op het skelet
     pa.legL.rotation.x=b.legL;   pa.legR.rotation.x=b.legR;
     if(pa.kneeL){ pa.kneeL.rotation.x=b.kneeL; pa.kneeR.rotation.x=b.kneeR; }
+    if(pa.footL){ pa.footL.rotation.x=b.footL; pa.footR.rotation.x=b.footR; }
     pa.armL.rotation.x=b.armLx;  pa.armR.rotation.x=b.armRx;
     pa.armL.rotation.z=b.armLz;  pa.armR.rotation.z=b.armRz;
     if(pa.elbL){ pa.elbL.rotation.x=b.elbL; pa.elbR.rotation.x=b.elbR; }
     pa.body.rotation.z=b.bodyRz; pa.body.rotation.y=b.bodyRy;
     // buigen (ruku/sujud) om een HEUP-scharnier: romp kantelt, heupen blijven boven de voeten
-    const hipH=0.45;
+    const hipH=0.62;
     pa.body.rotation.x=b.bodyRx;
     pa.body.position.y=b.bodyY + hipH*(1-Math.cos(b.bodyRx));
     pa.body.position.z=-hipH*Math.sin(b.bodyRx);

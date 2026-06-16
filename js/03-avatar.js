@@ -56,27 +56,29 @@ function makeAvatar(o){
   function leg(side){
     const lg=new THREER.Group(); lg.position.set(side*0.075,0.95,0);
     const kn=new THREER.Group(); kn.position.y=-0.47; lg.add(kn);              // KNIE-gewricht
+    const ak=new THREER.Group(); ak.position.y=-0.40; kn.add(ak);             // ENKEL-gewricht (voet plant vlak → geen voet-slip)
     if(ihram){
       const jb=sph(0.06,skin,skinM,10); kn.add(jb);
       const calf=cyl(0.048,0.062,0.36,skin,skinM,14); calf.position.y=-0.2; kn.add(calf);
-      const sole=box(0.115,0.03,0.27,0x5a4630); sole.position.set(0,-0.455,0.04); kn.add(sole);
-      const foot=sph(0.062,skin,skinM,10); foot.position.set(0,-0.42,0.05); foot.scale.set(.85,.5,1.5); kn.add(foot);
-      const strap=box(0.12,0.018,0.045,0x3c2e1e); strap.position.set(0,-0.405,0.09); kn.add(strap);
+      const sole=box(0.115,0.03,0.27,0x5a4630); sole.position.set(0,-0.055,0.04); ak.add(sole);
+      const foot=sph(0.062,skin,skinM,10); foot.position.set(0,-0.02,0.05); foot.scale.set(.85,.5,1.5); ak.add(foot);
+      const strap=box(0.12,0.018,0.045,0x3c2e1e); strap.position.set(0,-0.005,0.09); ak.add(strap);
     } else if(o.outfit==='casual' && gender==='male' && !ihram){
       const thigh=cyl(0.073,0.095,0.46,pantCol,clothM,14); thigh.position.y=-0.235; lg.add(thigh);
       const jb=sph(0.072,pantCol,clothM,10); kn.add(jb);
       const shin=cyl(0.06,0.073,0.4,pantCol,clothM,14); shin.position.y=-0.21; kn.add(shin);
-      const shoe=box(0.125,0.075,0.26,0x2a1c14); shoe.position.set(0,-0.445,0.035); kn.add(shoe);
-      const toe=sph(0.06,0x2a1c14,{roughness:.55},8); toe.position.set(0,-0.435,0.15); toe.scale.set(.95,.6,1); kn.add(toe);
+      const shoe=box(0.125,0.075,0.26,0x2a1c14); shoe.position.set(0,-0.045,0.035); ak.add(shoe);
+      const toe=sph(0.06,0x2a1c14,{roughness:.55},8); toe.position.set(0,-0.035,0.15); toe.scale.set(.95,.6,1); ak.add(toe);
     } else {
       const shin=cyl(0.04,0.048,0.42,pantCol,clothM,10); shin.position.y=-0.2; kn.add(shin);
-      const shoe=box(0.115,0.07,0.24,gender==='female'?0x1c1418:0x2a1c14); shoe.position.set(0,-0.44,0.03); kn.add(shoe);
+      const shoe=box(0.115,0.07,0.24,gender==='female'?0x1c1418:0x2a1c14); shoe.position.set(0,-0.04,0.03); ak.add(shoe);
     }
-    lg.userData.knee=kn;
+    lg.userData.knee=kn; lg.userData.ankle=ak;
     g.add(lg); return lg;
   }
   parts.legL=leg(1); parts.legR=leg(-1);
   parts.kneeL=parts.legL.userData.knee; parts.kneeR=parts.legR.userData.knee;
+  parts.footL=parts.legL.userData.ankle; parts.footR=parts.legR.userData.ankle;
 
   // ===== HALS + HOOFD (schoon: features liggen óp het hoofd) =====
   const neck=cyl(0.054,0.068,0.15,skin,skinM,14); neck.position.y=1.8; bodyG.add(neck);

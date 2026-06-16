@@ -162,7 +162,9 @@ function minaTentField(cx,cz,rows,cols,gap){
   for(let r=0;r<rows;r++){ for(let c2=0;c2<cols;c2++){
     const tx=cx+(c2-cols/2)*(gap||2.4)+(Math.random()-.5)*.4;
     const tz=cz-r*(gap||2.4)+(Math.random()-.5)*.4;
-    const t=cyl(0.55,1.05,1.15,0xf3efe4,{roughness:1},4); t.rotation.y=Math.PI/4;
+    const ry=Math.floor(Math.random()*4)*Math.PI/2;
+    if(Assets.spawn('tent',tx,tz,0.85,ry)) continue;                 // GLTF-tent (witte piramidetent)
+    const t=cyl(0.55,1.05,1.15,0xf3efe4,{roughness:1},4); t.rotation.y=Math.PI/4;  // procedurele fallback
     t.position.set(tx,0.57,tz); t.castShadow=false; t.receiveShadow=false; grp.add(t);
   } }
   world.add(grp); return grp;
