@@ -17,6 +17,7 @@ const Game={
   restart(){ Object.assign(State,{scene:0,packed:0,ihrSteps:0,stonesCol:0,stonesThrown:0,tawaf:0,sai:0,saiLast:null,tawafAngle:0,tawafAccum:0,sabr:0,angryDone:false,saiHelpDone:false,quiz:0,quizTotal:0,zamzamDone:false,maqamDone:false,hadiDone:false,medinaChosen:undefined,medinaDone:false,rawdaDone:false,salamDone:false,qubaDone:false,duas:{},zamzamBottle:false,sharedZamzam:false,gaveZamzam:false});
     Object.values(QUIZZES).forEach(q=>delete q.asked);
     Sound.stopAmbient();
+    if(window.Recite)Recite.stopAll();
     encounter=null; paused=false;
     Char.ihram=false; Char.hair='full';
     showScreen('screen-intro'); },

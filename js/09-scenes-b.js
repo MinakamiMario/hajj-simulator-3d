@@ -14,35 +14,35 @@ SCENES.push({
   build(){
     groundTex(texSand(30),160);
     // ===== JABAL AL-RAHMA: beklimbare granietheuvel met witte obelisk =====
-    const HILL={x:0,z:-13,r:8.8,h:4.4};
+    const HILL={x:0,z:-13,r:9.0,h:7.5};         // forse, beklimbare granietberg (Jabal al-Rahma) — zuidvoet als origineel (camera vrij)
     const terr=(x,z)=>{ const d=Math.hypot(x-HILL.x,z-HILL.z); if(d>=HILL.r)return 0;
       const t=1-d/HILL.r; return HILL.h*t*t*(3-2*t); };          // glad koepelprofiel
     terrainFn=terr;
     // heuvel-mesh die exact het loopprofiel volgt (lathe van hetzelfde profiel)
     const pts=[]; for(let i=16;i>=0;i--){ const rr=HILL.r*i/16; pts.push(new THREER.Vector2(rr,terr(HILL.x+rr,HILL.z))); }
-    const hillM=new THREER.Mesh(new THREER.LatheGeometry(pts,40), mat(0x84745e,{roughness:1}));
+    const hillM=new THREER.Mesh(new THREER.LatheGeometry(pts,40), mat(0x6b6055,{roughness:1}));   // granietgrijs (steekt af tegen het zand)
     hillM.position.set(HILL.x,0,HILL.z); hillM.receiveShadow=true; hillM.castShadow=false; world.add(hillM);
     // granietblokken op de flanken — solide, en het trappad blijft vrij
-    for(let i=0;i<16;i++){ const a=Math.random()*Math.PI*2, rr=1.5+Math.random()*(HILL.r-1.2);
+    for(let i=0;i<42;i++){ const a=Math.random()*Math.PI*2, rr=1.4+Math.random()*(HILL.r-1.0);
       const bx=HILL.x+Math.cos(a)*rr, bz=HILL.z+Math.sin(a)*rr;
-      if(bz>HILL.z+HILL.r*0.88) continue;                         // zuidkant open
-      if(Math.abs(bx)<1.8 && bz>HILL.z-1) continue;               // corridor van het trappad
-      const rad=0.9+Math.random()*1.4;
-      rockAt(bx,bz,rad,terr(bx,bz)*0.8);
+      if(bz>HILL.z+HILL.r*0.90) continue;                         // zuidkant (toegang) open
+      if(Math.abs(bx)<1.9 && bz>HILL.z-1) continue;               // corridor van het trappad vrij
+      const rad=1.0+Math.random()*2.0;                            // grotere granietblokken → ruwer, rotsiger silhouet
+      rockAt(bx,bz,rad,terr(bx,bz)*0.85);
       colliders.push({minX:bx-rad*0.7,maxX:bx+rad*0.7,minZ:bz-rad*0.7,maxZ:bz+rad*0.7});
     }
     // trappad van de voet naar de top (lichtere steenplaten)
-    for(let i=0;i<=11;i++){ const pz=HILL.z+HILL.r-0.4 - i*((HILL.r-0.6)/11);
+    for(let i=0;i<=17;i++){ const pz=HILL.z+HILL.r-0.4 - i*((HILL.r-0.6)/17);
       const st=box(1.7,0.14,0.8,0xc4b496,{roughness:.95}); st.position.set(0,terr(0,pz)+0.05,pz);
       st.rotation.x=-0.1; st.castShadow=false; world.add(st); }
     // witte obelisk op de top (het herkenningspunt van Arafat)
     const topY=terr(HILL.x,HILL.z);
-    const plat=cyl(1.7,2.0,0.5,0xd8cdb4,{roughness:.9},14); plat.position.set(HILL.x,topY+0.2,HILL.z); plat.castShadow=false; world.add(plat);
-    const obelisk=box(0.85,3.6,0.85,0xf2efe6,{roughness:.7,emissive:0x55503e,emissiveIntensity:.25});
-    obelisk.position.set(HILL.x,topY+2.3,HILL.z); world.add(obelisk);
+    const plat=cyl(2.0,2.4,0.6,0xd8cdb4,{roughness:.9},16); plat.position.set(HILL.x,topY+0.25,HILL.z); plat.castShadow=false; world.add(plat);
+    const obelisk=box(0.9,4.6,0.9,0xf2efe6,{roughness:.7,emissive:0x55503e,emissiveIntensity:.25});
+    obelisk.position.set(HILL.x,topY+2.9,HILL.z); world.add(obelisk);
     colliders.push({minX:HILL.x-0.7,maxX:HILL.x+0.7,minZ:HILL.z-0.7,maxZ:HILL.z+0.7});
     camOccluders.push(obelisk);
-    const obLbl=textSprite('جَبَل الرَّحمَة — Jabal al-Rahma','#ffe2a0',{h:1.05}); obLbl.position.set(HILL.x,topY+5.4,HILL.z); world.add(obLbl);
+    const obLbl=textSprite('جَبَل الرَّحمَة — Jabal al-Rahma','#ffe2a0',{h:1.05}); obLbl.position.set(HILL.x,topY+6.8,HILL.z); world.add(obLbl);
     // pelgrims op de flanken, handen geheven in du'a
     for(let i=0;i<9;i++){ const a=(i/9)*Math.PI*2+0.3, rr=2.2+Math.random()*4.5;
       const px2=HILL.x+Math.cos(a)*rr, pz2=HILL.z+Math.sin(a)*rr;
@@ -172,7 +172,9 @@ SCENES.push({
     everyMs(()=>spawnTextAt('اللّٰهُ أَكبَر',(Math.random()-.5)*5,2.2,1+Math.random()*3),3200);
     State.stonesThrown=0;
     Zone.add({ id:'throw', x:0, z:1.6, r:1.6, icon:'💎', label:'Gooi steen', noConsume:true, guide:true,
-      action:(z)=>{ if(State.stonesThrown>=7)return; State.stonesThrown++; if(State.stonesThrown===1)learnDua('takbir'); setProgress(`💎 ${State.stonesThrown}/7 gegooid`);
+      action:(z)=>{ if(State.stonesThrown>=7)return; State.stonesThrown++;
+        if(State.stonesThrown===1){ learnDua('takbir'); if(window.Recite)Recite.stopTalbiya(); }   // Talbiya stopt bij de eerste worp op Jamrat al-Aqaba
+        setProgress(`💎 ${State.stonesThrown}/7 gegooid`);
         throwStone(Player.x,Player.z,0,-2.5);
         spawnTextAt('اللّٰهُ أَكبَر',Player.x,2.3,Player.z-0.5);
         if(State.stonesThrown>=7){ Zone.markDone(z); showFeedback('✅ Allahu Akbar! De shaytaan is symbolisch verdreven.',true,4000); showNextBtn('Naar de kapper →'); } }});
@@ -606,9 +608,14 @@ function tawafScene(){
   sceneTimeout(()=>showFeedback('🟢 Begin bij de <strong>Zwarte Steen</strong> (groene lijn). Loop <strong>tegen de klok in</strong> met de Ka\'ba aan je <strong>linkerhand</strong>.<br>Tussen <em>Rukn al-Yamani</em> en de Zwarte Steen zeg je: <em>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً</em>.',true,8000),700);
   everyMs(spawnDhikr,2200);
   sceneTimeout(angryEncounter,9000);
+  let rabbanaSeg=false;
   frameHook=()=>{
     const a=Math.atan2(Player.z,Player.x);
     if(State.tawafAngle===null){ State.tawafAngle=a; return; }
+    // Rabbana atina klinkt tussen Rukn al-Yamani (~45°) en de Zwarte Steen (0°) — op de juiste plek
+    const inSeg=(a>0.04 && a<0.80);
+    if(inSeg){ if(!rabbanaSeg){ rabbanaSeg=true; if(window.Recite)Recite.duaHere('rabbana',0.7); } }
+    else rabbanaSeg=false;
     let d=a-State.tawafAngle;
     if(d>Math.PI)d-=Math.PI*2; if(d<-Math.PI)d+=Math.PI*2;
     State.tawafAccum+=d; State.tawafAngle=a;

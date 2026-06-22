@@ -219,7 +219,9 @@ SCENES.push({
     function seatedNiyyah(){ openChoice({ ar:'النِّيَّة', sub:'Gezeten in je stoel', txt:'Maak nu je <strong>Niyyah</strong> (intentie) voor de Hajj.',
       choices:[{txt:'🤲 Spreek de Niyyah uit', action:()=>{ Sound.success(); showFeedback('✅ "Labbayka Allahumma Hajjan." Je intentie is gemaakt.',true,3000); setTimeout(seatedTalbiyah,1100); }}]}); }
     function seatedTalbiyah(){ openChoice({ ar:'التَّلبِية', sub:'', txt:'Spreek de <strong>Talbiyah</strong> uit:<br><br><em>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</em><br>"Hier ben ik, o Allah, hier ben ik."',
-      choices:[{txt:'🗣️ Spreek de Talbiyah', action:()=>{ Sound.success(); learnDua('talbiyah'); showFeedback('✅ Labbayka Allahumma labbayk! Je bent nu in staat van Ihraam. ✈️',true,4000); showNextBtn('Aankomst Mekka →'); }}]}); }
+      choices:[{txt:'🗣️ Spreek de Talbiyah', action:()=>{ Sound.success(); learnDua('talbiyah');
+        if(window.Recite)Recite.startTalbiya();                 // vanaf nu klinkt de Talbiya zacht mee (staat van ihraam)
+        showFeedback('✅ Labbayka Allahumma labbayk! Je bent nu in staat van Ihraam. ✈️',true,4000); showNextBtn('Aankomst Mekka →'); }}]}); }
     function sitDown(){ const sz2=Zone.list.find(q=>q.id==='seat'); if(sz2&&!sz2.done)Zone.markDone(sz2);
       Player.x=sx; Player.z=sz; Player.faceY=Math.PI; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
       Cam.yaw=Math.PI; Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }

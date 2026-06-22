@@ -60,6 +60,7 @@ function loadScene(id){
   showSceneTitle(s);
   const AMBIENTS=['night','outdoor','plane','crowd','crowd','crowd','outdoor','night','crowd','outdoor','crowd','crowd','crowd','outdoor','outdoor'];
   Sound.setAmbient(AMBIENTS[id]||null);
+  if(typeof Recite!=='undefined') Recite.onScene(id);   // klas-recitaties (Talbiya/Adhan/Rabbana)
   updateHUD(s); setTask(s);
   if(typeof Checklist!=='undefined') Checklist.build(id);   // per-scène afvinklijst (uit Zone.done + State)
   if(typeof Gids!=='undefined') Gids.start(typeof NARRATION!=='undefined'?NARRATION[id]:null);   // reisbegeleider-narratie
@@ -69,6 +70,7 @@ function loadScene(id){
 //  ENDING
 // ============================================================
 function renderEnding(){
+  if(typeof Recite!=='undefined') Recite.stopAll();   // recitaties stoppen bij het eindscherm
   const items=['Niyyah gemaakt','Koffer gepakt','Ihraam aangenomen',"Ka'ba gezien",'Tawaf (7 rondjes)',
     "2 rak'ah bij Maqam Ibrahim"+(State.zamzamDone?' + Zamzam':''),
     "Sa'i (Safa–Marwa)",'Wuquf op Arafat','Nacht in Muzdalifah','7 steentjes geraapt',
