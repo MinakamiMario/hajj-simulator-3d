@@ -11,7 +11,7 @@ function makeAvatar(o){
   const hairCol=o.hairColor!==undefined?o.hairColor:0x1a0e08;
   const shaved=o.shaved||'none';
   const white=0xf7f4ec;
-  const bw=o.build==='slank'?0.92:(o.build==='breed'?1.12:1);
+  const bw=o.build==='slank'?0.82:(o.build==='breed'?1.24:1);   // postuur: duidelijk zichtbaar verschil
   const hf=o.height==='klein'?0.94:(o.height==='lang'?1.06:1);
   const g=new THREER.Group(); g.userData.baseScale=hf;
   const parts={};
@@ -147,7 +147,14 @@ function makeAvatar(o){
         const backM=sph(0.13,hairCol,hairM,16); backM.position.set(0,headY-0.02,0.105); backM.scale.set(1.15,0.95,0.7); bodyG.add(backM);
       }
       if(style==='long'){
-        const fall2=lathe([[0.06,headY-0.52],[0.15,headY-0.52],[0.17,headY-0.25],[0.13,headY+0.02]],hairCol,hairM,18); fall2.position.z=0.06; bodyG.add(fall2);
+        if(gender==='female'){
+          // vrouw: lang haar valt rondom (zichtbaar zonder hoofdbedekking)
+          const fall2=lathe([[0.06,headY-0.52],[0.15,headY-0.52],[0.17,headY-0.25],[0.13,headY+0.02]],hairCol,hairM,18); fall2.position.z=0.06; bodyG.add(fall2);
+        } else {
+          // jongen: lang haar valt ALLEEN aan de achterkant langs de nek — niet langs het gezicht
+          const nape=sph(0.135,hairCol,hairM,18); nape.position.set(0,headY-0.26,0.10); nape.scale.set(1.06,2.05,0.55); bodyG.add(nape);
+          const napeEnd=sph(0.085,hairCol,hairM,14); napeEnd.position.set(0,headY-0.52,0.085); napeEnd.scale.set(1.0,0.95,0.6); bodyG.add(napeEnd);
+        }
       }
     }
   }

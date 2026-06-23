@@ -2,7 +2,7 @@
    Strategie: network-first voor navigaties (index.html altijd vers → pakt nieuwe ?v= assets op),
    cache-first voor de rest, met runtime-caching van same-origin én CDN (opaque) zodat het
    na één online bezoek volledig offline werkt. */
-const CACHE = 'hajj-cache-v6.4';
+const CACHE = 'hajj-cache-v6.5';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
 
