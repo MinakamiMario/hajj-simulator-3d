@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6.997">
+<link rel="stylesheet" href="css/style.css?v=6.998">
 </head>
 <body>
 
@@ -130,8 +130,23 @@
   <div class="credits-card">
     <button class="credits-close" onclick="toggleCredits(false)" aria-label="Sluiten">×</button>
     <h2>Met dank aan</h2>
-    <p class="credits-intro">Een deel van de 3D-modellen is gemaakt door deze artiesten en gedeeld onder de licentie <strong>Creative Commons Attribution 4.0</strong> (CC&nbsp;BY&nbsp;4.0). Met dank aan:</p>
-    <ul class="credits-list">
+    <p class="credits-intro">de leerlingen van <strong>basisschool Al&nbsp;Qalam</strong>.<br>In het bijzonder <strong>lichting&nbsp;3</strong>:</p>
+    <ul class="credits-students">
+      <li><span class="cs-name">Abdulahi Abdulkhader Abdi</span><span class="cs-klas">7c</span></li>
+      <li><span class="cs-name">Ayoub Ambari</span><span class="cs-klas">7a</span></li>
+      <li><span class="cs-name">Adam El Moussaoui</span><span class="cs-klas">7a</span></li>
+      <li><span class="cs-name">Saifeddine Boulabkoul</span><span class="cs-klas">7b</span></li>
+      <li><span class="cs-name">Dawud Mekrani</span><span class="cs-klas">6c</span></li>
+      <li><span class="cs-name">Mohamed Fatehi</span><span class="cs-klas">7c</span></li>
+      <li><span class="cs-name">Naoufel Assabbab</span><span class="cs-klas">6c</span></li>
+      <li><span class="cs-name">Maher Ben Hadou</span><span class="cs-klas">6b</span></li>
+      <li><span class="cs-name">Amr Jahouhi</span><span class="cs-klas">7a</span></li>
+      <li><span class="cs-name">Safouane Amajjar</span><span class="cs-klas">8c</span></li>
+      <li><span class="cs-name">Chahid Yahia</span><span class="cs-klas">6b</span></li>
+    </ul>
+    <div class="credits-div"></div>
+    <p class="credits-sub">3D-modellen — een deel van anderen, gedeeld onder <strong>CC&nbsp;BY&nbsp;4.0</strong>:</p>
+    <ul class="credits-list credits-list--compact">
       <li><span class="cr-emoji">🕋</span><div><b>Masjid al-Haram (Ka'ba)</b><br><span>Mostafa Ebrahim · CC BY 4.0 — aangepast in Blender voor dit project</span><br><a href="https://sketchfab.com/3d-models/masjid-al-haram-kaaba-578a772545214cc383167d9223866558" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
       <li><span class="cr-emoji">🕌</span><div><b>Makkah Royal Clock Tower</b><br><span>T3DIOJGS2 · CC BY 4.0</span><br><a href="https://sketchfab.com/3d-models/makkah-royal-clock-tower-8504bccd77b446dc93b2a77b12c6de1f" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
       <li><span class="cr-emoji">🏠</span><div><b>Appartement (interieur)</b><br><span>SrMonteiro · CC BY 4.0</span><br><a href="https://sketchfab.com/3d-models/appartement-6a7a5fe208344b2e8123a88923dbd5b3" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
@@ -164,29 +179,41 @@
 .credits-link{margin-top:1.1rem;background:none;border:none;color:#b8a8e0;font-size:.9rem;cursor:pointer;
   text-decoration:underline;opacity:.85;}
 .credits-link:hover{opacity:1;color:#e8c878;}
+.credits-students{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:.45rem .6rem;}
+.credits-students li{display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:.42rem .6rem;}
+.cs-name{font-size:.84rem;color:#f3eede;line-height:1.2;}
+.cs-klas{flex:none;font-size:.64rem;font-weight:700;color:#1a0f0a;letter-spacing:.03em;
+  background:linear-gradient(135deg,#d4af37,#f4e3b5);border-radius:6px;padding:.08rem .42rem;}
+.credits-div{height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.45),transparent);margin:1.2rem 0 .9rem;}
+.credits-sub{font-size:.78rem;color:#9a92b8;text-align:center;margin:0 0 .8rem;}
+.credits-list--compact li{padding:.55rem .7rem;}
+.credits-list--compact b{font-size:.92rem;}
+.credits-list--compact span{font-size:.78rem;}
+@media (max-width:520px){ .credits-students{grid-template-columns:1fr;} }
 </style>
 <script>function toggleCredits(on){var o=document.getElementById('credits-overlay');if(o)o.classList.toggle('show',on);}</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="js/lib-DRACOLoader.js?v=6.997"></script>
-<script src="js/00-globals.js?v=6.997"></script>
-<script src="js/01-helpers.js?v=6.997"></script>
-<script src="js/02-gfx.js?v=6.997"></script>
-<script src="js/02b-assets.js?v=6.997"></script>
-<script src="js/03-avatar.js?v=6.997"></script>
-<script src="js/04-player.js?v=6.997"></script>
-<script src="js/05-zones.js?v=6.997"></script>
-<script src="js/06-ui.js?v=6.997"></script>
-<script src="js/07-env.js?v=6.997"></script>
-<script src="js/08-scenes-a.js?v=6.997"></script>
-<script src="js/09-scenes-b.js?v=6.997"></script>
-<script src="js/10-loader.js?v=6.997"></script>
-<script src="js/11-engine.js?v=6.997"></script>
-<script src="js/12-customize.js?v=6.997"></script>
-<script src="js/13-main.js?v=6.997"></script>
-<script src="js/14-narration.js?v=6.997"></script>
-<script src="js/15-checklist.js?v=6.997"></script>
-<script src="js/16-recite.js?v=6.997"></script>
+<script src="js/lib-DRACOLoader.js?v=6.998"></script>
+<script src="js/00-globals.js?v=6.998"></script>
+<script src="js/01-helpers.js?v=6.998"></script>
+<script src="js/02-gfx.js?v=6.998"></script>
+<script src="js/02b-assets.js?v=6.998"></script>
+<script src="js/03-avatar.js?v=6.998"></script>
+<script src="js/04-player.js?v=6.998"></script>
+<script src="js/05-zones.js?v=6.998"></script>
+<script src="js/06-ui.js?v=6.998"></script>
+<script src="js/07-env.js?v=6.998"></script>
+<script src="js/08-scenes-a.js?v=6.998"></script>
+<script src="js/09-scenes-b.js?v=6.998"></script>
+<script src="js/10-loader.js?v=6.998"></script>
+<script src="js/11-engine.js?v=6.998"></script>
+<script src="js/12-customize.js?v=6.998"></script>
+<script src="js/13-main.js?v=6.998"></script>
+<script src="js/14-narration.js?v=6.998"></script>
+<script src="js/15-checklist.js?v=6.998"></script>
+<script src="js/16-recite.js?v=6.998"></script>
 </body>
 </html>
