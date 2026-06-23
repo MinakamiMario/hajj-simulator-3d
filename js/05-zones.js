@@ -126,7 +126,8 @@ function updatePrompt(){
     btn.classList.add('ready'); btn.querySelector('.ba-hint').textContent=(Zone.current.label||'actie').toLowerCase();
     if(!Zone.current.auto){
       promptEl=document.createElement('div'); promptEl.className='world-prompt';
-      promptEl.innerHTML=`<div class="wp-key">A</div><div class="wp-label">${Zone.current.label||'Actie'}</div>`;
+      const actKey=(typeof matchMedia!=='undefined' && matchMedia('(pointer:fine)').matches)?'Spatie':'A';   // desktop: spatiebalk · touch: A-knop
+      promptEl.innerHTML=`<div class="wp-key">${actKey}</div><div class="wp-label">${Zone.current.label||'Actie'}</div>`;
       labels.appendChild(promptEl);
     }
   } else { btn.classList.remove('ready'); btn.querySelector('.ba-hint').textContent='—'; }

@@ -50,7 +50,7 @@ function addWearIhram(x,z){
 SCENES.push({
   id:0, loc:'🏠 Je slaapkamer — 02:17', ar:'النِّيَّة',
   task:'🎯 Maak je Niyyah (intentie), en ga dan slapen — morgen begint de reis',
-  story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe (WASD / joystick), druk op <strong>A</strong> — en ga daarna naar je <strong>bed</strong>. Morgenochtend pak je je koffer.`,
+  story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe met <strong>WASD</strong> (of de joystick) en druk op de actieknop <strong>A</strong> of de <strong>spatiebalk</strong>. Loop daarna naar je <strong>bed</strong> in de slaapkamer om te slapen. Morgenochtend pak je je koffer.`,
   spawn:{x:-4.8,z:4.2,face:0,bounds:{minX:-9.8,maxX:0.2,minZ:-9.0,maxZ:6.4}},
   light:{amb:0x46588a,ambI:1.0,dir:0x9aaae0,dirI:0.65,sky:0x0e0b24,exp:0.5},
   cam:{dist:4.8,height:4.7,pitch:0.62},                      // third-person dollhouse-hoek (kijkt in de open kamers) + muur-fade
@@ -60,8 +60,8 @@ SCENES.push({
     if(apt){
       Assets.tint(apt,0.55);                                 // nacht: dim de baked-bright woning (eigen nachtlamp blijft warm)
       fadeModel=apt;                                         // muren faden als ze cam→speler blokkeren
-      // Niyyah in de ruime open woonkamer/eethoek (loopbaar), daarna 'slapen' richting slaapkamer
-      addNiyyahFlow(-4.8,3.0, -3.9,1.5);
+      // Niyyah in de ruime open woonkamer/eethoek; daarna loop je naar het BED in de slaapkamer om te slapen
+      addNiyyahFlow(-4.8,3.0, -3.8,-0.7);
     } else {
       // ---- procedurele fallback (oude slaapkamer) ----
       room(10,10,3.2,0x322652,0x3a2e58);

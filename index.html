@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6.9911">
+<link rel="stylesheet" href="css/style.css?v=6.992">
 </head>
 <body>
 
@@ -27,7 +27,7 @@
     <h1 class="title-ar">رحلة الحج</h1>
     <p class="title-nl">Hajj Simulator · 3D <span class="build-tag" id="build-tag"></span></p>
     <p class="intro-desc">Een 3D third-person reis door de Hajj.<br>Loop, kijk rond, beleef de rituelen.</p>
-    <div class="tags"><span>🎮 3D</span><span>🕹️ WASD + joystick</span><span>🖱️ Sleep om te kijken</span><span>⇧ Shift = rennen</span></div>
+    <div class="tags"><span>🎮 3D</span><span>🕹️ WASD = lopen</span><span>␣ Spatie = actie</span><span>🖱️ Sleep = kijken</span><span>⇧ Shift = rennen</span></div>
     <button class="btn-cta" onclick="Game.toCharSelect()">Bismillah — Kies je personage</button>
     <div class="scene-jump-wrap">
       <label for="scene-jump">of oefen één scène:</label>
@@ -73,7 +73,7 @@
   <div class="joystick" id="joystick"><div class="joy-knob" id="joy-knob"></div></div>
   <div class="look-hint" id="look-hint">Sleep rechts op het scherm om rond te kijken</div>
   <button class="btn-action" id="btn-action" onclick="Player.interact()">
-    <span class="ba-letter">A</span><span class="ba-hint">actie</span>
+    <span class="ba-letter">A</span><span class="ba-hint">actie</span><span class="ba-key">of ␣ spatie</span>
   </button>
   <div id="vignette"></div>
   <!-- REISBEGELEIDER: verhalende narratie tijdens het spelen -->
@@ -169,24 +169,24 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="js/lib-DRACOLoader.js?v=6.9911"></script>
-<script src="js/00-globals.js?v=6.9911"></script>
-<script src="js/01-helpers.js?v=6.9911"></script>
-<script src="js/02-gfx.js?v=6.9911"></script>
-<script src="js/02b-assets.js?v=6.9911"></script>
-<script src="js/03-avatar.js?v=6.9911"></script>
-<script src="js/04-player.js?v=6.9911"></script>
-<script src="js/05-zones.js?v=6.9911"></script>
-<script src="js/06-ui.js?v=6.9911"></script>
-<script src="js/07-env.js?v=6.9911"></script>
-<script src="js/08-scenes-a.js?v=6.9911"></script>
-<script src="js/09-scenes-b.js?v=6.9911"></script>
-<script src="js/10-loader.js?v=6.9911"></script>
-<script src="js/11-engine.js?v=6.9911"></script>
-<script src="js/12-customize.js?v=6.9911"></script>
-<script src="js/13-main.js?v=6.9911"></script>
-<script src="js/14-narration.js?v=6.9911"></script>
-<script src="js/15-checklist.js?v=6.9911"></script>
-<script src="js/16-recite.js?v=6.9911"></script>
+<script src="js/lib-DRACOLoader.js?v=6.992"></script>
+<script src="js/00-globals.js?v=6.992"></script>
+<script src="js/01-helpers.js?v=6.992"></script>
+<script src="js/02-gfx.js?v=6.992"></script>
+<script src="js/02b-assets.js?v=6.992"></script>
+<script src="js/03-avatar.js?v=6.992"></script>
+<script src="js/04-player.js?v=6.992"></script>
+<script src="js/05-zones.js?v=6.992"></script>
+<script src="js/06-ui.js?v=6.992"></script>
+<script src="js/07-env.js?v=6.992"></script>
+<script src="js/08-scenes-a.js?v=6.992"></script>
+<script src="js/09-scenes-b.js?v=6.992"></script>
+<script src="js/10-loader.js?v=6.992"></script>
+<script src="js/11-engine.js?v=6.992"></script>
+<script src="js/12-customize.js?v=6.992"></script>
+<script src="js/13-main.js?v=6.992"></script>
+<script src="js/14-narration.js?v=6.992"></script>
+<script src="js/15-checklist.js?v=6.992"></script>
+<script src="js/16-recite.js?v=6.992"></script>
 </body>
 </html>

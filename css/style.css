@@ -103,6 +103,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 .btn-action:active{transform:scale(.92);}
 .ba-letter{font-size:1.4rem;font-weight:700;line-height:1;}
 .ba-hint{font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;opacity:.85;}
+.ba-key{display:none;}                                   /* toetsenbord-hint: alleen op desktop/muis tonen */
+@media (pointer:fine){ .ba-key{display:block;font-size:.5rem;letter-spacing:.04em;opacity:.7;margin-top:2px;} }
 
 /* MODALS */
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(8px);}
