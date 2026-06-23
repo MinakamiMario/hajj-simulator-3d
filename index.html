@@ -14,7 +14,7 @@
 <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
 <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=6.8">
+<link rel="stylesheet" href="css/style.css?v=6.9">
 </head>
 <body>
 
@@ -33,6 +33,7 @@
       <label for="scene-jump">of oefen één scène:</label>
       <select id="scene-jump" onchange="State.startScene=+this.value"></select>
     </div>
+    <button class="credits-link" onclick="toggleCredits(true)">ⓘ Met dank aan — credits &amp; bronnen</button>
   </div>
 </div>
 
@@ -120,29 +121,72 @@
     <p class="end-sub">Moge Allah jouw Hajj aanvaarden. آمين</p>
     <div class="end-list" id="end-list"></div>
     <button class="btn-cta" style="margin-top:1.5rem" onclick="Game.restart()">Opnieuw beginnen</button>
+    <button class="credits-link" onclick="toggleCredits(true)">ⓘ Credits &amp; bronnen</button>
   </div>
 </div>
 
+<!-- CREDITS -->
+<div id="credits-overlay" onclick="if(event.target===this)toggleCredits(false)">
+  <div class="credits-card">
+    <button class="credits-close" onclick="toggleCredits(false)" aria-label="Sluiten">×</button>
+    <h2>Met dank aan</h2>
+    <p class="credits-intro">De fotorealistische 3D-modellen in dit spel zijn gemaakt door deze artiesten en gedeeld onder de licentie <strong>Creative Commons Attribution 4.0</strong> (CC&nbsp;BY&nbsp;4.0). Met dank aan:</p>
+    <ul class="credits-list">
+      <li><span class="cr-emoji">🕋</span><div><b>Masjid al-Haram (Ka'ba)</b><br><span>Mostafa Ebrahim · CC BY 4.0</span><br><a href="https://sketchfab.com/3d-models/masjid-al-haram-kaaba-578a772545214cc383167d9223866558" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
+      <li><span class="cr-emoji">🕌</span><div><b>Makkah Royal Clock Tower</b><br><span>T3DIOJGS2 · CC BY 4.0</span><br><a href="https://sketchfab.com/3d-models/makkah-royal-clock-tower-8504bccd77b446dc93b2a77b12c6de1f" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
+      <li><span class="cr-emoji">🏠</span><div><b>Appartement (interieur)</b><br><span>SrMonteiro · CC BY 4.0</span><br><a href="https://sketchfab.com/3d-models/appartement-6a7a5fe208344b2e8123a88923dbd5b3" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
+      <li><span class="cr-emoji">✈️</span><div><b>Airplane interior</b><br><span>Newbie99999993 · CC BY 4.0</span><br><a href="https://sketchfab.com/3d-models/airplane-interior-f56acb1930b645aaab879a259e36b606" target="_blank" rel="noopener">bron op Sketchfab ↗</a></div></li>
+    </ul>
+    <p class="credits-foot">Overige modellen, omgevingen, animaties, geluid en narratie zijn voor dit project gemaakt. Gebouwd met Three.js. · جزاكم الله خيرًا</p>
+  </div>
+</div>
+<style>
+#credits-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;
+  background:rgba(8,6,16,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:1.2rem;}
+#credits-overlay.show{display:flex;}
+.credits-card{position:relative;max-width:540px;width:100%;max-height:86vh;overflow-y:auto;
+  background:linear-gradient(160deg,#1b1730,#241d3c);border:1px solid #4a3f6e;border-radius:20px;
+  padding:1.8rem 1.6rem;box-shadow:0 24px 70px rgba(0,0,0,.6);color:#ece7f7;}
+.credits-card h2{font-family:'Amiri',serif;color:#e8c878;margin:0 0 .6rem;font-size:1.7rem;text-align:center;}
+.credits-intro{font-size:.92rem;line-height:1.5;color:#c7c0dd;margin:0 0 1.1rem;text-align:center;}
+.credits-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.7rem;}
+.credits-list li{display:flex;gap:.8rem;align-items:flex-start;background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:.75rem .85rem;}
+.credits-list .cr-emoji{font-size:1.6rem;line-height:1;flex:none;}
+.credits-list b{color:#fff;font-size:1rem;}
+.credits-list span{color:#b3abcc;font-size:.84rem;}
+.credits-list a{color:#8fb8ff;font-size:.84rem;text-decoration:none;}
+.credits-list a:hover{text-decoration:underline;}
+.credits-foot{margin:1.1rem 0 0;font-size:.8rem;color:#9a92b8;text-align:center;line-height:1.5;}
+.credits-close{position:absolute;top:.6rem;right:.7rem;width:2rem;height:2rem;border-radius:50%;
+  border:1px solid #5a4f7e;background:rgba(0,0,0,.3);color:#e8c878;font-size:1.3rem;line-height:1;cursor:pointer;}
+.credits-close:hover{background:rgba(0,0,0,.5);}
+.credits-link{margin-top:1.1rem;background:none;border:none;color:#b8a8e0;font-size:.9rem;cursor:pointer;
+  text-decoration:underline;opacity:.85;}
+.credits-link:hover{opacity:1;color:#e8c878;}
+</style>
+<script>function toggleCredits(on){var o=document.getElementById('credits-overlay');if(o)o.classList.toggle('show',on);}</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="js/lib-DRACOLoader.js?v=6.8"></script>
-<script src="js/00-globals.js?v=6.8"></script>
-<script src="js/01-helpers.js?v=6.8"></script>
-<script src="js/02-gfx.js?v=6.8"></script>
-<script src="js/02b-assets.js?v=6.8"></script>
-<script src="js/03-avatar.js?v=6.8"></script>
-<script src="js/04-player.js?v=6.8"></script>
-<script src="js/05-zones.js?v=6.8"></script>
-<script src="js/06-ui.js?v=6.8"></script>
-<script src="js/07-env.js?v=6.8"></script>
-<script src="js/08-scenes-a.js?v=6.8"></script>
-<script src="js/09-scenes-b.js?v=6.8"></script>
-<script src="js/10-loader.js?v=6.8"></script>
-<script src="js/11-engine.js?v=6.8"></script>
-<script src="js/12-customize.js?v=6.8"></script>
-<script src="js/13-main.js?v=6.8"></script>
-<script src="js/14-narration.js?v=6.8"></script>
-<script src="js/15-checklist.js?v=6.8"></script>
-<script src="js/16-recite.js?v=6.8"></script>
+<script src="js/lib-DRACOLoader.js?v=6.9"></script>
+<script src="js/00-globals.js?v=6.9"></script>
+<script src="js/01-helpers.js?v=6.9"></script>
+<script src="js/02-gfx.js?v=6.9"></script>
+<script src="js/02b-assets.js?v=6.9"></script>
+<script src="js/03-avatar.js?v=6.9"></script>
+<script src="js/04-player.js?v=6.9"></script>
+<script src="js/05-zones.js?v=6.9"></script>
+<script src="js/06-ui.js?v=6.9"></script>
+<script src="js/07-env.js?v=6.9"></script>
+<script src="js/08-scenes-a.js?v=6.9"></script>
+<script src="js/09-scenes-b.js?v=6.9"></script>
+<script src="js/10-loader.js?v=6.9"></script>
+<script src="js/11-engine.js?v=6.9"></script>
+<script src="js/12-customize.js?v=6.9"></script>
+<script src="js/13-main.js?v=6.9"></script>
+<script src="js/14-narration.js?v=6.9"></script>
+<script src="js/15-checklist.js?v=6.9"></script>
+<script src="js/16-recite.js?v=6.9"></script>
 </body>
 </html>

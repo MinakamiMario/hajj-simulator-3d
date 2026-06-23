@@ -160,7 +160,32 @@ const Player = {
 let camOccluders=[];   // grote objecten waar de camera niet achter mag verdwijnen
 const Cam = {
   yaw:0, pitch:0.32, dist:6.2, height:2.4, lookH:1.4, maxY:null, bound:null,
+  fp:false, intro:null, eyeH:1.55, cine:null,          // first-person modus + intro-zwaai + filmische cutscene
+  // start een filmische zwaai vanaf 'from' naar het popetje, daarna first-person
+  startIntro(from, durMs){ this.fp=false; this.intro={ from:{x:from.x,y:from.y,z:from.z}, start:performance.now(), dur:durMs||2600 }; },
   update(){
+    // ---- scripted filmische camera (cutscene): scène stuurt camera volledig, normale cam pauzeert ----
+    if(this.cine){ this.cine(); return; }
+    // ---- intro-zwaai naar het popetje → first-person ----
+    if(this.intro){
+      const e=Math.min(1,(performance.now()-this.intro.start)/this.intro.dur);
+      const k=e<0.5?2*e*e:1-Math.pow(-2*e+2,2)/2;        // easeInOut
+      const eyeY=Player.y0+this.eyeH, f=this.intro.from, cpz=Math.cos(this.pitch);
+      camera.position.set(f.x+(Player.x-f.x)*k, f.y+(eyeY-f.y)*k, f.z+(Player.z-f.z)*k);
+      camera.lookAt(Player.x-Math.sin(this.yaw)*cpz*4, eyeY-Math.sin(this.pitch)*4, Player.z-Math.cos(this.yaw)*cpz*4);
+      if(Player.obj) Player.obj.visible=true;
+      if(e>=1){ this.intro=null; this.fp=true; }
+      return;
+    }
+    // ---- first-person: camera op het hoofd, kijkend langs yaw/pitch ----
+    if(this.fp){
+      const eyeY=Player.y0+this.eyeH, cpz=Math.cos(this.pitch);
+      camera.position.set(Player.x,eyeY,Player.z);
+      camera.lookAt(Player.x-Math.sin(this.yaw)*cpz*4, eyeY-Math.sin(this.pitch)*4, Player.z-Math.cos(this.yaw)*cpz*4);
+      if(Player.obj) Player.obj.visible=false;           // verberg jezelf in first-person
+      return;
+    }
+    if(Player.obj && !Player.obj.visible) Player.obj.visible=true;   // weer zichtbaar in third-person
     const cp=Math.cos(this.pitch), sp=Math.sin(this.pitch);
     const bx=Math.sin(this.yaw)*cp, bz=Math.cos(this.yaw)*cp;     // behind dir (xz)
     let camX=Player.x+bx*this.dist;

@@ -13,52 +13,62 @@ function blocked(x,z){ for(const c of colliders){ if(x>c.minX&&x<c.maxX&&z>c.min
 
 const SCENES=[];
 
+/* Niyyah → slapen-flow, gedeeld door appartement en procedurele fallback */
+function addNiyyahFlow(matX,matZ,bedX,bedZ){
+  Zone.add({ id:'mat', x:matX, z:matZ, r:0.9, icon:'🤲', label:'Maak Niyyah', guide:true,
+    action:()=>{ Player.setPose('dua');
+      showFeedback('✅ In je hart maak je de intentie voor de Hajj — hardop hoeft niet. Een warm gevoel trekt door je borst. Ga nu slapen; morgenochtend pak je je koffer.',true,5500);
+      setTimeout(()=>{ Player.setPose('stand');
+        Zone.add({ id:'sleep', x:bedX, z:bedZ, r:1.1, icon:'😴', label:'Ga slapen', guide:true,
+          action:()=>{ showFeedback('🌙 Je slaapt vol voorpret. De volgende ochtend begint je reis met inpakken.',true,3500); showNextBtn('De volgende ochtend →'); }});
+      },1200);
+    }});
+}
+
+/* inpak-item (gedeeld door appartement + procedurele fallback) */
+function addPackItem(it){
+  Zone.add({ id:'pi-'+it.id, x:it.x, z:it.z, y:it.y, r:0.7, trigR:0.95, pickup:true, glow:it.ok,
+    icon:it.e, label:'Pak '+it.l, noConsume:true,
+    action:(z)=>{
+      if(it.ok){ Zone.markDone(z); State.packed++; setProgress(`📦 ${State.packed}/7 ingepakt`);
+        if(State.packed>=7){ showFeedback('✅ Koffer gepakt! De taxi staat voor.',true,4000); showNextBtn('Naar het vliegtuig →'); }
+      } else { showFeedback(`❌ ${it.l}: ${it.id==='parfum'?'verboden tijdens Ihraam':it.id==='alcohol'?'haram, hoort niet mee':'laat thuis — leid je niet af'}`,false,3000); }
+    }});
+}
+function addWearIhram(x,z){
+  Zone.add({ id:'wear-ihram', x:x, z:z, r:1.0, icon:'🤍', label:'Ihraam aandoen (optioneel)', noConsume:true,
+    action:(zo)=>{ if(Char.ihram){ showFeedback('Je draagt de Ihraam al. 🤍',true,2500); return; }
+      Char.ihram=true; Player.build();
+      showFeedback(Char.gender==='female'?'🧕 Voor jou als vrouw is je gewone bedekkende kleding je Ihraam — geen witte doeken nodig. De intentie en de regels gelden wél vanaf de Miqaat.':'🤍 Je doet de witte Ihraam-doeken alvast aan. In het vliegtuig hoef je je dan niet meer te verkleden (niet verplicht).',true,4800);
+      if(zo.ring) zo.ring.material.color.set(0x27ae60); }});
+}
+
 /* 0 — NIYYAH (bedroom night) */
 SCENES.push({
   id:0, loc:'🏠 Je slaapkamer — 02:17', ar:'النِّيَّة',
   task:'🎯 Maak je Niyyah (intentie), en ga dan slapen — morgen begint de reis',
   story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe (WASD / joystick), druk op <strong>A</strong> — en ga daarna naar je <strong>bed</strong>. Morgenochtend pak je je koffer.`,
-  spawn:{x:0,z:4.2,face:Math.PI,bounds:{minX:-4.5,maxX:4.5,minZ:-4.5,maxZ:4.5}},
-  light:{amb:0x46588a,ambI:1.0,dir:0x9aaae0,dirI:0.65,sky:0x0e0b24,exp:0.42},
+  spawn:{x:-2.5,z:0.0,face:0,bounds:{minX:-3.4,maxX:-1.5,minZ:-2.3,maxZ:0.5}},
+  light:{amb:0x46588a,ambI:1.0,dir:0x9aaae0,dirI:0.65,sky:0x0e0b24,exp:0.5},
+  cam:{fp:true,eyeH:1.48,pitch:0.38},
   build(){
-    room(10,10,3.2,0x322652,0x3a2e58);
-    windowOnWall(-3.6,-4.9,0x2a4a90);
-    const moonL=new THREER.PointLight(0xaac4ff,0.9,18); moonL.position.set(-3.4,2.4,-3.5); world.add(moonL);
-    // bed in the back-left corner, neatly against the walls
-    bed(-3.4,-3.0,0);
-    const ns=nightstand(-3.5,-1.4);
-    const lamp=cyl(0.1,0.16,0.4,0xd4a040,{emissive:0xffcc66,emissiveIntensity:1.4}); lamp.position.set(ns.position.x,ns.userData.topY+0.22,ns.position.z); world.add(lamp);
-    const pl=new THREER.PointLight(0xffcc88,1.7,12); pl.position.set(ns.position.x,1.4,ns.position.z); world.add(pl);
-    // desk with homework + laptop against the right wall
-    const dk=desk(3.4,-2.6,-Math.PI/2);
-    const laptop=box(0.42,0.28,0.04,0x1a1a22,{emissive:0x2a6acc,emissiveIntensity:.5}); laptop.position.set(3.2,dk.userData.topY+0.16,-2.6); laptop.rotation.y=-Math.PI/2; laptop.rotation.x=-0.4; world.add(laptop);
-    const base=box(0.42,0.03,0.3,0x222228); base.position.set(3.32,dk.userData.topY+0.02,-2.6); base.rotation.y=-Math.PI/2; world.add(base);
-    const books=emojiSprite('📚',0.42); books.position.set(3.32,dk.userData.topY+0.22,-3.1); world.add(books);
-    const note=emojiSprite('📝',0.34); note.position.set(3.32,dk.userData.topY+0.16,-2.1); world.add(note);
-    chair(2.7,-2.6,Math.PI/2);
-    // wardrobe + plant
-    const wardrobe=box(1.1,2.3,0.6,0x2f2238); wardrobe.position.set(3.9,1.15,2.0); wardrobe.rotation.y=-Math.PI/2; world.add(wardrobe);
-    potplant(3.7,4.0,1);
-    // packed suitcase ready by the door
-    suitcase(1.2,-3.0);
-    const sCase=emojiSprite('🧳',0.5); sCase.position.set(1.2,0.5,-3.0); world.add(sCase);
-    // prayer rug centre
-    rugMat(-0.6,0.4,0x3a1d55);
-    // Ka'ba picture + door on back wall
-    const pic=box(0.8,0.6,0.05,0xc9a84c); pic.position.set(2.2,2.1,-4.88); world.add(pic);
-    const picK=emojiSprite('🕋',0.4); picK.position.set(2.2,2.1,-4.8); world.add(picK);
-    const door=box(1.2,2.4,0.12,0x241326); door.position.set(0,1.2,-4.86); world.add(door);
-    const frame=box(1.45,2.66,0.06,0xc9a84c,{emissive:0x5a4410,emissiveIntensity:.4}); frame.position.set(0,1.33,-4.92); world.add(frame);
-    const knob=sph(0.06,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6}); knob.position.set(0.45,1.2,-4.78); world.add(knob);
-
-    Zone.add({ id:'mat', x:-0.6, z:0.4, r:1.0, icon:'🤲', label:'Maak Niyyah', guide:true,
-      action:()=>{ Player.setPose('dua');
-        showFeedback('✅ In je hart maak je de intentie voor de Hajj — hardop hoeft niet. Een warm gevoel trekt door je borst. Ga nu slapen; morgenochtend pak je je koffer.',true,5500);
-        setTimeout(()=>{ Player.setPose('stand');
-          Zone.add({ id:'sleep', x:-3.4, z:-2.4, r:1.2, icon:'😴', label:'Ga slapen', guide:true,
-            action:()=>{ showFeedback('🌙 Je slaapt vol voorpret. De volgende ochtend begint je reis met inpakken.',true,3500); showNextBtn('De volgende ochtend →'); }});
-        },1200);
-      }});
+    const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,1):null;
+    if(apt){
+      Assets.tint(apt,0.55);                                 // nacht: dim de baked-bright woning (eigen nachtlamp blijft warm)
+      addNiyyahFlow(-2.5,-0.6,-2.5,-1.5);                    // Niyyah aan 't voeteneind → slapen in bed
+    } else {
+      // ---- procedurele fallback (oude slaapkamer) ----
+      room(10,10,3.2,0x322652,0x3a2e58);
+      windowOnWall(-3.6,-4.9,0x2a4a90);
+      const moonL=new THREER.PointLight(0xaac4ff,0.9,18); moonL.position.set(-3.4,2.4,-3.5); world.add(moonL);
+      bed(-3.4,-3.0,0);
+      const ns=nightstand(-3.5,-1.4);
+      const lamp=cyl(0.1,0.16,0.4,0xd4a040,{emissive:0xffcc66,emissiveIntensity:1.4}); lamp.position.set(ns.position.x,ns.userData.topY+0.22,ns.position.z); world.add(lamp);
+      const pl=new THREER.PointLight(0xffcc88,1.7,12); pl.position.set(ns.position.x,1.4,ns.position.z); world.add(pl);
+      rugMat(-0.6,0.4,0x3a1d55);
+      const door=box(1.2,2.4,0.12,0x241326); door.position.set(0,1.2,-4.86); world.add(door);
+      addNiyyahFlow(-0.6,0.4,-3.4,-2.4);
+    }
   }
 });
 
@@ -67,11 +77,32 @@ SCENES.push({
   id:1, loc:'🏠 Inpakken — Ochtend', ar:'التَّحضِير',
   task:'🎯 Pak de juiste 7 items (sommige zijn verboden in Ihraam!)',
   story:`Het is ochtend in je straat. Door het grote raam zie je het dorp en de taxi die zo komt. Pak alleen wat je nodig hebt — sommige items zijn <strong>verboden</strong> tijdens Ihraam.<br><br>Tip: je mag je <strong>Ihraam hier alvast aandoen</strong> (niet verplicht — het kan ook in het vliegtuig).`,
-  spawn:{x:0,z:3.4,face:Math.PI,bounds:{minX:-4.6,maxX:4.6,minZ:-4.6,maxZ:4.6}},
-  light:{amb:0x9fb0d0,ambI:0.8,dir:0xfff0d0,dirI:1.05,sky:0x9cc4e8,exp:0.9},
+  spawn:{x:-4.3,z:3.7,face:-Math.PI/2,bounds:{minX:-6.5,maxX:-0.5,minZ:1.2,maxZ:4.2}},
+  light:{amb:0xbfd0e8,ambI:1.0,dir:0xfff2da,dirI:1.05,sky:0x9cc4e8,exp:0.95},
   fog:{near:28,far:90},
+  cam:{fp:true,eyeH:1.5,pitch:0.16},
   build(){
-    ground(0x6a705a,90,{roughness:1});                        // outdoor earth (visible outside)
+    const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,1):null;
+    if(apt){
+      State.packed=0;
+      suitcase(-4.4,3.9);                                       // koffer klaar bij de eethoek
+      // items verspreid over eettafel, keuken-aanrecht en woonkamer
+      [ {id:'paspoort',e:'🛂',l:'Paspoort',     ok:true, x:-3.4,z:2.6,y:0.86},
+        {id:'duaboek', e:'📖',l:"Du'a boek",    ok:true, x:-2.7,z:2.7,y:0.86},
+        {id:'geld',    e:'💵',l:'Geld',         ok:true, x:-3.0,z:3.0,y:0.86},
+        {id:'medicijn',e:'💊',l:'Medicijnen',   ok:true, x:-1.1,z:1.7,y:1.0},
+        {id:'zeep',    e:'🧴',l:'Reukloze zeep',ok:true, x:-1.5,z:2.0,y:1.0},
+        {id:'sandalen',e:'👡',l:'Sandalen',     ok:true, x:-5.8,z:3.4,y:0.5},
+        {id:'ihraam',  e:'🤍',l:'Ihraam',       ok:true, x:-5.3,z:2.9,y:0.55},
+        {id:'parfum',  e:'🌸',l:'Parfum',       ok:false,x:-2.2,z:3.2,y:0.86},
+        {id:'alcohol', e:'🍷',l:'Alcohol',      ok:false,x:-0.8,z:2.1,y:1.0},
+        {id:'camera',  e:'📷',l:'Camera',       ok:false,x:-6.0,z:2.4,y:0.55},
+      ].forEach(addPackItem);
+      setProgress('📦 0/7 ingepakt');
+      addWearIhram(-4.9,2.2);
+    } else {
+      // ---- procedurele fallback (oude inpak-kamer) ----
+      ground(0x6a705a,90,{roughness:1});                        // outdoor earth (visible outside)
     const floor=box(10,0.08,10,0x4a3a55); floor.position.set(0,0.05,0); world.add(floor);
     const left=box(0.2,3.2,10,0x4a4060,{roughness:1}); left.position.set(-5,1.6,0); world.add(left);
     const right=box(0.2,3.2,10,0x4a4060,{roughness:1}); right.position.set(5,1.6,0); world.add(right);
@@ -144,6 +175,7 @@ SCENES.push({
         Char.ihram=true; Player.build();
         showFeedback(Char.gender==='female'?'🧕 Voor jou als vrouw is je gewone bedekkende kleding je Ihraam — geen witte doeken nodig. De intentie en de regels gelden wél vanaf de Miqaat.':'🤍 Je doet de witte Ihraam-doeken alvast aan. In het vliegtuig hoef je je dan niet meer te verkleden (niet verplicht).',true,4800);
         if(z.ring) z.ring.material.color.set(0x27ae60); }});
+    }
   }
 });
 
@@ -154,6 +186,7 @@ SCENES.push({
   story:`<em>"Wij naderen de Miqaat..."</em> Je hebt thuis al ghusl gedaan. Aan boord ga je in staat van Ihraam.<br><br>Deed je de Ihraam thuis nog niet aan? <strong>Verkleed je in het toilet (achterin)</strong>. Daarna: <strong>ga in je stoel ✦ zitten → Niyyah → Talbiyah</strong>.`,
   spawn:{x:0,z:2.4,face:Math.PI,bounds:{minX:-0.42,maxX:0.42,minZ:-4.0,maxZ:4.0}},
   light:{amb:0xcfe2ff,ambI:1.0,dir:0xffffff,dirI:0.95,sky:0x7fb4e6,exp:0.95},
+  fog:{near:60,far:340},                                  // ruimere fog: blauwe lucht voor de establishing-shot
   cam:{dist:4.4,height:2.0,pitch:0.2,maxY:2.7,bound:{minX:-2.1,maxX:2.1,minZ:-4.6,maxZ:4.6},playerScale:0.85},
   build(){
     // ceiling + floor (no big ground -> open sides reveal the sky)
@@ -235,6 +268,25 @@ SCENES.push({
     Zone.add({ id:'seat', x:0.3, z:sz, r:1.0, icon:'🪑', label:'Ga zitten', noConsume:true, guide:true,
       action:()=>{ if(!Char.ihram){ showFeedback('⚠️ Trek eerst je Ihraam aan in het toilet (achterin).',false,2800); return; } sitDown(); }});
     instruct();
+
+    // ---- establishing-shot: het exterieur-toestel vliegt door de lucht, daarna ben je aan boord ----
+    if(typeof Assets!=='undefined' && Assets.ready('airplane')){
+      const pl=Assets.cache.airplane.clone(true); pl.scale.setScalar(0.5);
+      pl.traverse(o=>{ if(o.isMesh){ o.castShadow=false; o.receiveShadow=false; } });
+      if(Assets.tint) Assets.tint(pl,0.62);                                    // grijstint → contrast tegen de lichte lucht
+      pl.position.set(-55,15,-16); pl.rotation.set(0,0,0.07); world.add(pl);   // lange as = X → vliegt naar +X
+      const t0=performance.now(), DUR=4600;
+      paused=true;
+      Cam.cine=function(){
+        const e=Math.min(1,(performance.now()-t0)/DUR);
+        pl.position.x=-55+e*110;                                       // kruist de hemel van links naar rechts
+        pl.position.y=15-Math.sin(e*Math.PI)*2;                        // zachte boog
+        pl.rotation.z=0.07+Math.sin(e*Math.PI)*0.05;                   // subtiele bank
+        camera.position.set(0,9,16);                                   // BINNEN de sky-dome (buiten = zwarte lucht)
+        camera.lookAt(pl.position.x*0.22,13,-14);                      // pan zacht met het toestel mee
+      };
+      sceneTimeout(()=>{ Cam.cine=null; world.remove(pl); paused=false; }, DUR+150);
+    }
   }
 });
 
@@ -252,7 +304,7 @@ SCENES.push({
     const haram=(typeof Assets!=='undefined')?Assets.placeHaram(0,-3,6.5):null;
     if(haram){
       groundTex(texMarble(40),360,0xece4d2);                      // mataf-vloer rondom het model
-      Assets.placeProp('clocktower',-78,-150,3.4);                // Abraj Al-Bait torent in de skyline
+      Assets.placeProp('clocktower',-72,-150,2.6);                // Abraj Al-Bait in de skyline links-achter de Haram
     } else {
       groundTex(texMarble(34),150,0xf0e8d6); kaaba(0,-3); haramSurround(0,-3,16); meccaSkyline(0,-3,16);
     }

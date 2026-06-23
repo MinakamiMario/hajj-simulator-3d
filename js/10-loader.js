@@ -10,6 +10,7 @@ function clearSceneIntervals(){ sceneIntervals.forEach(id=>{ clearInterval(id); 
 function loadScene(id){
   const s=SCENES[id]; State.scene=id; frameHook=null; jamPillar=null;
   encounter=null; paused=false; closeChoice(); colliders=[]; camOccluders.length=0; terrainFn=null;
+  if(typeof Cam!=='undefined') Cam.cine=null;             // ruim filmische cutscene op vóór build (build mag 'm opnieuw zetten)
   clearSceneIntervals();
   clearWorld(); Zone.clear();
   document.querySelectorAll('.feedback-bar,.next-bar,.sim-bar').forEach(n=>n.remove());
@@ -50,7 +51,9 @@ function loadScene(id){
   const odx=tx-Player.x, odz=tz-Player.z;
   Player.faceY=(odx===0&&odz===0)?Player.faceY:Math.atan2(-odx,-odz);
   Player.updateTransform();
+  Cam.fp=false; Cam.intro=null;                          // standaard third-person; FP-scènes triggeren via cam.fp
   const C=s.cam||{};
+  if(C.fp){ Cam.fp=true; Cam.eyeH=(C.eyeH!==undefined?C.eyeH:1.55); }   // first-person (bv. binnenruimtes)
   Cam.dist=C.dist!==undefined?C.dist:6.2;
   Cam.height=C.height!==undefined?C.height:2.4;
   Cam.maxY=C.maxY!==undefined?C.maxY:null;

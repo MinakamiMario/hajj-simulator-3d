@@ -150,9 +150,12 @@ SCENES.push({
   build(){
     groundTex(texSand(24),110,0x8a8278);
     const deck=box(16,0.06,14,0xffffff,{map:texAsphalt(8)}); deck.position.y=0.03; world.add(deck);
-    // de iconische tentenstad van Mina rondom
-    minaTentField(0,-12,7,18,2.5);
-    minaTentField(-16,4,6,5,2.5); minaTentField(16,4,6,5,2.5);
+    // echte Mina-tentenstad achter de brug (overdag zichtbaar) + procedurele tenten dichtbij
+    const minaCity=(typeof Assets!=='undefined')?Assets.placeProp('mina',0,-95,0.26):null;
+    minaTentField(-16,5,5,4,2.5); minaTentField(16,5,5,4,2.5);
+    if(!minaCity) minaTentField(0,10,8,4,2.5);
+    // de échte Jamarat-brug torent op de achtergrond (lokaal prototype-model)
+    const jamBg=(typeof Assets!=='undefined')?Assets.placeProp('jamarat',0,-16,0.09):null;
     mountainRange(60,0x4a3a2c,12);
     // the pillar (wall) inside its oval basin ("put")
     const pillar=box(1.4,4,0.6,0x4a4858,{roughness:.8}); pillar.position.set(0,2,-2.5); world.add(pillar); jamPillar=pillar; jamPillarShake=0;

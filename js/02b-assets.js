@@ -25,6 +25,7 @@ const Assets = {
     jamarat:    'assets/models/jamarat.glb',
     mina:       'assets/models/mina.glb',
     appartement:'assets/models/appartement.glb',
+    airplane:   'assets/models/airplane.glb',
   },
   cache: {}, started: false,
   preload(){
@@ -68,6 +69,24 @@ const Assets = {
     m.traverse(o => { if(o.isMesh && o.name.indexOf('keswa') >= 0){ const b = new THREE.Box3().setFromObject(o); if(b.min.y < minY) minY = b.min.y; } });
     if(isFinite(minY)){ m.position.y += (0.8 - minY); m.updateMatrixWorld(true); }
     return m;
+  },
+  // appartement-interieur: vloer op y=0; (ox,oz) verschuift het hele model, ry roteert
+  // native room-coords (schaal 1): master-bed (-2.5,-1.3) · 2e bed (-1.8,-5.0) · bank (-6,3) · eethoek (-3,2.7) · keuken (-0.7,0.4) · bad (-5.5,-2)
+  placeApartment(ox, oz, s, ry){
+    const src = this.cache.appartement; if(!src) return null;
+    const m = src.clone(true); m.scale.setScalar(s || 1);
+    if(ry !== undefined) m.rotation.y = ry;
+    m.position.set(ox || 0, 0, oz || 0); world.add(m); m.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(m); m.position.y -= b.min.y; m.updateMatrixWorld(true);
+    return m;
+  },
+  // dim de unlit/baked materialen van een model (nacht): factor 0..1 op de basiskleur
+  tint(model, factor){
+    if(!model) return;
+    model.traverse(o => { if(o.isMesh && o.material){
+      const mats = Array.isArray(o.material) ? o.material : [o.material];
+      mats.forEach(mat => { if(!mat.userData.__origColor && mat.color) mat.userData.__origColor = mat.color.clone();
+        if(mat.userData.__origColor) mat.color.copy(mat.userData.__origColor).multiplyScalar(factor); }); }});
   },
   // willekeurig model: XZ-gecentreerd op (x,z), onderkant op de grond (y=0)
   placeProp(key, x, z, s, ry){
