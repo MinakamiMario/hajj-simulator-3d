@@ -166,11 +166,18 @@ details.faq p{margin:.5rem .2rem 0;color:#cfc6b0;font-size:.88rem;line-height:1.
   background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);border-radius:50%;}
 .gids-body{flex:1 1 auto;min-width:0;}
 .gids-name{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--gold);margin-bottom:.12rem;}
-.gids-txt{font-size:.92rem;line-height:1.42;color:#f3eede;}
+.gids-txt{font-size:.92rem;line-height:1.42;color:#f3eede;max-height:34vh;overflow-y:auto;overscroll-behavior:contain;}
 .gids-more{font-size:.66rem;color:rgba(201,168,76,.75);margin-top:.35rem;text-align:right;}
 .gids-close{flex:0 0 auto;background:none;border:none;color:rgba(240,220,160,.5);font-size:.95rem;cursor:pointer;padding:.05rem .2rem;line-height:1;}
 .gids-close:hover{color:var(--gold2);}
-@media (max-width:520px){ .gids{bottom:160px;} .gids-txt{font-size:.86rem;} }
+@media (max-width:520px){
+  .gids{bottom:150px;padding:.5rem .6rem;gap:.5rem;width:calc(100% - 1rem);background:rgba(4,6,12,.92);}
+  .gids-ic{width:30px;height:30px;font-size:1.1rem;}
+  .gids-name{font-size:.6rem;}
+  .gids-txt{font-size:.8rem;line-height:1.32;max-height:19vh;}   /* lange narratie scrollt i.p.v. het scherm te vullen */
+  .gids-more{font-size:.62rem;margin-top:.25rem;}
+  .gids-close{font-size:1.3rem;padding:.15rem .4rem;}            /* groter tik-doel om te sluiten */
+}
 
 /* ===== PER-SCENE CHECKLIST (afvinklijst) ===== */
 .checklist{position:absolute;top:104px;left:8px;z-index:27;max-width:min(56%,300px);
