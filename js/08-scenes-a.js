@@ -101,7 +101,7 @@ SCENES.push({
         {id:'medicijn',e:'💊',l:'Medicijnen',   ok:true, x:-5.4,z:-2.4,y:0.75},  // badkamer
         {id:'zeep',    e:'🧴',l:'Reukloze zeep',ok:true, x:-5.0,z:-1.4,y:0.75},  // badkamer
         {id:'sandalen',e:'👡',l:'Sandalen',     ok:true, x:-3.0,z:3.4, y:0.1},   // bij de entree/hal
-        {id:'ihraam',  e:'🤍',l:'Ihraam',       ok:true, x:-2.5,z:-0.5,y:0.6},   // op het bed (voeteneind)
+        {id:'ihraam',  e:'🤍',l:'Ihraam',       ok:true, x:-5.4,z:2.7, y:0.5},   // in de woonkamer bij de salontafel (goed zichtbaar + bereikbaar)
         {id:'parfum',  e:'🌸',l:'Parfum',       ok:false,x:-1.5,z:-1.0,y:0.6},   // slaapkamer-nachtkastje
         {id:'alcohol', e:'🍷',l:'Alcohol',      ok:false,x:-1.1,z:0.5, y:0.9},   // keuken
         {id:'camera',  e:'📷',l:'Camera',       ok:false,x:-5.9,z:3.6, y:0.45},  // salontafel
