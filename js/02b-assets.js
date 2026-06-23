@@ -16,6 +16,7 @@ const Assets = {
     rock3:   'assets/models/rock3.glb',
     nabawi_interior: 'assets/models/nabawi_interior.glb',
     minaret: 'assets/models/minaret.glb',
+    quba:    'assets/models/quba_mosque.glb',
     tent:    'assets/models/tent.glb',
     lantern: 'assets/models/lantern.glb',
     // fotorealistische, gedownloade + geoptimaliseerde modellen (Draco)

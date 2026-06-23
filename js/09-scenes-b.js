@@ -488,17 +488,23 @@ SCENES.push({
   fog:{near:30,far:110},
   build(){
     groundTex(texSand(18),80,0xcabb9e);
-    // witte moskee met koepel en vier minaretten
-    const hall=box(14,4.2,6,0xf6f2e8,{roughness:.92}); hall.position.set(0,2.1,-4); world.add(hall);
-    colliders.push({minX:-7.2,maxX:7.2,minZ:-7.2,maxZ:-0.85});
-    camOccluders.push(hall);
-    for(let x=-5.5;x<=5.5;x+=2.2){ const arch=box(1.2,2.2,0.3,0xddd4c2,{roughness:.9}); arch.position.set(x,1.1,-0.9); world.add(arch);
-      const at=sph(0.6,0xddd4c2,{roughness:.9},10); at.position.set(x,2.2,-0.9); at.scale.set(1,0.6,0.5); world.add(at); }
-    const dome=sph(1.7,0xf2ede0,{roughness:.85},24); dome.position.set(0,5.0,-4); dome.scale.set(1,0.85,1); world.add(dome);
-    const domeTip=cyl(0.02,0.16,0.8,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.55}); domeTip.position.set(0,6.6,-4); world.add(domeTip);
-    [[-6.4,-1.4],[6.4,-1.4],[-6.4,-6.6],[6.4,-6.6]].forEach(p=>{
-      const m=cyl(0.38,0.5,9,0xf6f2e8,{roughness:.9}); m.position.set(p[0],4.5,p[1]); m.castShadow=false; world.add(m);
-      const tip=cyl(0.02,0.3,1.2,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(p[0],9.7,p[1]); tip.castShadow=false; world.add(tip); });
+    // echte Quba-moskee (GLTF-model) met procedurele fallback
+    const quba=(typeof Assets!=='undefined')?Assets.placeProp('quba',0,-7.8,0.3,0):null;
+    if(quba){
+      colliders.push({minX:-9.5,maxX:9.5,minZ:-15,maxZ:-1.0});   // botsing rond het moskee-model (gevel op z≈-1)
+    } else {
+      // witte moskee met koepel en vier minaretten (procedureel)
+      const hall=box(14,4.2,6,0xf6f2e8,{roughness:.92}); hall.position.set(0,2.1,-4); world.add(hall);
+      colliders.push({minX:-7.2,maxX:7.2,minZ:-7.2,maxZ:-0.85});
+      camOccluders.push(hall);
+      for(let x=-5.5;x<=5.5;x+=2.2){ const arch=box(1.2,2.2,0.3,0xddd4c2,{roughness:.9}); arch.position.set(x,1.1,-0.9); world.add(arch);
+        const at=sph(0.6,0xddd4c2,{roughness:.9},10); at.position.set(x,2.2,-0.9); at.scale.set(1,0.6,0.5); world.add(at); }
+      const dome=sph(1.7,0xf2ede0,{roughness:.85},24); dome.position.set(0,5.0,-4); dome.scale.set(1,0.85,1); world.add(dome);
+      const domeTip=cyl(0.02,0.16,0.8,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.55}); domeTip.position.set(0,6.6,-4); world.add(domeTip);
+      [[-6.4,-1.4],[6.4,-1.4],[-6.4,-6.6],[6.4,-6.6]].forEach(p=>{
+        const m=cyl(0.38,0.5,9,0xf6f2e8,{roughness:.9}); m.position.set(p[0],4.5,p[1]); m.castShadow=false; world.add(m);
+        const tip=cyl(0.02,0.3,1.2,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.5}); tip.position.set(p[0],9.7,p[1]); tip.castShadow=false; world.add(tip); });
+    }
     // palmbomen (Medina staat bekend om zijn dadelpalmen) — GLTF met fallback
     [[-6,4],[6,4],[-8,1],[8,1],[-3,6.5],[3,6.5],[-10,5],[10,5],[-12,2],[12,2]].forEach(p=>palmTree(p[0],p[1],0.9+Math.random()*0.25));
     const courtyard=box(14,0.05,8,0xffffff,{map:texMarble(6),roughness:.9}); courtyard.position.set(0,0.04,3); world.add(courtyard);
