@@ -28,6 +28,8 @@ function addNiyyahFlow(matX,matZ,bedX,bedZ){
 
 /* inpak-item (gedeeld door appartement + procedurele fallback) */
 function addPackItem(it){
+  // leg het item op het werkelijke oppervlak (meubel of vloer) zodat 't nooit ín een meubel verdwijnt
+  if(typeof surfaceTopY==='function'){ const sy=surfaceTopY(it.x,it.z); if(sy!==null) it.y=sy+0.3; }
   Zone.add({ id:'pi-'+it.id, x:it.x, z:it.z, y:it.y, r:0.7, trigR:0.95, pickup:true, glow:it.ok,
     icon:it.e, label:'Pak '+it.l, noConsume:true,
     action:(z)=>{

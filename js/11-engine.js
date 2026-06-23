@@ -33,6 +33,16 @@ function initThree(){
   animate();
 }
 
+// hoogte van het bovenste oppervlak (meubel of vloer) op (x,z) — voor het netjes neerleggen van items
+let _surfRay=null;
+function surfaceTopY(x,z){
+  if(typeof fadeModel==='undefined' || !fadeModel) return null;
+  _surfRay = _surfRay || new THREER.Raycaster();
+  _surfRay.set(new THREER.Vector3(x,6,z), new THREER.Vector3(0,-1,0)); _surfRay.far=8;
+  const h=_surfRay.intersectObject(fadeModel,true);
+  return h.length ? h[0].point.y : null;
+}
+
 // muur-collision voor binnenruimtes: blokkeer een stap als er een muur/obstakel vóór zit
 // (raycast op heuphoogte in de loop-richting; werkt op willekeurige geometrie → speler glijdt langs muren en door deuropeningen)
 let _wallRay=null;
