@@ -33,6 +33,18 @@ function initThree(){
   animate();
 }
 
+// muur-collision voor binnenruimtes: blokkeer een stap als er een muur/obstakel vóór zit
+// (raycast op heuphoogte in de loop-richting; werkt op willekeurige geometrie → speler glijdt langs muren en door deuropeningen)
+let _wallRay=null;
+function wallBetween(fx,fz,tx,tz){
+  if(typeof fadeModel==='undefined' || !fadeModel) return false;
+  const dx=tx-fx, dz=tz-fz, d=Math.hypot(dx,dz); if(d<1e-4) return false;
+  _wallRay = _wallRay || new THREER.Raycaster();
+  _wallRay.set(new THREER.Vector3(fx, Player.y0+0.9, fz), new THREER.Vector3(dx/d,0,dz/d));
+  _wallRay.far = d + 0.32;                                // staplengte + lichaamsstraal
+  return _wallRay.intersectObject(fadeModel,true).length>0;
+}
+
 // muren/objecten tussen camera en speler doorzichtig maken (Sims-stijl) voor binnenruimtes
 let _fadeRay=null;
 function updateWallFade(){
@@ -89,8 +101,8 @@ function animate(){
         const sp=Player.speed*Math.min(1,mag)*(Player.running?1.7:1);
         let nx=Math.max(Player.bounds.minX,Math.min(Player.bounds.maxX,Player.x+dx*sp*dt));
         let nz=Math.max(Player.bounds.minZ,Math.min(Player.bounds.maxZ,Player.z+dz*sp*dt));
-        if(!blocked(nx,Player.z))Player.x=nx;   // axis-separated sliding
-        if(!blocked(Player.x,nz))Player.z=nz;
+        if(!blocked(nx,Player.z) && !wallBetween(Player.x,Player.z,nx,Player.z))Player.x=nx;   // axis-separated sliding + muur-collision
+        if(!blocked(Player.x,nz) && !wallBetween(Player.x,Player.z,Player.x,nz))Player.z=nz;
         const target=Math.atan2(-dx,-dz);
         let diff=target-Player.faceY; while(diff>Math.PI)diff-=Math.PI*2; while(diff<-Math.PI)diff+=Math.PI*2;
         Player.faceY+=diff*Math.min(1,dt*12);

@@ -49,7 +49,7 @@ SCENES.push({
   id:0, loc:'🏠 Je slaapkamer — 02:17', ar:'النِّيَّة',
   task:'🎯 Maak je Niyyah (intentie), en ga dan slapen — morgen begint de reis',
   story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe (WASD / joystick), druk op <strong>A</strong> — en ga daarna naar je <strong>bed</strong>. Morgenochtend pak je je koffer.`,
-  spawn:{x:-3.25,z:0.1,face:0,bounds:{minX:-4.5,maxX:-1.9,minZ:-3.0,maxZ:0.9}},
+  spawn:{x:-3.5,z:3.6,face:0,bounds:{minX:-8.3,maxX:0.0,minZ:-7.5,maxZ:5.4}},
   light:{amb:0x46588a,ambI:1.0,dir:0x9aaae0,dirI:0.65,sky:0x0e0b24,exp:0.5},
   cam:{dist:4.2,height:3.4,pitch:0.52},                      // third-person, iets van bovenaf (dollhouse) + muur-fade
   build(){
@@ -58,7 +58,8 @@ SCENES.push({
     if(apt){
       Assets.tint(apt,0.55);                                 // nacht: dim de baked-bright woning (eigen nachtlamp blijft warm)
       fadeModel=apt;                                         // muren faden als ze cam→speler blokkeren
-      addNiyyahFlow(-2.5*S,-0.6*S,-2.5*S,-1.5*S);            // Niyyah aan 't voeteneind → slapen in bed
+      // Niyyah in de ruime open woonkamer/eethoek (loopbaar), daarna 'slapen' richting slaapkamer
+      addNiyyahFlow(-4.0,2.9, -3.2,1.7);
     } else {
       // ---- procedurele fallback (oude slaapkamer) ----
       room(10,10,3.2,0x322652,0x3a2e58);
