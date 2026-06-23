@@ -154,8 +154,6 @@ SCENES.push({
     const minaCity=(typeof Assets!=='undefined')?Assets.placeProp('mina',0,-95,0.26):null;
     minaTentField(-16,5,5,4,2.5); minaTentField(16,5,5,4,2.5);
     if(!minaCity) minaTentField(0,10,8,4,2.5);
-    // de échte Jamarat-brug torent op de achtergrond (lokaal prototype-model)
-    const jamBg=(typeof Assets!=='undefined')?Assets.placeProp('jamarat',0,-16,0.09):null;
     mountainRange(60,0x4a3a2c,12);
     // the pillar (wall) inside its oval basin ("put")
     const pillar=box(1.4,4,0.6,0x4a4858,{roughness:.8}); pillar.position.set(0,2,-2.5); world.add(pillar); jamPillar=pillar; jamPillarShake=0;

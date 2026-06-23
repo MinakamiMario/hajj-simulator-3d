@@ -12,6 +12,12 @@
       "runtimeExecutable": "sh",
       "runtimeArgs": ["-c", "cd '/Users/oussama/code/MyCountingApp' && npx expo start --web --port 8082"],
       "port": 8082
+    },
+    {
+      "name": "qalamgames",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "4178", "--directory", "/Users/oussama/code/qalamgames2/dist"],
+      "port": 4178
     }
   ]
 }

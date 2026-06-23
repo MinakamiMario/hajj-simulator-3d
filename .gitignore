@@ -9,7 +9,5 @@ assets/audio/gids/_arabic_test/
 # ruwe gedownloade 3D-modellen (FBX + ongeoptimaliseerde GLB) — alleen de geoptimaliseerde .glb gaan mee
 assets/models/sketchfab/
 
-# prototype-modellen met onduidelijke licentie — lokaal houden tot rechten geregeld zijn
-assets/models/jamarat.glb
+# prototype-model met onduidelijke licentie — lokaal houden tot rechten geregeld zijn
 assets/models/mina.glb
-assets/models/jamaraat.glb

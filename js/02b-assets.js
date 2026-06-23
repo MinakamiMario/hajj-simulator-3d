@@ -18,11 +18,9 @@ const Assets = {
     minaret: 'assets/models/minaret.glb',
     tent:    'assets/models/tent.glb',
     lantern: 'assets/models/lantern.glb',
-    jamaraat: 'assets/models/jamaraat.glb',
     // fotorealistische, gedownloade + geoptimaliseerde modellen (Draco)
     haram:      'assets/models/haram.glb',
     clocktower: 'assets/models/clocktower.glb',
-    jamarat:    'assets/models/jamarat.glb',
     mina:       'assets/models/mina.glb',
     appartement:'assets/models/appartement.glb',
     airplane:   'assets/models/airplane.glb',
