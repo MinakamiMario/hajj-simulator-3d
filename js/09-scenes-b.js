@@ -587,7 +587,7 @@ function tawafScene(){
   // fotorealistisch Haram-model — kleinere schaal voor de Tawaf (je cirkelt er dicht omheen); fallback procedureel
   const haram=(typeof Assets!=='undefined')?Assets.placeHaram(0,0,3.6):null;
   if(haram){ groundTex(texMarble(40),300,0xece4d2); Assets.placeProp('clocktower',-70,-120,3.0);
-    colliders.push({minX:-3.7,maxX:3.7,minZ:-3.4,maxZ:3.4}); }   // botsing rond de Ka'ba (model heeft er geen)
+    colliders.push({minX:-3.85,maxX:3.75,minZ:-3.95,maxZ:3.65}); }   // botsing rond de Ka'ba (sluit aan op de keswa-kubus van het grotere model)
   else { groundTex(texMarble(34),150,0xf0e8d6); kaaba(0,0); haramSurround(0,0,16); meccaSkyline(0,0,16); }
   world.add(makeOrbitCrowd(90,4.6,11));
   // dashed path ring (visual)
