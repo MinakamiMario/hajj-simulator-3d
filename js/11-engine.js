@@ -40,9 +40,13 @@ function wallBetween(fx,fz,tx,tz){
   if(typeof fadeModel==='undefined' || !fadeModel) return false;
   const dx=tx-fx, dz=tz-fz, d=Math.hypot(dx,dz); if(d<1e-4) return false;
   _wallRay = _wallRay || new THREER.Raycaster();
-  _wallRay.set(new THREER.Vector3(fx, Player.y0+0.9, fz), new THREER.Vector3(dx/d,0,dz/d));
-  _wallRay.far = d + 0.32;                                // staplengte + lichaamsstraal
-  return _wallRay.intersectObject(fadeModel,true).length>0;
+  const ndx=dx/d, ndz=dz/d, far=d+0.32, y0=Player.y0;    // staplengte + lichaamsstraal
+  for(let k=0;k<2;k++){                                   // twee hoogtes: knie (0.35) vangt bedden/banken, borst (0.95) vangt muren
+    _wallRay.set(new THREER.Vector3(fx, y0+(k?0.95:0.35), fz), new THREER.Vector3(ndx,0,ndz));
+    _wallRay.far=far;
+    if(_wallRay.intersectObject(fadeModel,true).length>0) return true;
+  }
+  return false;
 }
 
 // muren/objecten tussen camera en speler doorzichtig maken (Sims-stijl) voor binnenruimtes
@@ -58,7 +62,7 @@ function updateWallFade(){
   const hit={}; _fadeRay.intersectObject(fadeModel,true).forEach(h=>{ hit[h.object.uuid]=1; });
   fadeModel.traverse(o=>{ if(o.isMesh && o.material && !Array.isArray(o.material)){
     const m=o.material;
-    const target = hit[o.uuid] ? 0.16 : 1.0;             // blokkerend → bijna doorzichtig
+    const target = hit[o.uuid] ? 0.3 : 1.0;              // blokkerend → doorzichtig (maar nog zichtbaar, niet spookachtig)
     if(m.__op===undefined) m.__op=1;
     m.__op += (target-m.__op)*0.2;                        // soepel faden
     m.opacity = m.__op; m.transparent = m.__op < 0.985; m.depthWrite = m.__op > 0.6;
