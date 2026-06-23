@@ -11,6 +11,7 @@ function loadScene(id){
   const s=SCENES[id]; State.scene=id; frameHook=null; jamPillar=null;
   encounter=null; paused=false; closeChoice(); colliders=[]; camOccluders.length=0; terrainFn=null;
   if(typeof Cam!=='undefined') Cam.cine=null;             // ruim filmische cutscene op vóór build (build mag 'm opnieuw zetten)
+  fadeModel=null;                                         // muur-fade uit (build zet 'm aan voor binnenruimtes)
   clearSceneIntervals();
   clearWorld(); Zone.clear();
   document.querySelectorAll('.feedback-bar,.next-bar,.sim-bar').forEach(n=>n.remove());

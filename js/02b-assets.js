@@ -75,6 +75,8 @@ const Assets = {
   placeApartment(ox, oz, s, ry){
     const src = this.cache.appartement; if(!src) return null;
     const m = src.clone(true); m.scale.setScalar(s || 1);
+    // materialen per instance klonen (clone(true) deelt ze met de cache) → tint/fade lekt niet tussen scènes
+    m.traverse(o=>{ if(o.isMesh && o.material){ o.material = Array.isArray(o.material) ? o.material.map(x=>x.clone()) : o.material.clone(); } });
     if(ry !== undefined) m.rotation.y = ry;
     m.position.set(ox || 0, 0, oz || 0); world.add(m); m.updateMatrixWorld(true);
     const b = new THREE.Box3().setFromObject(m); m.position.y -= b.min.y; m.updateMatrixWorld(true);

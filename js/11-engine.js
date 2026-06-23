@@ -33,6 +33,26 @@ function initThree(){
   animate();
 }
 
+// muren/objecten tussen camera en speler doorzichtig maken (Sims-stijl) voor binnenruimtes
+let _fadeRay=null;
+function updateWallFade(){
+  if(typeof fadeModel==='undefined' || !fadeModel || !camera || !Player.obj) return;
+  _fadeRay = _fadeRay || new THREER.Raycaster();
+  const ox=camera.position.x, oy=camera.position.y, oz=camera.position.z;
+  const tx=Player.x, ty=Player.y0+1.1, tz=Player.z;
+  const dx=tx-ox, dy=ty-oy, dz=tz-oz, len=Math.hypot(dx,dy,dz)||1;
+  _fadeRay.set(new THREER.Vector3(ox,oy,oz), new THREER.Vector3(dx/len,dy/len,dz/len));
+  _fadeRay.far = Math.max(0.1, len-0.7);                  // niet de speler zelf raken
+  const hit={}; _fadeRay.intersectObject(fadeModel,true).forEach(h=>{ hit[h.object.uuid]=1; });
+  fadeModel.traverse(o=>{ if(o.isMesh && o.material && !Array.isArray(o.material)){
+    const m=o.material;
+    const target = hit[o.uuid] ? 0.16 : 1.0;             // blokkerend → bijna doorzichtig
+    if(m.__op===undefined) m.__op=1;
+    m.__op += (target-m.__op)*0.2;                        // soepel faden
+    m.opacity = m.__op; m.transparent = m.__op < 0.985; m.depthWrite = m.__op > 0.6;
+  }});
+}
+
 function animate(){
   requestAnimationFrame(animate);
   if(!renderer)return;
@@ -82,6 +102,7 @@ function animate(){
     updateEncounter(dt);
     if(frameHook && !paused)frameHook();
     Cam.update();
+    updateWallFade();
     updateLabelPositions();
     Guide.update();
     // ambient life: orbiting crowd (tawaf), walkers (sai), swaying pilgrims

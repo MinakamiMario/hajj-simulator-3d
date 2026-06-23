@@ -5,6 +5,7 @@
 const State={ scene:0, packed:0, ihrSteps:0, stonesCol:0, stonesThrown:0,
   tawaf:0, sai:0, saiLast:null, tawafAngle:0, tawafAccum:0, sabr:0, angryDone:false, saiHelpDone:false, tawafSimOffered:false, saiSimOffered:false };
 let frameHook=null;
+let fadeModel=null;        // model waarvan muren transparant worden als ze cam→speler blokkeren (binnenruimtes)
 let paused=false;
 let encounter=null;
 let colliders=[];
@@ -48,14 +49,16 @@ SCENES.push({
   id:0, loc:'🏠 Je slaapkamer — 02:17', ar:'النِّيَّة',
   task:'🎯 Maak je Niyyah (intentie), en ga dan slapen — morgen begint de reis',
   story:`Het is midden in de nacht. Je hebt maanden voorbereid voor je Hajj. Tijd om je <em>Niyyah</em> (intentie) te maken.<br><br>💡 <strong>Goed om te weten:</strong> de Niyyah zit in je <strong>hart</strong> — je hoeft 'm niet hardop uit te spreken, en een gebedskleed is er niet voor nodig. In dit spel doen we het bij het kleedje als rustig moment.<br><br>Loop ernaartoe (WASD / joystick), druk op <strong>A</strong> — en ga daarna naar je <strong>bed</strong>. Morgenochtend pak je je koffer.`,
-  spawn:{x:-2.5,z:0.0,face:0,bounds:{minX:-3.4,maxX:-1.5,minZ:-2.3,maxZ:0.5}},
+  spawn:{x:-3.25,z:0.1,face:0,bounds:{minX:-4.5,maxX:-1.9,minZ:-3.0,maxZ:0.9}},
   light:{amb:0x46588a,ambI:1.0,dir:0x9aaae0,dirI:0.65,sky:0x0e0b24,exp:0.5},
-  cam:{fp:true,eyeH:1.48,pitch:0.38},
+  cam:{dist:4.2,height:3.4,pitch:0.52},                      // third-person, iets van bovenaf (dollhouse) + muur-fade
   build(){
-    const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,1):null;
+    const S=1.3;                                             // appartement wat ruimer voor het popetje
+    const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,S):null;
     if(apt){
       Assets.tint(apt,0.55);                                 // nacht: dim de baked-bright woning (eigen nachtlamp blijft warm)
-      addNiyyahFlow(-2.5,-0.6,-2.5,-1.5);                    // Niyyah aan 't voeteneind → slapen in bed
+      fadeModel=apt;                                         // muren faden als ze cam→speler blokkeren
+      addNiyyahFlow(-2.5*S,-0.6*S,-2.5*S,-1.5*S);            // Niyyah aan 't voeteneind → slapen in bed
     } else {
       // ---- procedurele fallback (oude slaapkamer) ----
       room(10,10,3.2,0x322652,0x3a2e58);
@@ -77,16 +80,18 @@ SCENES.push({
   id:1, loc:'🏠 Inpakken — Ochtend', ar:'التَّحضِير',
   task:'🎯 Pak de juiste 7 items (sommige zijn verboden in Ihraam!)',
   story:`Het is ochtend in je straat. Door het grote raam zie je het dorp en de taxi die zo komt. Pak alleen wat je nodig hebt — sommige items zijn <strong>verboden</strong> tijdens Ihraam.<br><br>Tip: je mag je <strong>Ihraam hier alvast aandoen</strong> (niet verplicht — het kan ook in het vliegtuig).`,
-  spawn:{x:-4.3,z:3.7,face:-Math.PI/2,bounds:{minX:-6.5,maxX:-0.5,minZ:1.2,maxZ:4.2}},
+  spawn:{x:-5.6,z:4.8,face:-Math.PI/2,bounds:{minX:-8.5,maxX:-0.6,minZ:1.5,maxZ:5.5}},
   light:{amb:0xbfd0e8,ambI:1.0,dir:0xfff2da,dirI:1.05,sky:0x9cc4e8,exp:0.95},
-  fog:{near:28,far:90},
-  cam:{fp:true,eyeH:1.5,pitch:0.16},
+  fog:{near:34,far:120},
+  cam:{dist:5.5,height:3.8,pitch:0.42},                        // third-person, iets van bovenaf + muur-fade
   build(){
-    const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,1):null;
+    const S=1.3;                                              // appartement wat ruimer voor het popetje
+    const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,S):null;
     if(apt){
+      fadeModel=apt;                                          // muren faden als ze cam→speler blokkeren
       State.packed=0;
-      suitcase(-4.4,3.9);                                       // koffer klaar bij de eethoek
-      // items verspreid over eettafel, keuken-aanrecht en woonkamer
+      suitcase(-4.4*S,3.9*S);                                  // koffer klaar bij de eethoek
+      // items verspreid over eettafel, keuken-aanrecht en woonkamer (×S meegeschaald)
       [ {id:'paspoort',e:'🛂',l:'Paspoort',     ok:true, x:-3.4,z:2.6,y:0.86},
         {id:'duaboek', e:'📖',l:"Du'a boek",    ok:true, x:-2.7,z:2.7,y:0.86},
         {id:'geld',    e:'💵',l:'Geld',         ok:true, x:-3.0,z:3.0,y:0.86},
@@ -97,9 +102,9 @@ SCENES.push({
         {id:'parfum',  e:'🌸',l:'Parfum',       ok:false,x:-2.2,z:3.2,y:0.86},
         {id:'alcohol', e:'🍷',l:'Alcohol',      ok:false,x:-0.8,z:2.1,y:1.0},
         {id:'camera',  e:'📷',l:'Camera',       ok:false,x:-6.0,z:2.4,y:0.55},
-      ].forEach(addPackItem);
+      ].forEach(it=>{ it.x*=S; it.z*=S; it.y*=S; addPackItem(it); });
       setProgress('📦 0/7 ingepakt');
-      addWearIhram(-4.9,2.2);
+      addWearIhram(-4.9*S,2.2*S);
     } else {
       // ---- procedurele fallback (oude inpak-kamer) ----
       ground(0x6a705a,90,{roughness:1});                        // outdoor earth (visible outside)
