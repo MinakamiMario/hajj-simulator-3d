@@ -241,21 +241,25 @@ SCENES.push({
 /* 3 — KA'BA REVEAL */
 SCENES.push({
   id:3, loc:"🕌 Masjid al-Haram — Eerste blik", ar:'أَوَّل رُؤيَة الكَعبَة',
-  task:"🎯 Loop naar de Ka'ba en hef je handen op voor du'a",
-  story:`Je loopt door de poort. En dan zie je hem — de Ka'ba. Tranen wellen op.`,
-  spawn:{x:0,z:10,face:Math.PI,bounds:{minX:-12,maxX:12,minZ:-2,maxZ:12}},
-  light:{amb:0x3a3654,ambI:0.8,dir:0xd8b86a,dirI:0.7,sky:0x141030,exp:0.6},
-  fog:{near:34,far:150},
-  cam:{dist:9.5,height:3.6,pitch:0.34},                 // ruim uitgezoomd: hele Ka'ba in beeld
+  task:"🎯 Loop over de mataf naar de Ka'ba en hef je handen op voor du'a",
+  story:`Je loopt de Masjid al-Haram binnen. En dan zie je hem — de Ka'ba. Tranen wellen op.`,
+  spawn:{x:0,z:34,face:Math.PI,bounds:{minX:-15,maxX:15,minZ:2,maxZ:38}},
+  light:{amb:0xffeede,ambI:1.2,dir:0xfff0d4,dirI:1.1,sky:0xa9c4dd,exp:0.6,hemiI:0.1},
+  fog:{near:70,far:520},
+  cam:{dist:10,height:4.2,pitch:0.12},
   build(){
-    groundTex(texMarble(34),150,0xf0e8d6);
-    kaaba(0,-3);
-    haramSurround(0,-3,16);
-    meccaSkyline(0,-3,16);
-    const oc=makeOrbitCrowd(60); oc.position.set(0,0,-3); world.add(oc);
-    addWanderers(8,{minX:-10,maxX:10,minZ:4,maxZ:11});
+    // fotorealistisch Haram-model (Ka'ba + mataf + galerij); val terug op procedureel als 't model nog laadt
+    const haram=(typeof Assets!=='undefined')?Assets.placeHaram(0,-3,6.5):null;
+    if(haram){
+      groundTex(texMarble(40),360,0xece4d2);                      // mataf-vloer rondom het model
+      Assets.placeProp('clocktower',-78,-150,3.4);                // Abraj Al-Bait torent in de skyline
+    } else {
+      groundTex(texMarble(34),150,0xf0e8d6); kaaba(0,-3); haramSurround(0,-3,16); meccaSkyline(0,-3,16);
+    }
+    const oc=makeOrbitCrowd(70,9,24); oc.position.set(0,0,-3); world.add(oc);   // tawaf-menigte rónd de grote Ka'ba
+    addWanderers(10,{minX:-13,maxX:13,minZ:6,maxZ:34});
     everyMs(()=>spawnDhikrAt(0,-3),2600);
-    Zone.add({ id:'pray', x:0, z:4.5, r:1.5, icon:'🤲', label:"Du'a voor Ka'ba", guide:true,
+    Zone.add({ id:'pray', x:0, z:7, r:1.8, icon:'🤲', label:"Du'a voor Ka'ba", guide:true,
       action:()=>{ Player.faceTowards(0,-3); Player.setPose('dua'); learnDua('kaaba');   // richt naar de Ka'ba
         showFeedback("✅ Je heft je handen op. \"Allahumma anta as-Salam wa minka as-Salam...\" Tranen lopen over je wangen.",true,5000);
         showNextBtn('Begin Tawaf →'); }});
@@ -267,10 +271,10 @@ SCENES.push({
   id:4, loc:"🕋 Tawaf — Rondom de Ka'ba", ar:'الطَّوَاف',
   task:"🎯 Loop 7× rondom de Ka'ba (tegen de klok in)",
   story:`Begin bij de Hajar al-Aswad-hoek. Loop <strong>tegen de klok in</strong> rondom de Ka'ba — de Ka'ba aan je linkerhand. Een volledige ronde telt als 1 tawaf.`,
-  spawn:{x:5,z:0,face:-Math.PI/2,bounds:{minX:-11,maxX:11,minZ:-11,maxZ:11}},
-  light:{amb:0x3a3654,ambI:0.8,dir:0xd8b86a,dirI:0.7,sky:0x141030,exp:0.6},
-  fog:{near:34,far:150},
-  cam:{dist:9,height:3.4,pitch:0.32},                   // uitgezoomd zodat Ka'ba + hoeklabels leesbaar blijven
+  spawn:{x:5,z:0,face:-Math.PI/2,bounds:{minX:-12,maxX:12,minZ:-12,maxZ:12}},
+  light:{amb:0xffeede,ambI:1.2,dir:0xfff0d4,dirI:1.1,sky:0xa9c4dd,exp:0.6,hemiI:0.1},
+  fog:{near:60,far:520},
+  cam:{dist:9.5,height:3.8,pitch:0.22},                 // uitgezoomd zodat Ka'ba + hoeklabels leesbaar blijven
   build(){ tawafScene();
     // Maqam Ibrahim: 2 rak'ah na de tawaf (optioneel, educatief)
     const maqam=box(0.5,0.9,0.5,0xc9a84c,{metalness:.5,roughness:.3,emissive:0x5a4410,emissiveIntensity:.4}); maqam.position.set(2.2,0.45,5.6); world.add(maqam);

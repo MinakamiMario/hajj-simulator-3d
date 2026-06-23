@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model-viewer — Hajj 3D</title>
+<style>
+  html,body{margin:0;height:100%;background:#cfe0ee;font-family:system-ui,sans-serif;overflow:hidden;}
+  #c{display:block;width:100vw;height:100vh;touch-action:none;}
+  #hud{position:fixed;top:10px;left:10px;background:rgba(20,20,30,.6);color:#f4e3b5;
+       padding:8px 12px;border-radius:10px;font-size:14px;line-height:1.4;backdrop-filter:blur(6px);}
+  #hud b{color:#ffd98a;}
+  #hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(20,20,30,.6);
+        color:#fff;padding:6px 14px;border-radius:20px;font-size:13px;backdrop-filter:blur(6px);}
+  #err{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:#a00;font-size:16px;display:none;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">Model: <b id="name">…</b><br><span id="dims"></span></div>
+<div id="hint">🖱️ sleep = draaien · scroll/knijp = zoomen · rechts-sleep = verschuiven</div>
+<div id="err"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const MODEL = params.get('model') || 'jamaraat';
+document.getElementById('name').textContent = MODEL;
+
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'), antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe0ee);
+scene.fog = new THREE.Fog(0xcfe0ee, 60, 160);
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 500);
+camera.position.set(20, 12, 22);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 3; controls.maxDistance = 120;
+
+// licht (zoals overdag in de game)
+scene.add(new THREE.HemisphereLight(0xeaf2ff, 0x6a5a44, 0.9));
+const sun = new THREE.DirectionalLight(0xfff0d8, 1.0);
+sun.position.set(-18, 30, 14); sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.near = 1; sun.shadow.camera.far = 120;
+sun.shadow.camera.left=-40; sun.shadow.camera.right=40; sun.shadow.camera.top=40; sun.shadow.camera.bottom=-40;
+scene.add(sun);
+
+// grond
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(400,400),
+  new THREE.MeshStandardMaterial({color:0xcabf9a, roughness:1}));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+const loader = new THREE.GLTFLoader();
+const draco = new THREE.DRACOLoader();
+draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+loader.setDRACOLoader(draco);
+loader.load('../assets/models/'+MODEL+'.glb?t='+Date.now(), (gltf)=>{
+  const m = gltf.scene;
+  m.traverse(o=>{ if(o.isMesh){ o.castShadow=true; o.receiveShadow=true; } });
+  scene.add(m);
+  // centreren op de grond + camera erop richten
+  const box = new THREE.Box3().setFromObject(m);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  m.position.x -= center.x; m.position.z -= center.z; m.position.y -= box.min.y;
+  document.getElementById('dims').textContent =
+    'b '+size.x.toFixed(1)+' × h '+size.y.toFixed(1)+' × d '+size.z.toFixed(1)+' (units)';
+  const r = Math.max(size.x,size.y,size.z);
+  controls.target.set(0, size.y*0.45, 0);
+  camera.position.set(r*1.1, r*0.7, r*1.3);
+  controls.update();
+}, undefined, (e)=>{
+  const el=document.getElementById('err'); el.style.display='block';
+  el.textContent='Kon model niet laden: '+MODEL+'.glb';
+});
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setSize(innerWidth, innerHeight);
+(function loop(){ requestAnimationFrame(loop); controls.update(); renderer.render(scene,camera); })();
+</script>
+</body>
+</html>

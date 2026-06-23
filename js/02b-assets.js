@@ -18,6 +18,13 @@ const Assets = {
     minaret: 'assets/models/minaret.glb',
     tent:    'assets/models/tent.glb',
     lantern: 'assets/models/lantern.glb',
+    jamaraat: 'assets/models/jamaraat.glb',
+    // fotorealistische, gedownloade + geoptimaliseerde modellen (Draco)
+    haram:      'assets/models/haram.glb',
+    clocktower: 'assets/models/clocktower.glb',
+    jamarat:    'assets/models/jamarat.glb',
+    mina:       'assets/models/mina.glb',
+    appartement:'assets/models/appartement.glb',
   },
   cache: {}, started: false,
   preload(){
@@ -27,6 +34,12 @@ const Assets = {
       return;
     }
     const loader = new THREE.GLTFLoader();
+    if(THREE.DRACOLoader){                                  // Draco-modellen (gecomprimeerd) — lokale decoder (offline)
+      const draco = new THREE.DRACOLoader();
+      draco.setDecoderPath('assets/draco/');
+      draco.setDecoderConfig({type:'wasm'});
+      loader.setDRACOLoader(draco);
+    }
     for(const key in this.defs){
       loader.load(this.defs[key], g => {
         g.scene.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; } });
@@ -43,5 +56,27 @@ const Assets = {
     if(s) m.scale.setScalar(s);
     m.rotation.y = (ry !== undefined) ? ry : Math.random() * Math.PI * 2;
     world.add(m); return m;
+  },
+  // Haram-model met de Ka'ba op (kx,0,kz); zakt de Ka'ba-voet naar y≈0.8 (op de mataf)
+  placeHaram(kx, kz, s){
+    s = s || 6.5;
+    const src = this.cache.haram; if(!src) return null;
+    const m = src.clone(true); m.scale.setScalar(s);
+    m.position.set(kx + 0.5 * s, 0, kz - 23.3 * s);        // Ka'ba-mesh (keswa) ligt op local (-0.5, 23.3)
+    world.add(m); m.updateMatrixWorld(true);
+    let minY = Infinity;
+    m.traverse(o => { if(o.isMesh && o.name.indexOf('keswa') >= 0){ const b = new THREE.Box3().setFromObject(o); if(b.min.y < minY) minY = b.min.y; } });
+    if(isFinite(minY)){ m.position.y += (0.8 - minY); m.updateMatrixWorld(true); }
+    return m;
+  },
+  // willekeurig model: XZ-gecentreerd op (x,z), onderkant op de grond (y=0)
+  placeProp(key, x, z, s, ry){
+    const src = this.cache[key]; if(!src) return null;
+    const m = src.clone(true); m.scale.setScalar(s || 1);
+    if(ry !== undefined) m.rotation.y = ry;
+    world.add(m); m.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(m), c = b.getCenter(new THREE.Vector3());
+    m.position.x += x - c.x; m.position.z += z - c.z; m.position.y -= b.min.y;
+    m.updateMatrixWorld(true); return m;
   }
 };

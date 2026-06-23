@@ -246,10 +246,10 @@ SCENES.push({
   id:10, loc:"🕋 Tawaf al-Ifada + al-Wada", ar:'طَوَاف الإِفَاضَة',
   task:"🎯 Loop 7× rondom de Ka'ba — de afsluitende tawaf",
   story:`De afsluitende tawaf. Je Ihraam is af. Loop opnieuw 7× tegen de klok in rondom de Ka'ba.`,
-  spawn:{x:5,z:0,face:-Math.PI/2,bounds:{minX:-11,maxX:11,minZ:-11,maxZ:11}},
-  light:{amb:0x3a3654,ambI:0.8,dir:0xd8b86a,dirI:0.7,sky:0x141030,exp:0.6},
-  fog:{near:34,far:150},
-  cam:{dist:9,height:3.4,pitch:0.32},                   // uitgezoomd zoals de eerste tawaf
+  spawn:{x:5,z:0,face:-Math.PI/2,bounds:{minX:-12,maxX:12,minZ:-12,maxZ:12}},
+  light:{amb:0xffeede,ambI:1.2,dir:0xfff0d4,dirI:1.1,sky:0xa9c4dd,exp:0.6,hemiI:0.1},
+  fog:{near:60,far:520},
+  cam:{dist:9.5,height:3.8,pitch:0.22},                 // uitgezoomd zoals de eerste tawaf
   onEnter:()=>{ Char.ihram=false; },
   build(){ tawafScene(true); },
   onExit(){ frameHook=null; }
@@ -583,11 +583,12 @@ SCENES.push({
 
 // ---- shared tawaf scene + frame hook ----
 function tawafScene(){
-  groundTex(texMarble(34),150,0xf0e8d6);
-  kaaba(0,0);
-  haramSurround(0,0,16);
-  meccaSkyline(0,0,16);
-  world.add(makeOrbitCrowd(90));
+  // fotorealistisch Haram-model — kleinere schaal voor de Tawaf (je cirkelt er dicht omheen); fallback procedureel
+  const haram=(typeof Assets!=='undefined')?Assets.placeHaram(0,0,3.6):null;
+  if(haram){ groundTex(texMarble(40),300,0xece4d2); Assets.placeProp('clocktower',-70,-120,3.0);
+    colliders.push({minX:-3.7,maxX:3.7,minZ:-3.4,maxZ:3.4}); }   // botsing rond de Ka'ba (model heeft er geen)
+  else { groundTex(texMarble(34),150,0xf0e8d6); kaaba(0,0); haramSurround(0,0,16); meccaSkyline(0,0,16); }
+  world.add(makeOrbitCrowd(90,4.6,11));
   // dashed path ring (visual)
   const ring=new THREER.Mesh(new THREER.RingGeometry(4.2,4.4,64),
     new THREER.MeshBasicMaterial({color:0xc9a84c,transparent:true,opacity:.3,side:THREER.DoubleSide}));
@@ -645,11 +646,12 @@ function tawafScene(){
   };
 }
 // crowd that slowly circles the Ka'ba (anti-clockwise)
-function makeOrbitCrowd(n){
+function makeOrbitCrowd(n,rMin,rMax){
   const grp=new THREER.Group();
+  const r0=(rMin!==undefined?rMin:3.2), rSpan=(rMax!==undefined?rMax:10.7)-r0;
   for(let i=0;i<n;i++){
     const p=pilgrimMesh();
-    const r=3.2+Math.random()*7.5, a=(i/n)*Math.PI*2;
+    const r=r0+Math.random()*rSpan, a=(i/n)*Math.PI*2;
     p.position.set(Math.cos(a)*r,0,Math.sin(a)*r);
     p.userData.orbit={r:r, a:a, sp:-(0.09+Math.random()*0.08)};  // negative = anti-clockwise
     grp.add(p);

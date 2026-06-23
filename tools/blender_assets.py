@@ -366,6 +366,65 @@ def build_lantern():
     P.append(hook)                                                         # ophangoog bovenaan
     export(P, 'lantern.glb')
 
+# ---------------- JAMARAAT (moderne ovale jamrah-muur + vangbak + multi-level brug) ----------------
+def build_jamaraat():
+    reset(); M = materials()
+    wall  = mat('jwall',  (0.83, 0.82, 0.79), 0.0, 0.6)    # jamrah-muur (licht beton)
+    capm  = mat('jcap',   (0.72, 0.71, 0.68), 0.0, 0.7)    # kaplijst / kolommen
+    basin = mat('jbasin', (0.33, 0.33, 0.37), 0.15, 0.55)  # donkere vangbak
+    deck  = mat('jdeck',  (0.86, 0.83, 0.76), 0.0, 0.8)    # brugdek (zandsteen)
+    gold  = M['gold']
+    P = []
+    wbase = mat('jwbase', (0.60, 0.58, 0.55), 0.0, 0.7)   # donkere voet van de muur
+    col   = mat('jcol',   (0.78, 0.76, 0.71), 0.0, 0.7)   # kolommen (warm beton)
+    Lh = 3.6   # halve lengte van de muur (langs Y)
+    # --- jamrah-muur: HOOG en ovaal (de hoofdvorm) ---
+    P.append(box('jwbase', 1.05, 2 * Lh + 0.7, 0.8, (0, 0, 0.4), wbase))       # brede voet
+    P.append(box('jamrah', 0.8, 2 * Lh, 5.2, (0, 0, 3.0), wall))               # kern z0.4..5.6
+    for sgn in (1, -1):
+        P.append(cyl('jend', 0.4, 5.2, (0, sgn * Lh, 3.0), wall, 22))          # afgeronde uiteinden
+    P.append(box('jcapbar', 0.96, 2 * Lh, 0.34, (0, 0, 5.75), capm))           # kaplijst
+    for sgn in (1, -1):
+        P.append(cyl('jcapend', 0.48, 0.34, (0, sgn * Lh, 5.75), capm, 22))
+    # --- ovale verzonken vangbak: rand (torus geschaald) + donkere vloer ---
+    bpy.ops.mesh.primitive_torus_add(location=(0, 0, 0.42), major_radius=3.9, minor_radius=0.55,
+                                     major_segments=56, minor_segments=12)
+    rim = bpy.context.active_object; rim.name = 'basinRim'
+    rim.scale = (1.0, 1.65, 0.85)
+    bpy.context.view_layer.objects.active = rim
+    bpy.ops.object.select_all(action='DESELECT'); rim.select_set(True)
+    bpy.ops.object.transform_apply(scale=True)
+    rim.data.materials.append(basin); bpy.ops.object.shade_smooth()
+    P.append(rim)
+    flr = cyl('basinFloor', 3.7, 0.14, (0, 0, 0.07), basin, 52)
+    flr.scale = (1.0, 1.6, 1.0)
+    bpy.context.view_layer.objects.active = flr
+    bpy.ops.object.select_all(action='DESELECT'); flr.select_set(True)
+    bpy.ops.object.transform_apply(scale=True)
+    P.append(flr)
+    # ===== multi-level brug: DIKKE kolommen in een ring + dek als VERBONDEN frame =====
+    ring = [(8.5, -12), (8.5, 0), (8.5, 12), (-8.5, -12), (-8.5, 0), (-8.5, 12), (0, -14), (0, 14)]
+    for (cx, cy) in ring:
+        P.append(cyl('colbase', 1.3, 0.5, (cx, cy, 0.25), capm, 20))
+        P.append(cyl('col',     0.98, 9.2, (cx, cy, 4.85), col, 20))           # dikke pijler z0.25..9.45
+        P.append(cone('colcap', 1.4, 1.0, 0.6, (cx, cy, 9.6), capm, 20))
+    # brugdek = rechthoekig FRAME met open midden (de well boven de jamrah) op z~10
+    DZ = 10.1
+    frame = [(0, 16, 26, 6), (0, -16, 26, 6), (12.5, 0, 5, 26), (-12.5, 0, 5, 26)]  # (x,y,sx,sy)
+    for (dx, dy, sx, sy) in frame:
+        P.append(box('deck', sx, sy, 0.9, (dx, dy, DZ), deck))
+    # gouden binnenrand rond de open well
+    P.append(box('railA', 21, 0.35, 0.2, (0, 13, DZ + 0.55), gold))
+    P.append(box('railB', 21, 0.35, 0.2, (0, -13, DZ + 0.55), gold))
+    P.append(box('railC', 0.35, 26, 0.2, (10, 0, DZ + 0.55), gold))
+    P.append(box('railD', 0.35, 26, 0.2, (-10, 0, DZ + 0.55), gold))
+    # tweede niveau als silhouet erboven
+    for (cx, cy) in [(8.5, -12), (8.5, 12), (-8.5, -12), (-8.5, 12)]:
+        P.append(cyl('col2', 0.72, 4.0, (cx, cy, 12.5), col, 16))
+    P.append(box('deck2a', 26, 5, 0.6, (0, 16, 14.7), deck))
+    P.append(box('deck2b', 26, 5, 0.6, (0, -16, 14.7), deck))
+    export(P, 'jamaraat.glb')
+
 if __name__ == '__main__':
     import sys
     argv = sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else []
@@ -373,6 +432,7 @@ if __name__ == '__main__':
         'kaaba': build_kaaba, 'dome': build_dome, 'arch': build_arch,
         'rocks': build_rocks, 'interior': build_nabawi_interior,
         'minaret': build_minaret, 'tent': build_tent, 'lantern': build_lantern,
+        'jamaraat': build_jamaraat,
     }
     targets = argv if argv else list(ALL.keys())
     print('Blender-assets bouwen ->', os.path.abspath(OUT), '| targets:', targets)
