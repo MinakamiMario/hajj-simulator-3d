@@ -594,17 +594,25 @@ function tawafScene(){
   const ring=new THREER.Mesh(new THREER.RingGeometry(4.2,4.4,64),
     new THREER.MeshBasicMaterial({color:0xc9a84c,transparent:true,opacity:.3,side:THREER.DoubleSide}));
   ring.rotation.x=-Math.PI/2; ring.position.y=0.02; world.add(ring);
-  // ===== START: de Zwarte Steen (Hajar al-Aswad) — duidelijk gemarkeerd =====
-  const stone=box(0.5,1.0,0.3,0x111016,{emissive:0x3a2a10,emissiveIntensity:.5}); stone.position.set(4.4,0.5,0); world.add(stone);
-  const stoneFrame=box(0.7,1.2,0.18,0xc9a84c,{metalness:1,roughness:.3}); stoneFrame.position.set(4.55,0.6,0); world.add(stoneFrame);
-  // groene startlijn op de mataf (de echte groene lijn die de start/eind-lijn markeert)
-  const startLine=box(0.45,0.05,4.2,0x2fd95f,{emissive:0x18b23e,emissiveIntensity:.8}); startLine.position.set(5.8,0.07,0); startLine.castShadow=false; world.add(startLine);
-  // 2-regelig label hóóg boven de Zwarte-Steen-markering (boven de menigte) → naam↔hoek meteen duidelijk
-  const startLbl=textSprite('الحَجَر الأَسوَد\n🟢 Zwarte Steen — start','#9af0b4',{h:0.95}); startLbl.position.set(4.6,3.0,0); world.add(startLbl);
-  // Rukn al-Yamani: de hoek vlak vóór de Zwarte Steen — vanaf hier de Rabbana-du'a
-  const yamDisc=cyl(0.6,0.6,0.06,0xc9a84c,{metalness:.6,roughness:.4},20); yamDisc.position.set(2.7,0.05,2.7); yamDisc.castShadow=false; world.add(yamDisc);
-  const yam=cyl(0.14,0.18,0.9,0x7a6a48,{roughness:.6,emissive:0x2a2212,emissiveIntensity:.3},12); yam.position.set(2.7,0.48,2.7); world.add(yam);
-  const yamLbl=textSprite('الرُّكن اليَمَاني\nRukn al-Yamani','#f0d080',{h:0.9}); yamLbl.position.set(2.9,2.85,2.9); world.add(yamLbl);
+  // ===== Ka'ba-HOEKEN (rukns) — op de 4 échte hoeken van het model (keswa-kubus ≈ ±3.6, gecentreerd op 0) =====
+  // deur (Bab al-Ka'ba) zit op de +X-wand richting +Z → Hajar al-Aswad = oosthoek (+X,+Z); dan met de klok mee Iraqi, Shami, Yamani
+  const COR={ aswad:[3.57,3.47], iraqi:[3.57,-3.78], shami:[-3.68,-3.78], yamani:[-3.68,3.47] };
+  function cornerLabel(txt,col,c,h){ const l=textSprite(txt,col,{h:h||0.85}); l.position.set(c[0]*1.16,4.1,c[1]*1.16); world.add(l); return l; }
+  // START: Hajar al-Aswad op de oosthoek (naast de deur)
+  const ax=COR.aswad[0], az=COR.aswad[1];
+  const stone=box(0.5,1.0,0.3,0x111016,{emissive:0x3a2a10,emissiveIntensity:.5}); stone.position.set(ax,0.5,az); stone.rotation.y=-Math.PI/4; world.add(stone);
+  const stoneFrame=box(0.7,1.2,0.18,0xc9a84c,{metalness:1,roughness:.3}); stoneFrame.position.set(ax+0.18,0.6,az+0.18); stoneFrame.rotation.y=-Math.PI/4; world.add(stoneFrame);
+  // groene start/eind-lijn: radiaal naar buiten vanaf de oosthoek
+  const startLine=box(0.4,0.05,3.4,0x2fd95f,{emissive:0x18b23e,emissiveIntensity:.8}); startLine.position.set(ax+1.2,0.07,az+1.2); startLine.rotation.y=Math.PI/4; startLine.castShadow=false; world.add(startLine);
+  cornerLabel('الحَجَر الأَسوَد\n🟢 Zwarte Steen — start','#9af0b4',COR.aswad,0.95);
+  // Rukn al-Yamani op de zuidhoek — op de wand híernaartoe (richting Zwarte Steen) klinkt de Rabbana-du'a
+  const yx=COR.yamani[0], yz=COR.yamani[1];
+  const yamDisc=cyl(0.6,0.6,0.06,0xc9a84c,{metalness:.6,roughness:.4},20); yamDisc.position.set(yx,0.05,yz); yamDisc.castShadow=false; world.add(yamDisc);
+  const yam=cyl(0.14,0.18,0.9,0x7a6a48,{roughness:.6,emissive:0x2a2212,emissiveIntensity:.3},12); yam.position.set(yx,0.48,yz); world.add(yam);
+  cornerLabel('الرُّكن اليَمَاني\nRukn al-Yamani','#f0d080',COR.yamani,0.9);
+  // de twee overige hoeken als label
+  cornerLabel('الرُّكن العِرَاقي\nRukn al-ʿIraqi','#d8c8a0',COR.iraqi,0.8);
+  cornerLabel('الرُّكن الشَّامي\nRukn ash-Shami','#d8c8a0',COR.shami,0.8);
     State.tawaf=0; State.tawafAngle=null; State.tawafAccum=0; State.tawafSimOffered=false;
     setProgress('🕋 Ronde 0/7 — start bij de groene lijn');
   sceneTimeout(()=>showFeedback('🟢 Begin bij de <strong>Zwarte Steen</strong> (groene lijn). Loop <strong>tegen de klok in</strong> met de Ka\'ba aan je <strong>linkerhand</strong>.<br>Tussen <em>Rukn al-Yamani</em> en de Zwarte Steen zeg je: <em>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً</em>.',true,8000),700);
@@ -614,8 +622,8 @@ function tawafScene(){
   frameHook=()=>{
     const a=Math.atan2(Player.z,Player.x);
     if(State.tawafAngle===null){ State.tawafAngle=a; return; }
-    // Rabbana atina klinkt tussen Rukn al-Yamani (~45°) en de Zwarte Steen (0°) — op de juiste plek
-    const inSeg=(a>0.04 && a<0.80);
+    // Rabbana atina klinkt op de wand tussen Rukn al-Yamani (~135°) en de Zwarte Steen (~45°) — op de juiste plek
+    const inSeg=(a>0.85 && a<2.30);
     if(inSeg){ if(!rabbanaSeg){ rabbanaSeg=true; if(window.Recite)Recite.duaHere('rabbana',0.7); } }
     else rabbanaSeg=false;
     let d=a-State.tawafAngle;
