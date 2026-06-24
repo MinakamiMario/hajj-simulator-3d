@@ -42,7 +42,10 @@ const Assets = {
     }
     for(const key in this.defs){
       loader.load(this.defs[key], g => {
-        g.scene.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; } });
+        g.scene.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false;
+          // verwijder null-attributen (bv. lege uv) — die laten renderer.render crashen in three r128
+          if(o.geometry && o.geometry.attributes){ for(const a in o.geometry.attributes){ if(!o.geometry.attributes[a]) delete o.geometry.attributes[a]; } }
+        }});
         this.cache[key] = g.scene;
       }, undefined, () => console.warn('Asset laden mislukt (fallback actief):', key));
     }
