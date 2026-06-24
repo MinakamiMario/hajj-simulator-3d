@@ -5,8 +5,24 @@
 const Game={
   toCharSelect(){ Assets.preload(); if(Custom.gender==='female' && Custom.headcover==='none' && Custom.hairStyle==='short') applyGenderDefaults('female'); showScreen('screen-char'); initPreview(); buildControls(); refreshPreview(); },
   pickChar(g){ Custom.gender=g; Char.gender=g; applyGenderDefaults(g); buildControls(); refreshPreview(); },
-  start(){ Assets.preload(); Char.gender = Char.preset ? (Char.preset==='woman'?'female':'male') : Custom.gender; Char.ihram=false; Char.hair='full'; Sound.init(); showScreen('screen-game'); if(!renderer)initThree(); Input.init(); loadScene(State.startScene||0);
-    clearTimeout(lookHintTimer); lookHintTimer=setTimeout(hideLookHint,5000); },
+  start(){ Assets.preload(); Char.gender = Char.preset ? (Char.preset==='woman'?'female':'male') : Custom.gender; Char.ihram=false; Char.hair='full'; Sound.init(); showScreen('screen-game'); if(!renderer)initThree(); Input.init();
+    const ss=State.startScene||0;
+    const go=()=>{ loadScene(ss); clearTimeout(lookHintTimer); lookHintTimer=setTimeout(hideLookHint,5000); };
+    // De woning-scènes (0/1) hebben appartement.glb nodig. Bouwt scène 0 vóórdat 't model geladen is,
+    // dan krijg je de oude procedurele kamer (fallback). Wacht daarom kort op 't model bij de start
+    // zodat de allereerste scène meteen de échte woning toont. (Latere scènes hebben genoeg laadtijd.)
+    const fade=el('fade');
+    if(ss<=1 && typeof Assets!=='undefined' && Assets.defs && Assets.defs.appartement && !Assets.ready('appartement')){
+      if(fade){ fade.classList.add('show'); fade.setAttribute('data-load','Je reis wordt voorbereid…'); }
+      let waited=0; const iv=setInterval(()=>{ waited+=120;
+        if(Assets.ready('appartement') || waited>=9000){ clearInterval(iv);
+          if(fade) fade.removeAttribute('data-load');
+          go();
+          if(fade) requestAnimationFrame(()=>requestAnimationFrame(()=>fade.classList.remove('show')));
+        }
+      },120);
+    } else { go(); }
+  },
   next(){ askQuiz(State.scene, ()=>Game._advance()); },
   _advance(){ const cur=SCENES[State.scene]; if(cur&&cur.onExit)cur.onExit();
     let n=State.scene+1;
