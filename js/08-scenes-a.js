@@ -278,7 +278,7 @@ SCENES.push({
     instruct();
 
     // ---- establishing-shot: het exterieur-toestel vliegt door de lucht, daarna ben je aan boord ----
-    if(typeof Assets!=='undefined' && Assets.ready('airplane')){
+    function startFlyby(){
       const pl=Assets.cache.airplane.clone(true); pl.scale.setScalar(0.5);
       pl.traverse(o=>{ if(o.isMesh){ o.castShadow=false; o.receiveShadow=false; } });
       if(Assets.tint) Assets.tint(pl,0.62);                                    // grijstint → contrast tegen de lichte lucht
@@ -294,6 +294,17 @@ SCENES.push({
         camera.lookAt(pl.position.x*0.22,13,-14);                      // pan zacht met het toestel mee
       };
       sceneTimeout(()=>{ Cam.cine=null; world.remove(pl); paused=false; }, DUR+150);
+    }
+    if(typeof Assets!=='undefined'){
+      if(Assets.ready('airplane')){ startFlyby(); }
+      else {
+        // het toestel (3,4 MB) is nog niet binnen → pauzeer, toon de lucht en wacht er kort op
+        paused=true; Cam.cine=function(){ camera.position.set(0,9,16); camera.lookAt(0,13,-14); };
+        let waited=0; const iv=setInterval(()=>{ waited+=200;
+          if(Assets.ready('airplane')){ clearInterval(iv); startFlyby(); }
+          else if(waited>=8000){ clearInterval(iv); Cam.cine=null; paused=false; }   // geef het op → ga gewoon aan boord
+        },200); sceneIntervals.push(iv);
+      }
     }
   }
 });
