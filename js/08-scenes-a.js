@@ -185,17 +185,27 @@ SCENES.push({
     }
 
     // ---- clear, ordered tasks ----
+    let niyyahDone=false;                                     // welke gebeds-stap is gedaan → recovery opent de juiste vraag
     function instruct(){ setProgress(Char.ihram ? '👉 Loop door het gangpad naar je stoel ✦ en ga zitten' : '👉 Toilet achterin (🚻): trek je Ihraam aan'); }
     function seatedNiyyah(){ openChoice({ ar:'النِّيَّة', sub:'Gezeten in je stoel', txt:'Maak nu je <strong>Niyyah</strong> (intentie) voor de Hajj.',
-      choices:[{txt:'🤲 Spreek de Niyyah uit', action:()=>{ Sound.success(); showFeedback('✅ "Labbayka Allahumma Hajjan." Je intentie is gemaakt.',true,3000); setTimeout(seatedTalbiyah,1100); }}]}); }
+      choices:[{txt:'🤲 Spreek de Niyyah uit', action:()=>{ Sound.success(); niyyahDone=true; showFeedback('✅ "Labbayka Allahumma Hajjan." Je intentie is gemaakt.',true,3000); setTimeout(seatedTalbiyah,1100); }}]}); }
     function seatedTalbiyah(){ openChoice({ ar:'التَّلبِية', sub:'', txt:'Spreek de <strong>Talbiyah</strong> uit:<br><br><em>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</em><br>"Hier ben ik, o Allah, hier ben ik."',
       choices:[{txt:'🗣️ Spreek de Talbiyah', action:()=>{ Sound.success(); learnDua('talbiyah');
         if(window.Recite)Recite.startTalbiya();                 // vanaf nu klinkt de Talbiya zacht mee (staat van ihraam)
+        const sz3=Zone.list.find(q=>q.id==='seat'); if(sz3)Zone.markDone(sz3);   // pas nu de stoel afronden → gids stopt + niet meer her-triggerbaar
         showFeedback('✅ Labbayka Allahumma labbayk! Je bent nu in staat van Ihraam. ✈️',true,4000); showNextBtn('Aankomst Mekka →'); }}]}); }
-    function sitDown(){ const sz2=Zone.list.find(q=>q.id==='seat'); if(sz2&&!sz2.done)Zone.markDone(sz2);
-      Player.x=sx; Player.z=sz; Player.faceY=Math.PI; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
-      Cam.yaw=Math.PI; Cam.eyeH=1.08; Cam.update();        // gezeten: ooghoogte zakt
-      Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
+    // zitten + gebeds-flow starten; zelfherstellend: zit je al maar staat er geen vraag open (bv. gemiste timer),
+    // dan her-opent een nieuwe druk op de actieknop de juiste stap → je kunt nooit vastzitten
+    function sitDown(){
+      if(!Player.sitting){
+        Player.x=sx; Player.z=sz; Player.faceY=Math.PI; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
+        Cam.yaw=Math.PI; Cam.eyeH=1.08; Cam.update();        // gezeten: ooghoogte zakt
+        Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200);
+        setTimeout(seatedNiyyah,1000);
+      } else if(el('modal-choice').classList.contains('hidden')){
+        (niyyahDone?seatedTalbiyah:seatedNiyyah)();           // al gezeten, geen vraag open → (her)start de juiste stap
+      }
+    }
 
     if(!Char.ihram){
       Zone.add({ id:'lav', x:-0.8, z:10, r:1.3, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
