@@ -38,5 +38,12 @@ window.addEventListener('load',()=>{
   if(sel){ SCENES.forEach((sc,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=(i+1)+'. '+sc.loc; sel.appendChild(op); });
     sel.value=0; State.startScene=0; }
   // PWA: service worker registreren (offline-speelbaar + installeerbaar)
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+  if('serviceWorker' in navigator){
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').then(reg=>{ if(reg) reg.update(); }).catch(()=>{});
+    // bij een nieuwe versie: de nieuwe SW neemt over → herlaad één keer zodat alle bestanden vers zijn
+    // (voorkomt 'mixed cache': nieuwe narratie + oude scène-code = verkeerde scène in beeld)
+    let reloaded=false;
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(hadController && !reloaded){ reloaded=true; location.reload(); } });
+  }
 });
