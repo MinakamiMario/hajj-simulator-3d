@@ -195,30 +195,43 @@ SCENES.push({
   spawn:{x:0,z:2.4,face:Math.PI,bounds:{minX:-0.42,maxX:0.42,minZ:-4.0,maxZ:4.0}},
   light:{amb:0xcfe2ff,ambI:1.0,dir:0xffffff,dirI:0.95,sky:0x7fb4e6,exp:0.95},
   fog:{near:60,far:340},                                  // ruimere fog: blauwe lucht voor de establishing-shot
-  cam:{dist:4.4,height:2.0,pitch:0.2,maxY:2.7,bound:{minX:-2.1,maxX:2.1,minZ:-4.6,maxZ:4.6},playerScale:0.85},
+  cam:{fp:true,eyeH:1.5,pitch:0.06,playerScale:0.85,dist:4.4,height:2.0,maxY:2.4,bound:{minX:-2.1,maxX:2.1,minZ:-4.6,maxZ:4.6}},
   build(){
-    // ceiling + floor (no big ground -> open sides reveal the sky)
-    const ceil=box(4.6,0.18,11,0xeae8e2); ceil.position.set(0,2.95,0); world.add(ceil);
-    const floor=box(4.2,0.06,11,0x2a3550); floor.position.y=0.03; world.add(floor);
-    const aisle=box(0.95,0.04,11,0x16202e); aisle.position.set(0,0.06,0); world.add(aisle);
-    // open side walls (solid base + top, glassy window band between) so you SEE the sky
-    [-1,1].forEach(side=>{ const wx=side*2.0;
-      const base=box(0.16,1.05,11,0xe8e6e2); base.position.set(wx,0.55,0); world.add(base);
-      const top =box(0.16,1.0,11,0xe2e0da);  top.position.set(wx,2.45,0); world.add(top);
-      for(let i=-4;i<=4;i++){ const fz=i*1.18;
-        // afgeronde bezel (afgeplatte bol = zachte raamomlijsting)
-        const bezel=sph(0.33,0xf6f4ee,{roughness:.6},16); bezel.scale.set(0.12,1.0,0.78); bezel.position.set(wx,1.78,fz); bezel.castShadow=false; world.add(bezel);
-        // ovaal raampje: afgeplatte cilinder op z'n kant = vliegtuigraam, helder verlicht
-        const glass=cyl(0.24,0.24,0.07,0xddf2ff,{transparent:true,opacity:0.55,emissive:0xbfe6ff,emissiveIntensity:.85},20);
-        glass.rotation.z=Math.PI/2; glass.scale.set(1.0,1.0,0.78); glass.position.set(wx+side*0.02,1.78,fz); glass.castShadow=false; world.add(glass);
-        // dun zonnescherm erboven
-        const shade=box(0.05,0.12,0.46,0xe8e4dc); shade.position.set(wx-side*0.01,2.05,fz); shade.castShadow=false; world.add(shade);
-      }
-    });
-    // overhead bins + cabin lights
-    [-1.9,1.9].forEach(bx=>{ const bin=box(0.5,0.45,10.6,0xeae6dd); bin.position.set(bx,2.55,0); world.add(bin); });
-    for(let i=0;i<4;i++){ const cl=new THREER.PointLight(0xfff0d8,0.4,9); cl.position.set(0,2.5,i*2.6-3.8); world.add(cl); }
-    // SKY: drifting clouds outside both sides + far below -> you see you're flying
+    // echte cabine (airplane_interior): gangpad op x=0, vloer op y=0; fallback = procedurele cabine
+    const cabin=(typeof Assets!=='undefined')?Assets.placeCabin(0.85):null;
+    // first-person (passagiers-view) via cam-config; bij het echte cabine-model geen procedurele geometrie
+    if(!cabin){
+      // ---- procedurele cabine (fallback als het model niet geladen is) ----
+      const ceil=box(4.6,0.18,11,0xeae8e2); ceil.position.set(0,2.95,0); world.add(ceil);
+      const floor=box(4.2,0.06,11,0x2a3550); floor.position.y=0.03; world.add(floor);
+      const aisle=box(0.95,0.04,11,0x16202e); aisle.position.set(0,0.06,0); world.add(aisle);
+      [-1,1].forEach(side=>{ const wx=side*2.0;
+        const base=box(0.16,1.05,11,0xe8e6e2); base.position.set(wx,0.55,0); world.add(base);
+        const top =box(0.16,1.0,11,0xe2e0da);  top.position.set(wx,2.45,0); world.add(top);
+        for(let i=-4;i<=4;i++){ const fz=i*1.18;
+          const bezel=sph(0.33,0xf6f4ee,{roughness:.6},16); bezel.scale.set(0.12,1.0,0.78); bezel.position.set(wx,1.78,fz); bezel.castShadow=false; world.add(bezel);
+          const glass=cyl(0.24,0.24,0.07,0xddf2ff,{transparent:true,opacity:0.55,emissive:0xbfe6ff,emissiveIntensity:.85},20);
+          glass.rotation.z=Math.PI/2; glass.scale.set(1.0,1.0,0.78); glass.position.set(wx+side*0.02,1.78,fz); glass.castShadow=false; world.add(glass);
+          const shade=box(0.05,0.12,0.46,0xe8e4dc); shade.position.set(wx-side*0.01,2.05,fz); shade.castShadow=false; world.add(shade);
+        }
+      });
+      [-1.9,1.9].forEach(bx=>{ const bin=box(0.5,0.45,10.6,0xeae6dd); bin.position.set(bx,2.55,0); world.add(bin); });
+      const rowsZ=[-3.0,-1.8,-0.6,0.6,1.8,3.0];
+      rowsZ.forEach(zz=>{ [-1.45,-0.85,0.85,1.45].forEach(sxx=>{
+        const seat=box(0.5,0.42,0.5,0x33506a); seat.position.set(sxx,0.42,zz); world.add(seat);
+        const bk=box(0.5,0.62,0.12,0x294056); bk.position.set(sxx,0.78,zz-0.27); world.add(bk);
+        const scr=box(0.3,0.2,0.03,0x0a1420,{emissive:0x10406a,emissiveIntensity:.55}); scr.position.set(sxx,0.98,zz-0.33); world.add(scr);
+      }); });
+      const galley=box(4.2,2.6,0.5,0xb8bcc4,{metalness:.3,roughness:.5}); galley.position.set(0,1.3,5.0); world.add(galley);
+      const counter=box(2.0,0.9,0.4,0xc8ccd2); counter.position.set(0,0.45,4.6); world.add(counter);
+      const cockpit=box(4.2,2.7,0.35,0x9aa0aa); cockpit.position.set(0,1.35,-5.0); world.add(cockpit);
+      const cdoor=box(0.85,1.9,0.06,0x5a6068,{metalness:.4}); cdoor.position.set(0,0.95,-4.8); world.add(cdoor);
+      const lavDoor=box(0.7,1.9,0.08,0xc0c4ca); lavDoor.position.set(-1.55,0.95,4.5); lavDoor.rotation.y=Math.PI/2; world.add(lavDoor);
+      const wing=box(4.2,0.16,1.5,0xc4c8ce,{metalness:.3,roughness:.5}); wing.position.set(-4.6,0.5,0.8); wing.rotation.z=0.05; world.add(wing);
+      const winglet=box(0.16,0.7,0.8,0xb4b8be); winglet.position.set(-6.6,0.85,0.8); world.add(winglet);
+      const engine=cyl(0.4,0.4,1.1,0x9aa0a8); engine.rotation.x=Math.PI/2; engine.position.set(-4.2,0.2,0.8); world.add(engine);
+    }
+    // ---- gedeeld: wolken buiten (vlieg-gevoel), zachte cabineverlichting, markers, steward ----
     function makeCloud(s){ const grp=new THREER.Group(); const n=3+Math.floor(Math.random()*3);
       for(let k=0;k<n;k++){ const b=sph(0.7+Math.random()*0.7,0xffffff,{roughness:1}); b.castShadow=false;
         b.position.set((Math.random()-.5)*1.8,(Math.random()-.5)*0.5,(Math.random()-.5)*1.2); b.scale.y=0.55; grp.add(b); }
@@ -229,29 +242,12 @@ SCENES.push({
     for(let i=0;i<8;i++){ const c=makeCloud(1.4+Math.random()*1.6);
       c.position.set((Math.random()-.5)*26, -5-Math.random()*5, -12+Math.random()*24);
       c.userData.cloud={sp:1.4+Math.random()*1.4}; world.add(c); }
-    // wing + engine + winglet, visible through the left windows
-    const wing=box(4.2,0.16,1.5,0xc4c8ce,{metalness:.3,roughness:.5}); wing.position.set(-4.6,0.5,0.8); wing.rotation.z=0.05; world.add(wing);
-    const winglet=box(0.16,0.7,0.8,0xb4b8be); winglet.position.set(-6.6,0.85,0.8); world.add(winglet);
-    const engine=cyl(0.4,0.4,1.1,0x9aa0a8); engine.rotation.x=Math.PI/2; engine.position.set(-4.2,0.2,0.8); world.add(engine);
-    // seat rows (2 + 2)
-    const rowsZ=[-3.0,-1.8,-0.6,0.6,1.8,3.0];
-    rowsZ.forEach(zz=>{ [-1.45,-0.85,0.85,1.45].forEach(sx=>{
-      const seat=box(0.5,0.42,0.5,0x33506a); seat.position.set(sx,0.42,zz); world.add(seat);
-      const bk=box(0.5,0.62,0.12,0x294056); bk.position.set(sx,0.78,zz-0.27); world.add(bk);
-      const scr=box(0.3,0.2,0.03,0x0a1420,{emissive:0x10406a,emissiveIntensity:.55}); scr.position.set(sx,0.98,zz-0.33); world.add(scr);
-    }); });
-    // YOUR seat (right inner, row z=-0.6) highlighted
-    const sx=0.85, sz=-0.6;
+    for(let i=0;i<4;i++){ const cl=new THREER.PointLight(0xfff0d8,0.32,9); cl.position.set(0,2.3,i*2.6-3.8); world.add(cl); }
+    // jouw stoel + markers + steward (stoel op een stoel-rijke plek in 't echte model)
+    const sx=0.6, sz=0;
     const ring=glowRing(0.5,0x6ad0a0); ring.position.set(sx,0.66,sz); world.add(ring);
     const star=emojiSprite('✦',0.4); star.position.set(sx,1.5,sz); world.add(star);
-    // galley (back) + cockpit (front) + lavatory door (back-left)
-    const galley=box(4.2,2.6,0.5,0xb8bcc4,{metalness:.3,roughness:.5}); galley.position.set(0,1.3,5.0); world.add(galley);
-    const counter=box(2.0,0.9,0.4,0xc8ccd2); counter.position.set(0,0.45,4.6); world.add(counter);
-    const cockpit=box(4.2,2.7,0.35,0x9aa0aa); cockpit.position.set(0,1.35,-5.0); world.add(cockpit);
-    const cdoor=box(0.85,1.9,0.06,0x5a6068,{metalness:.4}); cdoor.position.set(0,0.95,-4.8); world.add(cdoor);
-    const lavDoor=box(0.7,1.9,0.08,0xc0c4ca); lavDoor.position.set(-1.55,0.95,4.5); lavDoor.rotation.y=Math.PI/2; world.add(lavDoor);
     const lavSign=emojiSprite('🚻',0.4); lavSign.position.set(-1.4,2.0,4.2); world.add(lavSign);
-    // fasten-seatbelt sign + flight attendant
     const sign=emojiSprite('🔔',0.4); sign.position.set(0,2.55,-3.0); world.add(sign);
     const att=makePilgrim(0x355a8a); att.position.set(0,0,3.9); att.rotation.y=Math.PI; att.userData.ph=Math.random()*6.28; world.add(att);
 
@@ -276,36 +272,6 @@ SCENES.push({
     Zone.add({ id:'seat', x:0.3, z:sz, r:1.0, icon:'🪑', label:'Ga zitten', noConsume:true, guide:true,
       action:()=>{ if(!Char.ihram){ showFeedback('⚠️ Trek eerst je Ihraam aan in het toilet (achterin).',false,2800); return; } sitDown(); }});
     instruct();
-
-    // ---- establishing-shot: het exterieur-toestel vliegt door de lucht, daarna ben je aan boord ----
-    function startFlyby(){
-      const pl=Assets.cache.airplane.clone(true); pl.scale.setScalar(0.5);
-      pl.traverse(o=>{ if(o.isMesh){ o.castShadow=false; o.receiveShadow=false; } });
-      if(Assets.tint) Assets.tint(pl,0.62);                                    // grijstint → contrast tegen de lichte lucht
-      pl.position.set(-55,15,-16); pl.rotation.set(0,0,0.07); world.add(pl);   // lange as = X → vliegt naar +X
-      const t0=performance.now(), DUR=4600;
-      paused=true;
-      Cam.cine=function(){
-        const e=Math.min(1,(performance.now()-t0)/DUR);
-        pl.position.x=-55+e*110;                                       // kruist de hemel van links naar rechts
-        pl.position.y=15-Math.sin(e*Math.PI)*2;                        // zachte boog
-        pl.rotation.z=0.07+Math.sin(e*Math.PI)*0.05;                   // subtiele bank
-        camera.position.set(0,9,16);                                   // BINNEN de sky-dome (buiten = zwarte lucht)
-        camera.lookAt(pl.position.x*0.22,13,-14);                      // pan zacht met het toestel mee
-      };
-      sceneTimeout(()=>{ Cam.cine=null; world.remove(pl); paused=false; }, DUR+150);
-    }
-    if(typeof Assets!=='undefined'){
-      if(Assets.ready('airplane')){ startFlyby(); }
-      else {
-        // het toestel (3,4 MB) is nog niet binnen → pauzeer, toon de lucht en wacht er kort op
-        paused=true; Cam.cine=function(){ camera.position.set(0,9,16); camera.lookAt(0,13,-14); };
-        let waited=0; const iv=setInterval(()=>{ waited+=200;
-          if(Assets.ready('airplane')){ clearInterval(iv); startFlyby(); }
-          else if(waited>=8000){ clearInterval(iv); Cam.cine=null; paused=false; }   // geef het op → ga gewoon aan boord
-        },200); sceneIntervals.push(iv);
-      }
-    }
   }
 });
 

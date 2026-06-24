@@ -89,6 +89,22 @@ const Assets = {
       mats.forEach(mat => { if(!mat.userData.__origColor && mat.color) mat.userData.__origColor = mat.color.clone();
         if(mat.userData.__origColor) mat.color.copy(mat.userData.__origColor).multiplyScalar(factor); }); }});
   },
+  // vliegtuig-cabine (airplane_interior): gangpad langs Z op x=0, cabinevloer op y=0 (romp eronder verborgen)
+  placeCabin(s){
+    const src = this.cache.airplane; if(!src) return null;
+    const m = src.clone(true); s = s || 0.85; m.scale.setScalar(s); m.rotation.y = Math.PI/2;   // lange as → Z (gangpad)
+    m.traverse(o=>{ if(o.isMesh){ o.castShadow=false; o.receiveShadow=false;
+      if(o.material) o.material = Array.isArray(o.material) ? o.material.map(x=>x.clone()) : o.material.clone(); } });  // eigen materialen → fade lekt niet
+    world.add(m); m.updateMatrixWorld(true);
+    let b = new THREE.Box3().setFromObject(m); m.position.y -= b.min.y; m.updateMatrixWorld(true);
+    b = new THREE.Box3().setFromObject(m); const cx=(b.min.x+b.max.x)/2, cz=(b.min.z+b.max.z)/2;
+    // cabinevloer = 2e omlaag-hit in 't gangpad (1e = plafond)
+    const ray = new THREE.Raycaster(); ray.set(new THREE.Vector3(cx, b.max.y+0.5, cz), new THREE.Vector3(0,-1,0)); ray.far = b.max.y+2;
+    const hits = ray.intersectObject(m,true);
+    const floorY = hits.length>1 ? hits[1].point.y : (hits[0] ? hits[0].point.y : 0);
+    m.position.y -= floorY; m.position.x -= cx;        // vloer→y0, gangpad→x0
+    m.updateMatrixWorld(true); return m;
+  },
   // willekeurig model: XZ-gecentreerd op (x,z), onderkant op de grond (y=0)
   placeProp(key, x, z, s, ry){
     const src = this.cache[key]; if(!src) return null;
