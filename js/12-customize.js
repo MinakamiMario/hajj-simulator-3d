@@ -94,3 +94,41 @@ function buildControls(){
     row.appendChild(opts); host.appendChild(row);
   });
 }
+
+// ---- kant-en-klaar personage vs eigen bouwer ----
+function setCharMode(mode){
+  document.querySelectorAll('#char-mode .cmode').forEach(b=>b.classList.toggle('on', b.dataset.mode===mode));
+  const controls=el('pv-controls');
+  if(mode==='custom'){
+    Char.preset=null;
+    if(controls) controls.style.display='';
+    refreshPreview();
+  } else {
+    Char.preset=mode;
+    Char.gender=(mode==='woman')?'female':'male';
+    if(controls) controls.style.display='none';
+    if(typeof Assets!=='undefined' && Assets.loadPreset) Assets.loadPreset(mode);
+    showPresetPreview(mode);
+  }
+}
+window.setCharMode=setCharMode;
+
+// toon 't gerigde GLB-personage in de 3D-preview (eigen kopie, los van de in-game cache-instance)
+function showPresetPreview(preset){
+  THREER=THREER||window.THREE; if(!pv.group)return;
+  if(pv.avatar){ pv.group.remove(pv.avatar); pv.avatar=null; }
+  pv.presetCache=pv.presetCache||{};
+  const place=(m)=>{
+    const B={}; m.traverse(o=>{ if(o.isBone)B[o.name]=o; if(o.isSkinnedMesh)o.frustumCulled=false; });
+    // rustige houding: armen omlaag, lichte elleboogbuiging; gedraaid zodat 't gezicht naar de camera kijkt
+    if(B.upperarmL)B.upperarmL.rotation.set(-1.36,0,0.08); if(B.upperarmR)B.upperarmR.rotation.set(-1.36,0,-0.08);
+    if(B.forearmL)B.forearmL.rotation.x=0.18; if(B.forearmR)B.forearmR.rotation.x=0.18;
+    m.position.set(0,0,0); m.rotation.y=Math.PI;
+    pv.avatar=m; pv.group.add(m);
+  };
+  if(pv.presetCache[preset]){ place(pv.presetCache[preset]); return; }
+  const defs=(typeof Assets!=='undefined')?Assets.defs:null; if(!defs)return;
+  const loader=new THREER.GLTFLoader();
+  if(THREER.DRACOLoader){ const dr=new THREER.DRACOLoader(); dr.setDecoderPath('assets/draco/'); dr.setDecoderConfig({type:'wasm'}); loader.setDRACOLoader(dr); }
+  loader.load(defs[preset==='man'?'preset_man':'preset_woman'], g=>{ pv.presetCache[preset]=g.scene; place(g.scene); });
+}

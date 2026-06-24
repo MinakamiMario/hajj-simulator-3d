@@ -10,11 +10,27 @@ const Player = {
 
   build(){
     if(this.obj){ world.remove(this.obj); }
+    if(typeof Char!=='undefined' && Char.preset && this._buildRig(Char.preset)) return;
+    this.rigBones=null;
     this.obj=makeAvatar(Object.assign({}, Custom, { gender:Char.gender, ihram:Char.ihram, shaved:Char.hair }));
     this.obj.scale.setScalar((this.scaleVal||1)*(this.obj.userData.baseScale||1));
     world.add(this.obj);
     this.setPose(this.pose);
     this.updateTransform();
+  },
+  // kant-en-klaar (gerigd) personage: gebruik 't GLB-skelet i.p.v. de procedurele avatar
+  _buildRig(preset){
+    const key = preset==='man' ? 'preset_man' : 'preset_woman';
+    const src = (typeof Assets!=='undefined') ? Assets.cache[key] : null;
+    if(!src){                                               // nog niet geladen → laad lui en herbouw straks; intussen procedureel
+      if(typeof Assets!=='undefined' && Assets.loadPreset) Assets.loadPreset(preset, ()=>{ if(Char.preset===preset) Player.build(); });
+      return false;
+    }
+    this.rigBones={}; src.traverse(o=>{ if(o.isBone) this.rigBones[o.name]=o; if(o.isSkinnedMesh) o.frustumCulled=false; });
+    this.obj=src; this.obj.scale.setScalar(this.scaleVal||1);
+    world.add(this.obj);
+    this.setPose(this.pose); this.updateTransform();
+    return true;
   },
   spawn(s){
     this.x=s.x||0; this.z=s.z||0; this.faceY=s.face||0;
@@ -26,8 +42,9 @@ const Player = {
   updateTransform(){
     if(!this.obj)return;
     this.obj.position.set(this.x, this.sitting?-0.42:0, this.z);
-    this.obj.rotation.y=this.faceY;
+    this.obj.rotation.y=this.faceY + (this.rigBones?this._rigFaceOffset:0);
   },
+  _rigFaceOffset:Math.PI,   // gerigde GLB kijkt +Z bij rotatie 0 → draai naar de -Z conventie
   setPose(p){
     const was=this.pose;
     this.pose=p;
@@ -134,6 +151,13 @@ const Player = {
     if(t.footL===undefined){ t.footL=0; t.footR=0; }      // enkel terug naar neutraal buiten het lopen
     const k=Math.min(1,dt*(this.moving?14:7));
     for(const key in t) b[key]+= (t[key]-b[key])*k;
+    // 3a) gerigd GLB-personage: map de geblende houding op de botten en stop
+    if(this.rigBones){
+      const ty=(typeof terrainFn==='function'&&terrainFn)?terrainFn(this.x,this.z):0; Player.y0=ty;
+      this._applyRig(b);
+      this.obj.position.y=(this.sitting?-0.42:0)+b.rootY+(b.bodyY||0)+ty;
+      return;
+    }
     // 3) pas toe op het skelet
     pa.legL.rotation.x=b.legL;   pa.legR.rotation.x=b.legR;
     if(pa.kneeL){ pa.kneeL.rotation.x=b.kneeL; pa.kneeR.rotation.x=b.kneeR; }
@@ -150,6 +174,20 @@ const Player = {
     const ty=(typeof terrainFn==='function'&&terrainFn)?terrainFn(this.x,this.z):0;   // heuvels (Jabal al-Rahma)
     Player.y0=ty;
     this.obj.position.y=(this.sitting?-0.42:0)+b.rootY+ty;     // zakken naar de grond + terreinhoogte
+  },
+  // map de geblende procedurele houding (b) op de GLB-botten (eigen as-conventie van 't rig)
+  _applyRig(b){
+    const B=this.rigBones; if(!B)return;
+    const DN=-1.45;                                          // bovenarm-rust: omlaag langs 't lichaam
+    // armen: b.armLx/Rx = voorwaartse elevatie (0=omlaag, negatief=naar voren/omhoog); z = voor/achter zwaai
+    if(B.upperarmL) B.upperarmL.rotation.set(DN - b.armLx*0.7, 0, -b.armLx*0.6);
+    if(B.upperarmR) B.upperarmR.rotation.set(DN - b.armRx*0.7, 0,  b.armRx*0.6);
+    if(B.forearmL) B.forearmL.rotation.set(b.elbL*0.9, 0, 0); // elleboog buigt onderarm omhoog
+    if(B.forearmR) B.forearmR.rotation.set(b.elbR*0.9, 0, 0);
+    // romp: buigen (ruku/sujud), draaien (salam/loop) — verdeeld over spine+chest
+    if(B.spine){ B.spine.rotation.set(b.bodyRx*0.6, b.bodyRy*0.6, b.bodyRz||0); }
+    if(B.chest){ B.chest.rotation.set(b.bodyRx*0.5, b.bodyRy*0.4, 0); }
+    if(B.head){ B.head.rotation.set(-b.bodyRx*0.35, 0, 0); }  // hoofd blijft iets rechter bij 't buigen
   },
   interact(){ Sound.init(); Zone.trigger(); }
 };

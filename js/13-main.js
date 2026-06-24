@@ -5,7 +5,7 @@
 const Game={
   toCharSelect(){ Assets.preload(); if(Custom.gender==='female' && Custom.headcover==='none' && Custom.hairStyle==='short') applyGenderDefaults('female'); showScreen('screen-char'); initPreview(); buildControls(); refreshPreview(); },
   pickChar(g){ Custom.gender=g; Char.gender=g; applyGenderDefaults(g); buildControls(); refreshPreview(); },
-  start(){ Assets.preload(); Char.gender=Custom.gender; Char.ihram=false; Char.hair='full'; Sound.init(); showScreen('screen-game'); if(!renderer)initThree(); Input.init(); loadScene(State.startScene||0);
+  start(){ Assets.preload(); Char.gender = Char.preset ? (Char.preset==='woman'?'female':'male') : Custom.gender; Char.ihram=false; Char.hair='full'; Sound.init(); showScreen('screen-game'); if(!renderer)initThree(); Input.init(); loadScene(State.startScene||0);
     clearTimeout(lookHintTimer); lookHintTimer=setTimeout(hideLookHint,5000); },
   next(){ askQuiz(State.scene, ()=>Game._advance()); },
   _advance(){ const cur=SCENES[State.scene]; if(cur&&cur.onExit)cur.onExit();

@@ -49,6 +49,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',sans-serif;background:
 
 /* ==== customize screen ==== */
 .char-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:1rem 1rem 1.5rem;gap:.8rem;width:100%;max-width:640px;height:100%;}
+.char-mode{display:flex;gap:.5rem;width:100%;justify-content:center;flex-wrap:wrap;}
+.cmode{flex:1 1 0;min-width:88px;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:.1rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:var(--text);padding:.5rem .4rem;border-radius:14px;cursor:pointer;transition:all .15s;font-size:1.5rem;line-height:1.1;}
+.cmode span{font-size:.82rem;font-weight:600;}
+.cmode small{font-size:.64rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;}
+.cmode:hover{border-color:var(--gold);}
+.cmode.on{background:rgba(201,168,76,.22);border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,76,.4);}
 .char-build{display:flex;gap:1rem;width:100%;flex:1;min-height:0;align-items:stretch;}
 .pv-box{flex:0 0 44%;background:radial-gradient(ellipse at 50% 35%,#241636,#0c0716);border:1px solid rgba(201,168,76,.3);border-radius:16px;overflow:hidden;min-height:300px;}
 #pv-canvas{width:100%;height:100%;display:block;}

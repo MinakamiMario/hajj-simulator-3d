@@ -25,6 +25,9 @@ const Assets = {
     mina:       'assets/models/mina.glb',
     appartement:'assets/models/appartement.glb',
     airplane:   'assets/models/airplane.glb',
+    // kant-en-klare, gerigde personages (skinned GLB → animeren via botten in 04-player.js)
+    preset_woman:'assets/models/rigged/woman_rigged.glb',
+    preset_man:  'assets/models/rigged/man_rigged.glb',
   },
   cache: {}, started: false,
   preload(){
@@ -40,7 +43,9 @@ const Assets = {
       draco.setDecoderConfig({type:'wasm'});
       loader.setDRACOLoader(draco);
     }
+    this._loader = loader;
     for(const key in this.defs){
+      if(key.indexOf('preset_')===0) continue;             // presets lui laden (groot + alleen bij keuze nodig)
       loader.load(this.defs[key], g => {
         g.scene.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false;
           // verwijder null-attributen (bv. lege uv) — die laten renderer.render crashen in three r128
@@ -49,6 +54,22 @@ const Assets = {
         this.cache[key] = g.scene;
       }, undefined, () => console.warn('Asset laden mislukt (fallback actief):', key));
     }
+  },
+  // gerigd preset-personage los inladen (buiten de massale preload → geen race op de grote bestanden)
+  loadPreset(preset, cb){
+    const key = preset==='man' ? 'preset_man' : 'preset_woman';
+    if(this.cache[key]){ if(cb) cb(this.cache[key]); return; }
+    this._loadingPreset = this._loadingPreset || {};
+    if(this._loadingPreset[key]){ return; }                 // al bezig
+    this._loadingPreset[key] = true;
+    if(!window.THREE || !THREE.GLTFLoader){ return; }
+    const loader = this._loader || new THREE.GLTFLoader();
+    if(!this._loader && THREE.DRACOLoader){ const dr=new THREE.DRACOLoader(); dr.setDecoderPath('assets/draco/'); dr.setDecoderConfig({type:'wasm'}); loader.setDRACOLoader(dr); }
+    loader.load(this.defs[key], g => {
+      g.scene.traverse(o => { if(o.isSkinnedMesh){ o.frustumCulled=false; o.castShadow=false; o.receiveShadow=false; }
+        if(o.isMesh && o.geometry && o.geometry.attributes){ for(const a in o.geometry.attributes){ if(!o.geometry.attributes[a]) delete o.geometry.attributes[a]; } } });
+      this.cache[key] = g.scene; this._loadingPreset[key]=false; if(cb) cb(g.scene);
+    }, undefined, () => { this._loadingPreset[key]=false; console.warn('preset laden mislukt:', key); });
   },
   ready(key){ return !!this.cache[key]; },
   // plaats een kloon in de wereld; null als het model (nog) niet geladen is
