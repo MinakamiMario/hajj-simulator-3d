@@ -29,7 +29,7 @@ const Assets = {
     preset_woman:'assets/models/rigged/woman_rigged.glb',
     preset_man:  'assets/models/rigged/man_rigged.glb',
   },
-  cache: {}, started: false,
+  cache: {}, failed: {}, started: false,
   preload(){
     if(this.started) return; this.started = true;
     if(!window.THREE || !THREE.GLTFLoader){
@@ -52,7 +52,7 @@ const Assets = {
           if(o.geometry && o.geometry.attributes){ for(const a in o.geometry.attributes){ if(!o.geometry.attributes[a]) delete o.geometry.attributes[a]; } }
         }});
         this.cache[key] = g.scene;
-      }, undefined, () => console.warn('Asset laden mislukt (fallback actief):', key));
+      }, undefined, () => { this.failed[key]=true; console.warn('Asset laden mislukt:', key); });
     }
   },
   // gerigd preset-personage los inladen (buiten de massale preload → geen race op de grote bestanden)

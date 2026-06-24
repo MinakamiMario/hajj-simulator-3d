@@ -15,7 +15,7 @@ const Game={
     if(ss<=1 && typeof Assets!=='undefined' && Assets.defs && Assets.defs.appartement && !Assets.ready('appartement')){
       if(fade){ fade.classList.add('show'); fade.setAttribute('data-load','Je reis wordt voorbereid…'); }
       let waited=0; const iv=setInterval(()=>{ waited+=120;
-        if(Assets.ready('appartement') || waited>=9000){ clearInterval(iv);
+        if(Assets.ready('appartement') || (Assets.failed&&Assets.failed.appartement) || waited>=12000){ clearInterval(iv);
           if(fade) fade.removeAttribute('data-load');
           go();
           if(fade) requestAnimationFrame(()=>requestAnimationFrame(()=>fade.classList.remove('show')));

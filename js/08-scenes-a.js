@@ -57,24 +57,9 @@ SCENES.push({
   build(){
     const S=1.5;                                             // appartement ruim → genoeg loopruimte rond meubels
     const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,S):null;
-    if(apt){
-      Assets.tint(apt,0.55);                                 // nacht: dim de baked-bright woning (eigen nachtlamp blijft warm)
-      fadeModel=apt;                                         // muren faden als ze cam→speler blokkeren
-      // Niyyah in de ruime open woonkamer/eethoek; daarna loop je naar het BED in de slaapkamer om te slapen
-      addNiyyahFlow(-4.8,3.0, -3.8,-0.7);
-    } else {
-      // ---- procedurele fallback (oude slaapkamer) ----
-      room(10,10,3.2,0x322652,0x3a2e58);
-      windowOnWall(-3.6,-4.9,0x2a4a90);
-      const moonL=new THREER.PointLight(0xaac4ff,0.9,18); moonL.position.set(-3.4,2.4,-3.5); world.add(moonL);
-      bed(-3.4,-3.0,0);
-      const ns=nightstand(-3.5,-1.4);
-      const lamp=cyl(0.1,0.16,0.4,0xd4a040,{emissive:0xffcc66,emissiveIntensity:1.4}); lamp.position.set(ns.position.x,ns.userData.topY+0.22,ns.position.z); world.add(lamp);
-      const pl=new THREER.PointLight(0xffcc88,1.7,12); pl.position.set(ns.position.x,1.4,ns.position.z); world.add(pl);
-      rugMat(-0.6,0.4,0x3a1d55);
-      const door=box(1.2,2.4,0.12,0x241326); door.position.set(0,1.2,-4.86); world.add(door);
-      addNiyyahFlow(-0.6,0.4,-3.4,-2.4);
-    }
+    if(apt){ Assets.tint(apt,0.55); fadeModel=apt; }          // nacht: dim de woning; muren faden bij blokkade cam→speler
+    else { const fl=box(12,0.1,12,0x322652); fl.position.set(0,0.05,0); world.add(fl); }  // minimaal vangnet: alleen als 't model écht niet laadt (de wacht-gate in Game.start voorkomt dit normaal)
+    addNiyyahFlow(-4.8,3.0, -3.8,-0.7);                       // Niyyah in de woonkamer; daarna slapen bij 't bed
   }
 });
 
@@ -110,80 +95,8 @@ SCENES.push({
       setProgress('📦 0/7 ingepakt');
       addWearIhram(-4.3,-0.6);                                // ihraam aandoen: open vloer naast het bed (slaapkamer, bereikbaar)
     } else {
-      // ---- procedurele fallback (oude inpak-kamer) ----
-      ground(0x6a705a,90,{roughness:1});                        // outdoor earth (visible outside)
-    const floor=box(10,0.08,10,0x4a3a55); floor.position.set(0,0.05,0); world.add(floor);
-    const left=box(0.2,3.2,10,0x4a4060,{roughness:1}); left.position.set(-5,1.6,0); world.add(left);
-    const right=box(0.2,3.2,10,0x4a4060,{roughness:1}); right.position.set(5,1.6,0); world.add(right);
-    // back wall: solid left part (with the front door), big street window on the right
-    const sill=box(10,0.9,0.2,0x4a4060); sill.position.set(0,0.45,-5); world.add(sill);
-    const lintel=box(10,0.75,0.2,0x4a4060); lintel.position.set(0,2.82,-5); world.add(lintel);
-    const wallL=box(3.4,1.7,0.2,0x4a4060); wallL.position.set(-3.3,1.7,-5); world.add(wallL);   // solid section
-    [-1.6,1.6,4.6].forEach(px=>{ const p=box(0.4,1.7,0.2,0x4a4060); p.position.set(px,1.7,-5); world.add(p); });
-    const glass=box(5.8,1.7,0.05,0xcfeaff,{transparent:true,opacity:0.14,emissive:0x9fd0ff,emissiveIntensity:.15}); glass.position.set(1.55,1.7,-5); world.add(glass);
-    // front door (in the solid wall, clearly separate from the window)
-    const door=box(1.0,2.2,0.14,0x3a241c); door.position.set(-3.3,1.1,-4.95); world.add(door);
-    const dframe=box(1.25,2.45,0.06,0xc9a84c,{emissive:0x5a4410,emissiveIntensity:.35}); dframe.position.set(-3.3,1.22,-5.02); world.add(dframe);
-    const knob=sph(0.05,0xc9a84c,{emissive:0x6b5012,emissiveIntensity:.6}); knob.position.set(-2.9,1.1,-4.86); world.add(knob);
-    const doormat=box(0.9,0.04,0.5,0x6a4a3a); doormat.position.set(-3.3,0.06,-4.4); world.add(doormat);
-    // ---- village street behind the window ----
-    const street=box(36,0.06,5,0xffffff,{map:texAsphalt(10)}); street.position.set(0,0.03,-9); world.add(street);
-    [-2.6,2.6].forEach(o=>{ const c=box(36,0.14,0.3,0x70707a); c.position.set(0,0.07,-9+o); world.add(c); });
-    for(let i=-17;i<=17;i+=2){ const d=box(0.6,0.07,0.14,0xd8d2b0); d.position.set(i,0.08,-9); world.add(d); }
-    const sidewalk=box(36,0.1,3,0x8a8a82); sidewalk.position.set(0,0.05,-12.5); world.add(sidewalk);
-    [-15,-12.2,-9,-6.4,-3.8,3.8,6.4,9,12.2,15].forEach((hx,i)=>{ house(hx,-13.4,[0xcdbb99,0xb9a98a,0xd6c2a0,0xc9b59a,0xbfae90,0xd0bfa0,0xcdbb99,0xb9a98a,0xd6c2a0,0xc9b59a][i]); });
-    [-13,-7.5,-1.5,4.5,8.5,13.5].forEach(x=> lampPost(x,-10.6));
-    potplant(-9.5,-10.4,1.3); potplant(9.5,-10.4,1.3);
-    taxi(2.2,-10.2);
-    // dorpsmoskeetje in de verte
-    const mq=box(3.4,2.6,2.6,0xe8e0cc,{roughness:.95}); mq.position.set(-16,1.3,-15.5); mq.castShadow=false; world.add(mq);
-    const mqDome=sph(1.2,0x2e8a55,{roughness:.6},16); mqDome.position.set(-16,2.9,-15.5); mqDome.scale.set(1,0.8,1); mqDome.castShadow=false; world.add(mqDome);
-    const mqMin=cyl(0.22,0.3,5,0xe8e0cc,{roughness:.9}); mqMin.position.set(-13.8,2.5,-15.8); mqMin.castShadow=false; world.add(mqMin);
-    addWanderers(5,{minX:-13,maxX:13,minZ:-12.4,maxZ:-10.6});
-    const sun=sph(2.2,0xfff4d0,{emissive:0xffe49a,emissiveIntensity:1}); sun.position.set(8,9,-16); world.add(sun);
-    // furniture spread around the room
-    const bd=bed(-3.2,-2.6,0.2);
-    const ns=nightstand(-3.4,-0.7);
-    const dk=desk(3.2,-3.2);
-    const ch=chair(2.0,-2.4,0.4);
-    const dr=dresser(3.6,1.4,-Math.PI/2);
-    const sh=shelf(-1.4,1.5,-4.85,1.6);
-    suitcase(0,1.0);
-    potplant(-4.2,3.8,1);
-    const bedTop=bd.userData.topY, deskTop=dk.userData.topY, nsTop=ns.userData.topY, chTop=ch.userData.topY, drTop=dr.userData.topY, shTop=sh.userData.topY;
-    // items spread across bed, desk, nightstand, chair, dresser, shelf, windowsill, suitcase
-    const items=[
-      {id:'paspoort',e:'🛂',l:'Paspoort',     ok:true, x:-3.5,z:-3.2,y:bedTop},
-      {id:'ihraam',  e:'🤍',l:'Ihraam',       ok:true, x:-2.9,z:-2.1,y:bedTop},
-      {id:'sandalen',e:'👡',l:'Sandalen',     ok:true, x:2.0, z:-2.4,y:chTop},
-      {id:'duaboek', e:'📖',l:"Du'a boek",    ok:true, x:3.4, z:-3.4,y:deskTop},
-      {id:'medicijn',e:'💊',l:'Medicijnen',   ok:true, x:-3.4,z:-0.7,y:nsTop},
-      {id:'geld',    e:'💵',l:'Geld',         ok:true, x:3.6, z:1.4, y:drTop},
-      {id:'zeep',    e:'🧴',l:'Reukloze zeep',ok:true, x:-1.4,z:-4.7,y:shTop},
-      {id:'parfum',  e:'🌸',l:'Parfum',       ok:false,x:2.9, z:-3.1,y:deskTop},
-      {id:'alcohol', e:'🍷',l:'Alcohol',      ok:false,x:3.6, z:1.9, y:drTop},
-      {id:'camera',  e:'📷',l:'Camera',       ok:false,x:3.2, z:-4.6,y:1.35},
-    ];
-    State.packed=0;
-    items.forEach(it=>{
-      Zone.add({ id:'pi-'+it.id, x:it.x, z:it.z, y:it.y, r:0.7, trigR:0.95, pickup:true, glow:it.ok,
-        icon:it.e, label:'Pak '+it.l, noConsume:true,
-        action:(z)=>{
-          if(it.ok){ Zone.markDone(z); State.packed++;
-            setProgress(`📦 ${State.packed}/7 ingepakt`);
-            if(State.packed>=7){ showFeedback('✅ Koffer gepakt! De taxi staat voor.',true,4000); showNextBtn('Naar het vliegtuig →'); }
-          } else {
-            showFeedback(`❌ ${it.l}: ${it.id==='parfum'?'verboden tijdens Ihraam':it.id==='alcohol'?'haram, hoort niet mee':'laat thuis — leid je niet af'}`,false,3000);
-          }
-        }});
-    });
-    setProgress('📦 0/7 ingepakt');
-    // optional: put on Ihraam already (not required; can also be done on the plane)
-    Zone.add({ id:'wear-ihram', x:-4.2, z:-3.4, r:1.0, icon:'🤍', label:'Ihraam aandoen (optioneel)', noConsume:true,
-      action:(z)=>{ if(Char.ihram){ showFeedback('Je draagt de Ihraam al. 🤍',true,2500); return; }
-        Char.ihram=true; Player.build();
-        showFeedback(Char.gender==='female'?'🧕 Voor jou als vrouw is je gewone bedekkende kleding je Ihraam — geen witte doeken nodig. De intentie en de regels gelden wél vanaf de Miqaat.':'🤍 Je doet de witte Ihraam-doeken alvast aan. In het vliegtuig hoef je je dan niet meer te verkleden (niet verplicht).',true,4800);
-        if(z.ring) z.ring.material.color.set(0x27ae60); }});
+      // minimaal vangnet: alleen als 't woning-model écht niet laadt (de wacht-gate in Game.start voorkomt dit normaal)
+      const fl=box(12,0.1,12,0x4a4060); fl.position.set(0,0.05,0); world.add(fl);
     }
   }
 });
