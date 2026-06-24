@@ -193,7 +193,7 @@ SCENES.push({
   id:2, loc:'✈️ Aan boord — onderweg naar de Miqaat', ar:'الإِحرَام',
   task:'🎯 Volg de aanwijzingen aan boord',
   story:`<em>"Wij naderen de Miqaat..."</em> Je hebt thuis al ghusl gedaan. Aan boord ga je in staat van Ihraam.<br><br>Deed je de Ihraam thuis nog niet aan? <strong>Verkleed je in het toilet (achterin)</strong>. Daarna: <strong>ga in je stoel ✦ zitten → Niyyah → Talbiyah</strong>.`,
-  spawn:{x:0,z:1.5,face:Math.PI,bounds:{minX:-0.45,maxX:0.45,minZ:-1.5,maxZ:16.0}},
+  spawn:{x:-0.8,z:1.0,face:Math.PI,bounds:{minX:-1.05,maxX:-0.55,minZ:-1.0,maxZ:14.5}},  // het LINKER gangpad (x≈-0.8); x=0 is het midden-stoelblok (twin-aisle)
   light:{amb:0xcfe2ff,ambI:1.0,dir:0xffffff,dirI:0.95,sky:0x7fb4e6,exp:0.95},
   fog:{near:60,far:340},                                  // ruimere fog: blauwe lucht door de raampjes
   cam:{fp:true,eyeH:1.42,pitch:0.02,playerScale:0.85},    // first-person door 't gangpad (gesloten cabine → 3e-persoon camera klemt in de stoelen)
@@ -247,13 +247,29 @@ SCENES.push({
         c.userData.cloud={sp:1.4+Math.random()*1.4}; world.add(c); }
     }
     for(let i=0;i<5;i++){ const cl=new THREER.PointLight(0xfff0d8,0.3,12); cl.position.set(0,2.2,i*4-2); world.add(cl); }
-    // jouw stoel + markers + steward — verderop in 't gangpad (+Z) zodat je langs de stoelenrijen loopt
-    const sx=0.7, sz=6;
+    // jouw stoel (gangpad-stoel van 't midden-blok, naast 't linker gangpad) + markers + stewardess
+    const sx=-0.2, sz=6;
     const ring=glowRing(0.5,0x6ad0a0); ring.position.set(sx,0.66,sz); world.add(ring);
-    const star=emojiSprite('✦',0.4); star.position.set(sx,1.5,sz); world.add(star);
-    const lavSign=emojiSprite('🚻',0.4); lavSign.position.set(0,2.05,14); world.add(lavSign);
-    const sign=emojiSprite('🔔',0.4); sign.position.set(0,2.15,9); world.add(sign);
-    const att=makePilgrim(0x355a8a); att.position.set(0,0,11); att.rotation.y=Math.PI; att.userData.ph=Math.random()*6.28; world.add(att);
+    const star=emojiSprite('✦',0.4); star.position.set(sx,1.62,sz); world.add(star);
+    const lavSign=emojiSprite('🚻',0.4); lavSign.position.set(-0.8,2.05,13); world.add(lavSign);
+    const sign=emojiSprite('🔔',0.4); sign.position.set(-0.8,2.15,9); world.add(sign);
+    // stewardess: vrouw in uniform, kleiner geschaald zodat ze niet als reus oogt; staat verderop in 't gangpad
+    const att=pilgrimMesh(0x1f3a5f,null,'f'); att.scale.setScalar(0.86); att.position.set(-0.8,0,10.5); att.rotation.y=0; att.userData.ph=Math.random()*6.28; world.add(att);
+
+    // ---- cabine deels vullen met gezeten reizigers (alleen bij 't echte model) ----
+    if(cabin){
+      const cols=[-1.9,-1.45,-0.2,0.35,0.85,2.05,2.5];   // stoel-kolommen (linker-blok / midden-blok / rechter-blok)
+      for(let z=3.0; z<=13.5; z+=1.0){                    // start verderop zodat ze niet pal vóór de camera opdoemen
+        cols.forEach(cxp=>{
+          if(Math.abs(cxp-sx)<0.25 && Math.abs(z-sz)<0.7) return;       // jouw eigen stoel vrijhouden
+          if(Math.random()<0.55){                                       // ~deels gevuld
+            const pax=makeSeatedPax(); pax.position.set(cxp+(Math.random()-.5)*0.05, (Math.random()-.5)*0.02, z+(Math.random()-.5)*0.06);
+            pax.rotation.y=0;                                            // kijkt naar voren (+Z), net als jij
+            world.add(pax);
+          }
+        });
+      }
+    }
 
     // ---- clear, ordered tasks ----
     function instruct(){ setProgress(Char.ihram ? '👉 Loop door het gangpad naar je stoel ✦ en ga zitten' : '👉 Toilet achterin (🚻): trek je Ihraam aan'); }
@@ -269,12 +285,12 @@ SCENES.push({
       Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
 
     if(!Char.ihram){
-      Zone.add({ id:'lav', x:0, z:14, r:1.3, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
+      Zone.add({ id:'lav', x:-0.8, z:13, r:1.3, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
         action:(z)=>{ if(Char.ihram)return; Char.ihram=true; Player.build(); Sound.step();
           showFeedback(Char.gender==='female'?'🧕 Voor de vrouw is de Ihraam geen witte kleding: je gewone bedekkende kleding ís je Ihraam (gezicht en handen blijven onbedekt — geen niqab of handschoenen). Je bent er klaar voor.':'🤍 In het toilet trek je de twee witte Ihraam-doeken aan (izar en rida). Je outfit verandert.',true,Char.gender==='female'?5000:3500);
           Zone.markDone(z); instruct(); }});
     }
-    Zone.add({ id:'seat', x:0.3, z:sz, r:1.0, icon:'🪑', label:'Ga zitten', noConsume:true, guide:true,
+    Zone.add({ id:'seat', x:-0.55, z:sz, r:1.15, icon:'🪑', label:'Ga zitten', noConsume:true, guide:true,
       action:()=>{ if(!Char.ihram){ showFeedback('⚠️ Trek eerst je Ihraam aan in het toilet (achterin).',false,2800); return; } sitDown(); }});
     instruct();
   }

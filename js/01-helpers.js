@@ -133,6 +133,37 @@ function makePilgrim(col,emoji){
   return p;
 }
 
+// lichtgewicht GEZETEN passagier (kijkt naar +Z): schoot + onderbenen + romp + hoofd → de L-vorm leest als 'zit'.
+// ~7 meshes i.p.v. ~45 → je kunt er tientallen plaatsen om een cabine te vullen.
+// Zit op de kussen (~0.35); hoofd ~1.19 komt net boven de stoelrug (~1.05) uit. Plaats met rotation.y=0.
+function makeSeatedPax(){
+  const skins=[0xead0b0,0xd4ab7d,0xc9a06a,0xa9764a,0x8a5a34,0x6e4526];
+  const sk=skins[Math.floor(Math.random()*skins.length)];
+  const hairC=[0x161009,0x2a1c10,0x3a2a18,0x4a4a4a][Math.floor(Math.random()*4)];
+  const female=Math.random()<0.42;
+  const ihramStyle=!female && Math.random()<0.55;                 // veel Hajj-reizigers zitten al in ihraam (wit)
+  const robe = female ? [0x33323e,0x26303a,0x3a2a3e,0x2c3640][Math.floor(Math.random()*4)]
+                      : (ihramStyle?0xf4f1e8:[0xeeeae0,0xdfd8c8,0x9fb0bd,0xcfc6b6][Math.floor(Math.random()*4)]);
+  const dk=c=>((((c>>16)&255)*0.8|0)<<16)|((((c>>8)&255)*0.8|0)<<8)|((c&255)*0.8|0);
+  const g=new THREER.Group();
+  const lap=box(0.34,0.15,0.4,robe,{roughness:.9}); lap.position.set(0,0.5,0.2); lap.castShadow=false; g.add(lap);            // bovenbenen naar voren (+Z)
+  const legs=box(0.3,0.42,0.16,dk(robe),{roughness:.9}); legs.position.set(0,0.26,0.41); legs.castShadow=false; g.add(legs); // onderbenen omlaag vooraan
+  const torso=cyl(0.12,0.16,0.5,robe,{roughness:.9},9); torso.position.set(0,0.78,-0.02); torso.castShadow=false; g.add(torso);
+  const shoulders=sph(0.155,robe,{roughness:.9},9); shoulders.scale.set(1.15,0.72,0.82); shoulders.position.set(0,1.0,-0.03); shoulders.castShadow=false; g.add(shoulders);
+  const neck=cyl(0.04,0.046,0.06,sk,{roughness:.6},6); neck.position.set(0,1.09,-0.02); neck.castShadow=false; g.add(neck);
+  const head=sph(0.112,sk,{roughness:.55},12); head.position.set(0,1.19,-0.02); head.scale.set(0.96,1.07,0.97); head.castShadow=false; g.add(head);
+  if(female){
+    const hij=sph(0.126,dk(robe),{roughness:1},10); hij.position.set(0,1.205,-0.03); hij.scale.set(1.08,1.13,1.14); hij.castShadow=false; g.add(hij);
+  } else {
+    const r=Math.random();
+    if(ihramStyle||r<0.5){ const hr=sph(0.114,hairC,{roughness:.9},10); hr.position.set(0,1.225,-0.02); hr.scale.set(1.0,0.8,1.02); hr.castShadow=false; g.add(hr); }
+    else if(r<0.78){ const gh=sph(0.125,0xf3f1ea,{roughness:1},10); gh.position.set(0,1.21,-0.02); gh.scale.set(1.1,1.0,1.12); gh.castShadow=false; g.add(gh); }
+    else { const kuf=sph(0.115,0xe5dfd0,{roughness:1},10); kuf.position.set(0,1.24,-0.02); kuf.scale.set(1.0,0.5,1.0); kuf.castShadow=false; g.add(kuf); }
+    if(!ihramStyle && Math.random()<0.35){ const bd=sph(0.066,hairC,{roughness:.95},7); bd.position.set(0,1.13,0.06); bd.scale.set(1.1,0.85,0.8); bd.castShadow=false; g.add(bd); }
+  }
+  return g;
+}
+
 // ---------- char preview SVGs (select screen only) ----------
 const PREVIEW = {
   male:`<svg viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="196" rx="30" ry="3" fill="rgba(0,0,0,.35)"/><path d="M28,58 Q30,55 36,55 L64,55 Q70,55 72,58 L82,190 L18,190 Z" fill="#f0e8d0" stroke="#c8bc98" stroke-width="1.2"/><rect x="44" y="46" width="12" height="12" fill="#c89770"/><ellipse cx="50" cy="30" rx="20" ry="22" fill="#1a0e08"/><ellipse cx="50" cy="36" rx="15" ry="14" fill="#c89770"/></svg>`,
