@@ -101,10 +101,12 @@ const Assets = {
     world.add(m); m.updateMatrixWorld(true);
     let b = new THREE.Box3().setFromObject(m); m.position.y -= b.min.y; m.updateMatrixWorld(true);
     b = new THREE.Box3().setFromObject(m); const cx=(b.min.x+b.max.x)/2, cz=(b.min.z+b.max.z)/2;
-    // cabinevloer = 2e omlaag-hit in 't gangpad (1e = plafond)
-    const ray = new THREE.Raycaster(); ray.set(new THREE.Vector3(cx, b.max.y+0.5, cz), new THREE.Vector3(0,-1,0)); ray.far = b.max.y+2;
-    const hits = ray.intersectObject(m,true);
-    const floorY = hits.length>1 ? hits[1].point.y : (hits[0] ? hits[0].point.y : 0);
+    // cabinevloer = de LAAGSTE omlaag-hit recht onder 't gangpad (geen vracht onder 't gangpad gemodelleerd);
+    // de 2e hit pakt bij dit model een plafond/bagagebak → cabine zakt onder de grond, vandaar 't laagste punt
+    const ray = new THREE.Raycaster(); let floorY=null;
+    [cz-8, cz, cz+8].forEach(zz=>{ ray.set(new THREE.Vector3(cx, b.max.y+1, zz), new THREE.Vector3(0,-1,0)); ray.far = b.max.y+3;
+      const h = ray.intersectObject(m,true); if(h.length){ const y=h[h.length-1].point.y; if(floorY===null || y>floorY) floorY=y; } });  // hoogste vloer-kandidaat (vermijdt romp/buik-uitschieters)
+    if(floorY===null) floorY=0;
     m.position.y -= floorY; m.position.x -= cx;        // vloer→y0, gangpad→x0
     m.updateMatrixWorld(true); return m;
   },

@@ -193,10 +193,10 @@ SCENES.push({
   id:2, loc:'✈️ Aan boord — onderweg naar de Miqaat', ar:'الإِحرَام',
   task:'🎯 Volg de aanwijzingen aan boord',
   story:`<em>"Wij naderen de Miqaat..."</em> Je hebt thuis al ghusl gedaan. Aan boord ga je in staat van Ihraam.<br><br>Deed je de Ihraam thuis nog niet aan? <strong>Verkleed je in het toilet (achterin)</strong>. Daarna: <strong>ga in je stoel ✦ zitten → Niyyah → Talbiyah</strong>.`,
-  spawn:{x:0,z:2.4,face:Math.PI,bounds:{minX:-0.42,maxX:0.42,minZ:-4.0,maxZ:4.0}},
+  spawn:{x:0,z:1.5,face:Math.PI,bounds:{minX:-0.45,maxX:0.45,minZ:-1.5,maxZ:16.0}},
   light:{amb:0xcfe2ff,ambI:1.0,dir:0xffffff,dirI:0.95,sky:0x7fb4e6,exp:0.95},
-  fog:{near:60,far:340},                                  // ruimere fog: blauwe lucht voor de establishing-shot
-  cam:{fp:true,eyeH:1.5,pitch:0.06,playerScale:0.85,dist:4.4,height:2.0,maxY:2.4,bound:{minX:-2.1,maxX:2.1,minZ:-4.6,maxZ:4.6}},
+  fog:{near:60,far:340},                                  // ruimere fog: blauwe lucht door de raampjes
+  cam:{fp:true,eyeH:1.42,pitch:0.02,playerScale:0.85},    // first-person door 't gangpad (gesloten cabine → 3e-persoon camera klemt in de stoelen)
   build(){
     // echte cabine (airplane_interior): gangpad op x=0, vloer op y=0; fallback = procedurele cabine
     const cabin=(typeof Assets!=='undefined')?Assets.placeCabin(0.85):null;
@@ -232,28 +232,31 @@ SCENES.push({
       const winglet=box(0.16,0.7,0.8,0xb4b8be); winglet.position.set(-6.6,0.85,0.8); world.add(winglet);
       const engine=cyl(0.4,0.4,1.1,0x9aa0a8); engine.rotation.x=Math.PI/2; engine.position.set(-4.2,0.2,0.8); world.add(engine);
     }
-    // ---- gedeeld: wolken buiten (vlieg-gevoel), zachte cabineverlichting, markers, steward ----
-    function makeCloud(s){ const grp=new THREER.Group(); const n=3+Math.floor(Math.random()*3);
-      for(let k=0;k<n;k++){ const b=sph(0.7+Math.random()*0.7,0xffffff,{roughness:1}); b.castShadow=false;
-        b.position.set((Math.random()-.5)*1.8,(Math.random()-.5)*0.5,(Math.random()-.5)*1.2); b.scale.y=0.55; grp.add(b); }
-      grp.scale.setScalar(s||1); return grp; }
-    for(let i=0;i<14;i++){ const c=makeCloud(0.7+Math.random()*1.1);
-      const side=Math.random()>.5?1:-1; c.position.set(side*(3.5+Math.random()*7), 0.5+Math.random()*3.2, -12+Math.random()*24);
-      c.userData.cloud={sp:2.2+Math.random()*2.2}; world.add(c); }
-    for(let i=0;i<8;i++){ const c=makeCloud(1.4+Math.random()*1.6);
-      c.position.set((Math.random()-.5)*26, -5-Math.random()*5, -12+Math.random()*24);
-      c.userData.cloud={sp:1.4+Math.random()*1.4}; world.add(c); }
-    for(let i=0;i<4;i++){ const cl=new THREER.PointLight(0xfff0d8,0.32,9); cl.position.set(0,2.3,i*2.6-3.8); world.add(cl); }
-    // jouw stoel + markers + steward (stoel op een stoel-rijke plek in 't echte model)
-    const sx=0.6, sz=0;
+    // ---- gedeeld: zachte cabineverlichting, markers, steward ----
+    // wolken alleen bij de PROCEDURELE cabine (in 't echte gesloten model zouden ze ín de cabine zweven)
+    if(!cabin){
+      const makeCloud=(s)=>{ const grp=new THREER.Group(); const n=3+Math.floor(Math.random()*3);
+        for(let k=0;k<n;k++){ const b=sph(0.7+Math.random()*0.7,0xffffff,{roughness:1}); b.castShadow=false;
+          b.position.set((Math.random()-.5)*1.8,(Math.random()-.5)*0.5,(Math.random()-.5)*1.2); b.scale.y=0.55; grp.add(b); }
+        grp.scale.setScalar(s||1); return grp; };
+      for(let i=0;i<14;i++){ const c=makeCloud(0.7+Math.random()*1.1);
+        const side=Math.random()>.5?1:-1; c.position.set(side*(3.5+Math.random()*7), 0.5+Math.random()*3.2, -12+Math.random()*24);
+        c.userData.cloud={sp:2.2+Math.random()*2.2}; world.add(c); }
+      for(let i=0;i<8;i++){ const c=makeCloud(1.4+Math.random()*1.6);
+        c.position.set((Math.random()-.5)*26, -5-Math.random()*5, -12+Math.random()*24);
+        c.userData.cloud={sp:1.4+Math.random()*1.4}; world.add(c); }
+    }
+    for(let i=0;i<5;i++){ const cl=new THREER.PointLight(0xfff0d8,0.3,12); cl.position.set(0,2.2,i*4-2); world.add(cl); }
+    // jouw stoel + markers + steward — verderop in 't gangpad (+Z) zodat je langs de stoelenrijen loopt
+    const sx=0.7, sz=6;
     const ring=glowRing(0.5,0x6ad0a0); ring.position.set(sx,0.66,sz); world.add(ring);
     const star=emojiSprite('✦',0.4); star.position.set(sx,1.5,sz); world.add(star);
-    const lavSign=emojiSprite('🚻',0.4); lavSign.position.set(-1.4,2.0,4.2); world.add(lavSign);
-    const sign=emojiSprite('🔔',0.4); sign.position.set(0,2.55,-3.0); world.add(sign);
-    const att=makePilgrim(0x355a8a); att.position.set(0,0,3.9); att.rotation.y=Math.PI; att.userData.ph=Math.random()*6.28; world.add(att);
+    const lavSign=emojiSprite('🚻',0.4); lavSign.position.set(0,2.05,14); world.add(lavSign);
+    const sign=emojiSprite('🔔',0.4); sign.position.set(0,2.15,9); world.add(sign);
+    const att=makePilgrim(0x355a8a); att.position.set(0,0,11); att.rotation.y=Math.PI; att.userData.ph=Math.random()*6.28; world.add(att);
 
     // ---- clear, ordered tasks ----
-    function instruct(){ setProgress(Char.ihram ? '👉 Loop naar je stoel ✦ (rechts) en ga zitten' : '👉 Toilet achterin: trek je Ihraam aan'); }
+    function instruct(){ setProgress(Char.ihram ? '👉 Loop door het gangpad naar je stoel ✦ en ga zitten' : '👉 Toilet achterin (🚻): trek je Ihraam aan'); }
     function seatedNiyyah(){ openChoice({ ar:'النِّيَّة', sub:'Gezeten in je stoel', txt:'Maak nu je <strong>Niyyah</strong> (intentie) voor de Hajj.',
       choices:[{txt:'🤲 Spreek de Niyyah uit', action:()=>{ Sound.success(); showFeedback('✅ "Labbayka Allahumma Hajjan." Je intentie is gemaakt.',true,3000); setTimeout(seatedTalbiyah,1100); }}]}); }
     function seatedTalbiyah(){ openChoice({ ar:'التَّلبِية', sub:'', txt:'Spreek de <strong>Talbiyah</strong> uit:<br><br><em>لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ</em><br>"Hier ben ik, o Allah, hier ben ik."',
@@ -262,10 +265,11 @@ SCENES.push({
         showFeedback('✅ Labbayka Allahumma labbayk! Je bent nu in staat van Ihraam. ✈️',true,4000); showNextBtn('Aankomst Mekka →'); }}]}); }
     function sitDown(){ const sz2=Zone.list.find(q=>q.id==='seat'); if(sz2&&!sz2.done)Zone.markDone(sz2);
       Player.x=sx; Player.z=sz; Player.faceY=Math.PI; Player.sitting=true; Player.setPose('sit'); Player.updateTransform();
-      Cam.yaw=Math.PI; Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
+      Cam.yaw=Math.PI; Cam.eyeH=1.08; Cam.update();        // gezeten: ooghoogte zakt
+      Sound.step(); showFeedback('Je zit in je stoel met je gordel om. 🤍',true,2200); setTimeout(seatedNiyyah,1000); }
 
     if(!Char.ihram){
-      Zone.add({ id:'lav', x:-0.3, z:3.7, r:1.1, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
+      Zone.add({ id:'lav', x:0, z:14, r:1.3, icon:'🚻', label:'Trek Ihraam aan', noConsume:true, guide:true,
         action:(z)=>{ if(Char.ihram)return; Char.ihram=true; Player.build(); Sound.step();
           showFeedback(Char.gender==='female'?'🧕 Voor de vrouw is de Ihraam geen witte kleding: je gewone bedekkende kleding ís je Ihraam (gezicht en handen blijven onbedekt — geen niqab of handschoenen). Je bent er klaar voor.':'🤍 In het toilet trek je de twee witte Ihraam-doeken aan (izar en rida). Je outfit verandert.',true,Char.gender==='female'?5000:3500);
           Zone.markDone(z); instruct(); }});
