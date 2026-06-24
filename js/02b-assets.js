@@ -105,6 +105,16 @@ const Assets = {
     m.position.y -= floorY; m.position.x -= cx;        // vloer→y0, gangpad→x0
     m.updateMatrixWorld(true); return m;
   },
+  // shaders van een (zwaar) model alvast compileren zodat de eerste render in z'n scène niet hapert
+  prewarm(key){
+    const src = this.cache[key]; if(!src) return;
+    if(!this._warm) this._warm = {}; if(this._warm[key]) return;
+    if(typeof renderer==='undefined' || !renderer || typeof scene==='undefined' || !scene || typeof camera==='undefined' || !camera) return;
+    this._warm[key] = true;
+    const m = src.clone(true); scene.add(m);
+    try{ renderer.compile(scene, camera); }catch(e){}
+    scene.remove(m);
+  },
   // willekeurig model: XZ-gecentreerd op (x,z), onderkant op de grond (y=0)
   placeProp(key, x, z, s, ry){
     const src = this.cache[key]; if(!src) return null;

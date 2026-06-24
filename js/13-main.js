@@ -13,7 +13,11 @@ const Game={
     if(State.scene===10 && State.medinaChosen===false) n=SCENES.length-1;   // sla Medina/Quba over
     if(n>=SCENES.length){ renderEnding(); return; }
     const fade=el('fade'); fade.classList.add('show');
-    setTimeout(()=>{ loadScene(n); fade.classList.remove('show'); },500); },
+    setTimeout(()=>{ loadScene(n);
+      // houd 't scherm zwart tot de nieuwe scène écht gerenderd is: zware modellen (vliegtuig/Haram)
+      // uploaden bij de eerste render naar de GPU → anders bevriest 't oude beeld even ("blijft in de woonkamer hangen")
+      requestAnimationFrame(()=>requestAnimationFrame(()=>fade.classList.remove('show')));
+    },500); },
   restart(){ Object.assign(State,{scene:0,packed:0,ihrSteps:0,stonesCol:0,stonesThrown:0,tawaf:0,sai:0,saiLast:null,tawafAngle:0,tawafAccum:0,sabr:0,angryDone:false,saiHelpDone:false,quiz:0,quizTotal:0,zamzamDone:false,maqamDone:false,hadiDone:false,medinaChosen:undefined,medinaDone:false,rawdaDone:false,salamDone:false,qubaDone:false,duas:{},zamzamBottle:false,sharedZamzam:false,gaveZamzam:false});
     Object.values(QUIZZES).forEach(q=>delete q.asked);
     Sound.stopAmbient();

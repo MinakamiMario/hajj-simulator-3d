@@ -92,6 +92,7 @@ SCENES.push({
     const apt=(typeof Assets!=='undefined')?Assets.placeApartment(0,0,S):null;
     if(apt){
       fadeModel=apt;                                          // muren faden als ze cam→speler blokkeren
+      if(Assets.prewarm) Assets.prewarm('airplane');          // vliegtuig-shaders vast compileren → vlottere overgang naar scène 2
       State.packed=0;
       suitcase(-3.0*S,4.0*S);                                  // koffer klaar bij de eethoek
       // items logisch over de hele woning verspreid (eettafel, salontafel, keuken, badkamer, slaapkamer, hal) — ×S meegeschaald
