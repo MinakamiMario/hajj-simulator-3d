@@ -163,6 +163,31 @@ const Assets = {
       const bones = sk.bones.map(bn => map.get(bn)); cm.bind(new THREE.Skeleton(bones, sk.boneInverses), cm.matrixWorld); } });
     return clone;
   },
+  // de bron-mocap heeft een kapot stuk (~3.5-4.2s) waar een BEEN wegklapt, terwijl 't bovenlichaam dáár
+  // wél een echte beweging doet. Fix: bevries ALLEEN de been-botten in dat venster op hun pose net ervóór
+  // (de benen staan toch stil) → been-glitch weg, lichaamsbeweging blijft. Eénmalig op de gedeelde clip.
+  _fixPrayerGlitch(clip){
+    if(!clip || clip.__fixed) return; clip.__fixed = true;
+    const A = 3.1, B = 4.9;   // kapot segment (~3.3-4.7s, heel skelet klapt weg) → BRUG alle botten erover
+    const qa = new THREE.Quaternion(), qb = new THREE.Quaternion(), qo = new THREE.Quaternion();
+    clip.tracks.forEach(tr => {
+      const vs = tr.getValueSize(), T = tr.times, V = tr.values, n = T.length;
+      let i0 = -1, i1 = -1;
+      for(let i = 0; i < n; i++){ if(T[i] < A) i0 = i; }            // laatste schone keyframe vóór A
+      for(let i = 0; i < n; i++){ if(T[i] > B){ i1 = i; break; } }  // eerste schone keyframe ná B
+      if(i0 < 0 || i1 < 0) return;
+      const span = (T[i1] - T[i0]) || 1;
+      for(let i = i0 + 1; i < i1; i++){
+        const f = (T[i] - T[i0]) / span;
+        if(vs === 4){
+          qa.set(V[i0*vs],V[i0*vs+1],V[i0*vs+2],V[i0*vs+3]); qb.set(V[i1*vs],V[i1*vs+1],V[i1*vs+2],V[i1*vs+3]);
+          qo.copy(qa).slerp(qb, f); V[i*vs]=qo.x; V[i*vs+1]=qo.y; V[i*vs+2]=qo.z; V[i*vs+3]=qo.w;
+        } else {
+          for(let k = 0; k < vs; k++) V[i*vs+k] = V[i0*vs+k] * (1 - f) + V[i1*vs+k] * f;
+        }
+      }
+    });
+  },
   // zet een biddende pelgrim op (x,z), gedraaid ry, en speel de salah-animatie (mixer → userData.prayMixer, geüpdatet in de engine-loop)
   spawnPrayer(x, z, ry, s){
     const src = this.cache.prayer; if(!src) return null;
@@ -175,6 +200,7 @@ const Assets = {
     const b = new THREE.Box3().setFromObject(m); if(isFinite(b.min.y)) m.position.y = -b.min.y;   // gebedskleed op de grond
     m.updateMatrixWorld(true);
     const body = clips.reduce((a, c) => c.tracks.length > a.tracks.length ? c : a, clips[0]);     // body-clip = meeste tracks (niet de gezicht-morph)
+    this._fixPrayerGlitch(body);
     const mixer = new THREE.AnimationMixer(m); mixer.clipAction(body).play();
     mixer.setTime(Math.random() * body.duration);                                                 // willekeurige fase → niet synchroon
     m.userData.prayMixer = mixer;
