@@ -398,6 +398,10 @@ SCENES.push({
   build(){
     // vloer: gebedstapijt met saff-banen richting qibla
     const floor=box(24,0.06,17,0xffffff,{map:texCarpet(7),roughness:1}); floor.position.set(-1,0.03,0); world.add(floor);
+    // biddende pelgrims in saff-rijen, gericht op de qibla/mihrab (-Z, ry=0) — naast 't middenpad naar de Rawda
+    if(typeof Assets!=='undefined' && Assets.ready('prayer')){
+      [[-7,3],[-3.5,3],[2.5,3],[6,3],[-7.5,-1],[6.5,-1]].forEach(p=> Assets.spawnPrayer(p[0],p[1], 0, 1.0));
+    }
     // hal-schil met GI gebakken in vertex-kleuren (Blender Cycles), unlit getoond — warme sfeer.
     // Fallback: vlakke procedurele wanden + plafond als het model niet laadt.
     const shell=Assets.spawn('nabawi_interior',-1,0,1,0);
