@@ -168,7 +168,8 @@ const Assets = {
     const src = this.cache.prayer; if(!src) return null;
     const clips = src.userData && src.userData.clips; if(!clips || !clips.length) return null;
     const m = this._cloneSkinned(src);
-    m.scale.setScalar((s || 1) * 0.77); if(ry !== undefined) m.rotation.y = ry;   // 't model staat ~2.2m → normaliseer naar ~1.7m (pelgrim-formaat)
+    m.scale.setScalar((s || 1) * 0.77);   // 't model staat ~2.2m → normaliseer naar ~1.7m (pelgrim-formaat)
+    m.rotation.y = (ry === undefined ? 0 : ry) + Math.PI;   // 't model kijkt standaard +Z → +PI zodat ry de speler-conventie volgt (ry=0 → -Z, atan2(px,pz) → naar (0,0))
     m.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; o.frustumCulled = false; } });  // skinned-bbox klopt niet altijd → niet cullen
     m.position.set(x, 0, z); world.add(m); m.updateMatrixWorld(true);
     const b = new THREE.Box3().setFromObject(m); if(isFinite(b.min.y)) m.position.y = -b.min.y;   // gebedskleed op de grond
