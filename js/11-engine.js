@@ -134,6 +134,7 @@ function animate(){
     // ambient life: orbiting crowd (tawaf), walkers (sai), swaying pilgrims
     world.traverse(o=>{
       const u=o.userData; if(!u)return;
+      if(u.prayMixer){ u.prayMixer.update(dt); return; }       // biddende pelgrim (skinned salah-animatie)
       if(u.orbit){ u.orbit.a+=u.orbit.sp*dt; o.position.x=Math.cos(u.orbit.a)*u.orbit.r; o.position.z=Math.sin(u.orbit.a)*u.orbit.r; o.rotation.y=-u.orbit.a; o.position.y=Math.abs(Math.sin(clock.elapsedTime*4.6+u.orbit.r))*0.05; if(u.arms)u.arms.rotation.x=Math.sin(clock.elapsedTime*4.6+u.orbit.r)*0.35; }
       else if(u.cloud){ o.position.z-=u.cloud.sp*dt; if(o.position.z<-14)o.position.z=14; }
       else if(u.walk){ u.walk.x+=u.walk.dir*u.walk.sp*dt; if(u.walk.x>u.walk.max){u.walk.x=u.walk.max;u.walk.dir=-1;} if(u.walk.x<u.walk.min){u.walk.x=u.walk.min;u.walk.dir=1;} o.rotation.y=u.walk.dir>0?-Math.PI/2:Math.PI/2; o.position.x=u.walk.x; o.position.y=Math.abs(Math.sin(clock.elapsedTime*6+u.walk.ph))*0.07; if(u.arms)u.arms.rotation.x=Math.sin(clock.elapsedTime*6+u.walk.ph)*0.5; }

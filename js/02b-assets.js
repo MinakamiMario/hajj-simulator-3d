@@ -25,6 +25,7 @@ const Assets = {
     mina:       'assets/models/mina.glb',
     appartement:'assets/models/appartement.glb',
     airplane:   'assets/models/airplane.glb',
+    prayer:     'assets/models/prayer.glb',   // geanimeerde biddende pelgrim op gebedskleed (skinned + salah-clip)
     // kant-en-klare, gerigde personages (skinned GLB → animeren via botten in 04-player.js)
     preset_woman:'assets/models/rigged/woman_rigged.glb',
     preset_man:  'assets/models/rigged/man_rigged.glb',
@@ -51,6 +52,7 @@ const Assets = {
           // verwijder null-attributen (bv. lege uv) — die laten renderer.render crashen in three r128
           if(o.geometry && o.geometry.attributes){ for(const a in o.geometry.attributes){ if(!o.geometry.attributes[a]) delete o.geometry.attributes[a]; } }
         }});
+        if(g.animations && g.animations.length) g.scene.userData.clips = g.animations;   // bewaar animatie-clips (bv. gebed)
         this.cache[key] = g.scene;
       }, undefined, () => { this.failed[key]=true; console.warn('Asset laden mislukt:', key); });
     }
@@ -150,5 +152,31 @@ const Assets = {
     const b = new THREE.Box3().setFromObject(m), c = b.getCenter(new THREE.Vector3());
     m.position.x += x - c.x; m.position.z += z - c.z; m.position.y -= b.min.y;
     m.updateMatrixWorld(true); return m;
+  },
+  // ---- biddende pelgrim (skinned mesh + salah-animatie) ----
+  // diep-clone die ELKE instance een eigen skelet geeft (gewone clone deelt 't skelet → alle kopieën vervormen samen/kapot)
+  _cloneSkinned(src){
+    const map = new Map();
+    const clone = src.clone(true);
+    (function par(a, b){ map.set(a, b); for(let i=0;i<a.children.length;i++) par(a.children[i], b.children[i]); })(src, clone);
+    src.traverse(o => { if(o.isSkinnedMesh){ const cm = map.get(o), sk = o.skeleton;
+      const bones = sk.bones.map(bn => map.get(bn)); cm.bind(new THREE.Skeleton(bones, sk.boneInverses), cm.matrixWorld); } });
+    return clone;
+  },
+  // zet een biddende pelgrim op (x,z), gedraaid ry, en speel de salah-animatie (mixer → userData.prayMixer, geüpdatet in de engine-loop)
+  spawnPrayer(x, z, ry, s){
+    const src = this.cache.prayer; if(!src) return null;
+    const clips = src.userData && src.userData.clips; if(!clips || !clips.length) return null;
+    const m = this._cloneSkinned(src);
+    m.scale.setScalar((s || 1) * 0.77); if(ry !== undefined) m.rotation.y = ry;   // 't model staat ~2.2m → normaliseer naar ~1.7m (pelgrim-formaat)
+    m.traverse(o => { if(o.isMesh){ o.castShadow = false; o.receiveShadow = false; o.frustumCulled = false; } });  // skinned-bbox klopt niet altijd → niet cullen
+    m.position.set(x, 0, z); world.add(m); m.updateMatrixWorld(true);
+    const b = new THREE.Box3().setFromObject(m); if(isFinite(b.min.y)) m.position.y = -b.min.y;   // gebedskleed op de grond
+    m.updateMatrixWorld(true);
+    const body = clips.reduce((a, c) => c.tracks.length > a.tracks.length ? c : a, clips[0]);     // body-clip = meeste tracks (niet de gezicht-morph)
+    const mixer = new THREE.AnimationMixer(m); mixer.clipAction(body).play();
+    mixer.setTime(Math.random() * body.duration);                                                 // willekeurige fase → niet synchroon
+    m.userData.prayMixer = mixer;
+    return m;
   }
 };

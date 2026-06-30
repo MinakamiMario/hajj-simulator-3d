@@ -49,6 +49,10 @@ SCENES.push({
       const p=pilgrimMesh(); p.position.set(px2,terr(px2,pz2),pz2); p.rotation.y=Math.PI;
       pilgrimDua(p);                                               // natuurlijk geheven handen (du'a)
       world.add(p); }
+    // geanimeerde biddende pelgrims op de vlakte (salah), gericht op Jabal al-Rahma (0,-13)
+    if(typeof Assets!=='undefined' && Assets.ready('prayer')){
+      [[-11,7],[-13,3],[12,6],[10,2]].forEach(p=> Assets.spawnPrayer(p[0],p[1], Math.atan2(p[0], p[1]+13), 1.0));
+    }
     everyMs(()=>spawnDhikrAt(HILL.x,HILL.z+4),3400);
     // laagstaande zon achter de heuvel
     const sun=sph(2.4,0xffd070,{emissive:0xffb050,emissiveIntensity:1}); sun.position.set(6,4.5,-30); world.add(sun);
@@ -126,6 +130,10 @@ SCENES.push({
       const b=cyl(0.18,0.24,1.3,0xddd6c8,{roughness:1}); b.rotation.x=Math.PI/2; b.position.set(p[0],0.22,p[1]); b.castShadow=false; world.add(b);
       const h=sph(0.14,0xc9a06a); h.position.set(p[0],0.22,p[1]-0.8); h.castShadow=false; world.add(h); });
     addWanderers(5,{minX:-9,maxX:9,minZ:-9,maxZ:9});
+    // geanimeerde biddende pelgrims aan de rand (salah), nachtgebed onder de sterren
+    if(typeof Assets!=='undefined' && Assets.ready('prayer')){
+      [[-8.5,-6],[8.5,5],[-6,8]].forEach(p=> Assets.spawnPrayer(p[0],p[1], Math.atan2(p[0], p[1]+20), 1.0));
+    }
     State.stonesCol=0;
     const pos=[[-3,-2],[2,-3],[3,2],[-2,3],[-5,1],[5,-1],[1,3],[-1,-4],[4.5,4.5],[-4.5,-4.5],[0,-3.5],
                [-6,-3],[6,3],[-6.5,4],[6.5,-4],[3.5,-6],[-3.5,6],[0,6.5]];
@@ -155,6 +163,10 @@ SCENES.push({
     minaTentField(-16,5,5,4,2.5); minaTentField(16,5,5,4,2.5);
     if(!minaCity) minaTentField(0,10,8,4,2.5);
     mountainRange(60,0x4a3a2c,12);
+    // geanimeerde biddende pelgrims naast 't pad bij de tenten (salah), buiten de loopzone
+    if(typeof Assets!=='undefined' && Assets.ready('prayer')){
+      [[-9,4],[-10,6],[9,3],[10,5]].forEach(p=> Assets.spawnPrayer(p[0],p[1], Math.atan2(p[0], p[1]+2.5), 1.0));
+    }
     // the pillar (wall) inside its oval basin ("put")
     const pillar=box(1.4,4,0.6,0x4a4858,{roughness:.8}); pillar.position.set(0,2,-2.5); world.add(pillar); jamPillar=pillar; jamPillarShake=0;
     const cap=box(1.7,0.4,0.9,0x5a5868); cap.position.set(0,4.1,-2.5); world.add(cap);
@@ -596,6 +608,11 @@ function tawafScene(){
     colliders.push({minX:-3.85,maxX:3.75,minZ:-3.95,maxZ:3.65}); }   // botsing rond de Ka'ba (sluit aan op de keswa-kubus van het grotere model)
   else { groundTex(texMarble(34),150,0xf0e8d6); kaaba(0,0); haramSurround(0,0,16); meccaSkyline(0,0,16); }
   world.add(makeOrbitCrowd(90,4.6,11));
+  // geanimeerde biddende pelgrims op de mataf-rand (echt gerigde salah), gericht op de Ka'ba (0,0)
+  if(typeof Assets!=='undefined' && Assets.ready('prayer')){
+    for(let i=0;i<4;i++){ const a=i/4*Math.PI*2+0.6, r=9+(i%2)*1.6; const px=Math.cos(a)*r, pz=Math.sin(a)*r;
+      Assets.spawnPrayer(px,pz, Math.atan2(px,pz), 1.0); }
+  }
   // dashed path ring (visual)
   const ring=new THREER.Mesh(new THREER.RingGeometry(4.2,4.4,64),
     new THREER.MeshBasicMaterial({color:0xc9a84c,transparent:true,opacity:.3,side:THREER.DoubleSide}));
