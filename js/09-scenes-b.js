@@ -398,9 +398,10 @@ SCENES.push({
   build(){
     // vloer: gebedstapijt met saff-banen richting qibla
     const floor=box(24,0.06,17,0xffffff,{map:texCarpet(7),roughness:1}); floor.position.set(-1,0.03,0); world.add(floor);
-    // biddende pelgrims in saff-rijen, gericht op de qibla/mihrab (-Z, ry=0) — naast 't middenpad naar de Rawda
+    // geanimeerde pelgrims in een VOORSTE saff-rij, gericht op de qibla/mihrab (-Z, ry=0).
+    // In 't gat tussen de procedurele crowd (z≈1.6–5.3) en de Rawda → geen overlap, en buiten 't middenpad.
     if(typeof Assets!=='undefined' && Assets.ready('prayer')){
-      [[-7,3],[-3.5,3],[2.5,3],[6,3],[-7.5,-1],[6.5,-1]].forEach(p=> Assets.spawnPrayer(p[0],p[1], 0, 1.0));
+      [[-8,-2.5],[-6,-2.5],[-3.5,-2.5],[2,-2.5],[4.5,-2.5],[6.5,-2.5]].forEach(p=> Assets.spawnPrayer(p[0],p[1], 0, 1.0));
     }
     // hal-schil met GI gebakken in vertex-kleuren (Blender Cycles), unlit getoond — warme sfeer.
     // Fallback: vlakke procedurele wanden + plafond als het model niet laadt.
@@ -614,7 +615,7 @@ function tawafScene(){
   world.add(makeOrbitCrowd(90,4.6,11));
   // geanimeerde biddende pelgrims op de mataf-rand (echt gerigde salah), gericht op de Ka'ba (0,0)
   if(typeof Assets!=='undefined' && Assets.ready('prayer')){
-    for(let i=0;i<4;i++){ const a=i/4*Math.PI*2+0.6, r=9+(i%2)*1.6; const px=Math.cos(a)*r, pz=Math.sin(a)*r;
+    for(let i=0;i<4;i++){ const a=i/4*Math.PI*2+0.6, r=12.5+(i%2)*0.8; const px=Math.cos(a)*r, pz=Math.sin(a)*r;   // op de mataf-rand, búiten de tawaf-stroom (crowd r≤11)
       Assets.spawnPrayer(px,pz, Math.atan2(px,pz), 1.0); }
   }
   // dashed path ring (visual)
